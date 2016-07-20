@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/personalData"
+            android:title="Личный кабинет"
+            android:icon="@drawable/contacts"/>
+        <item
+            android:id="@+id/videoList"
+            android:icon="@drawable/viewvideo"
+            android:title="Просмотр видео" />
+        <item
+            android:id="@+id/moderation"
+            android:icon="@drawable/moderation"
+            android:title="Модерация" />
+        <item
+            android:id="@+id/mapOfViolations"
+            android:icon="@drawable/map"
+            android:title="Карта нарушений" />
+    </group>
+
+    <item android:title="">
+        <menu>
+            <item
+                android:id="@+id/nav_logout"
+                android:icon="@drawable/logout"
+                android:title="LogOut" />
+
+        </menu>
+    </item>
+
+</menu>
