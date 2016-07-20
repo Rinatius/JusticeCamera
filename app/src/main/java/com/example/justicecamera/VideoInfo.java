@@ -131,6 +131,9 @@ public class VideoInfo extends AppCompatActivity {
                 pd.setMessage("Подождите");
                 pd.show();
 */
+                Toast toast3 = Toast.makeText(getApplicationContext(),
+                        "Тест", Toast.LENGTH_LONG);
+                toast3.show();
                 video.setMediaController(new MediaController(VideoInfo.this));
 
                 video.setOnCompletionListener(myVideoViewCompletionListener);
