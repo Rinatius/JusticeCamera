@@ -5,6 +5,9 @@ import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -12,6 +15,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class AddViolationLocation extends FragmentActivity implements OnMapReadyCallback {
@@ -19,6 +23,7 @@ public class AddViolationLocation extends FragmentActivity implements OnMapReady
     static final String LONGT = "longt";
     String lat = "";
     String longt = "";
+    Button buttonAddLocation;
 
     private GoogleMap mMap;
 
@@ -32,7 +37,6 @@ public class AddViolationLocation extends FragmentActivity implements OnMapReady
         mapFragment.getMapAsync(this);
     }
 
-
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -45,10 +49,14 @@ public class AddViolationLocation extends FragmentActivity implements OnMapReady
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        buttonAddLocation = (Button) findViewById(R.id.buttonAddLocation);
+        buttonAddLocation.setEnabled(false);
+        Toast showMessage = Toast.makeText(getApplicationContext(),
+                "Выберите место на карте", Toast.LENGTH_LONG);
+        showMessage.show();
 
         // Add a marker in Sydney and move the camera
         LatLng bishkek = new LatLng(42.8709181, 74.6144781);
-        //mMap.addMarker(new MarkerOptions().position(bishkek).title("Marker in Bishkek"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(bishkek));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(bishkek, 12));
 
@@ -71,15 +79,26 @@ public class AddViolationLocation extends FragmentActivity implements OnMapReady
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
+
+                if (!lat.equals("")) {
+                    mMap.clear();
+                }
+
                 lat = Double.toString(latLng.latitude);
                 longt = Double.toString(latLng.longitude);
-                Intent i = new Intent(AddViolationLocation.this, MainActivity.class);
-                i.putExtra(LAT, lat);
-                i.putExtra(LONGT, longt);
-                startActivity(i);
+                LatLng position = new LatLng(latLng.latitude, latLng.longitude);
+                Marker location = mMap.addMarker(new MarkerOptions().position(position));
+                buttonAddLocation.setEnabled(true);
             }
         });
 
-
+        buttonAddLocation.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View view){
+                 Intent i = new Intent(AddViolationLocation.this, MainActivity.class);
+                 i.putExtra(LAT, lat);
+                 i.putExtra(LONGT, longt);
+                 startActivity(i);
+            }
+        });
     }
 }

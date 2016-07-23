@@ -1,9 +1,12 @@
 package com.example.justicecamera;
 
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
@@ -15,6 +18,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
@@ -24,7 +28,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     List<Violation> list;
     LatLng position;
     Violation violation;
-
+    String latToSend = "";
+    String longtToSend = "";
+    static final String LATMAP = "lat";
+    static final String LONGTMAP = "longt";
 
     private GoogleMap mMap;
 
@@ -37,7 +44,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
-
 
     /**
      * Manipulates the map once available.
@@ -52,10 +58,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         list = new ArrayList<>();
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                LatLng current = marker.getPosition();
+                latToSend = Double.toString(current.latitude);
+                longtToSend = Double.toString(current.longitude);
+                Intent i = new Intent(MapsActivity.this, VideoInfo.class);
+                i.putExtra(LATMAP, latToSend);
+                i.putExtra(LONGTMAP, longtToSend);
+                startActivity(i);
+            }
+        });
 
-        // Add a marker in Sydney and move the camera
         LatLng bishkek = new LatLng(42.8709181, 74.6144781);
-        //mMap.addMarker(new MarkerOptions().position(bishkek).title("Marker in Bishkek"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(bishkek));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(bishkek, 12));
 
@@ -76,6 +92,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         load();
     }
+
     public void load() {
 
         Backendless.Persistence.of(Violation.class).find(new AsyncCallback<BackendlessCollection<Violation>>() {
@@ -100,14 +117,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         MarkerOptions markerOptions = new MarkerOptions();
                         markerOptions.position(position);
                         //mMap.addMarker(markerOptions);
-                        mMap.addMarker(new MarkerOptions().position(new LatLng(lat3, lng3)).title(violation.getName()));
+                        //mMap.addMarker(new MarkerOptions().position(new LatLng(lat3, lng3)).title(violation.getName()));
+                        String snippet = violation.getCarMake() + " " + violation.getCarModel();
+                        Marker location = mMap.addMarker(new MarkerOptions().position(position).title(violation.getName()).snippet(snippet));
                     }
                 }
             }
-
             @Override
             public void handleFault(BackendlessFault fault) {
-
             }
         });
     }

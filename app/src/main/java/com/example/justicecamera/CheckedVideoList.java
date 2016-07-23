@@ -29,7 +29,7 @@ public class CheckedVideoList extends AppCompatActivity {
     List<Violation> listViolation;
     TextView textViewTester;
     Button buttonBack;
-    String objectId;
+    String objectId = "";
     static final String OBJECTID = "checking";
 
     @Override

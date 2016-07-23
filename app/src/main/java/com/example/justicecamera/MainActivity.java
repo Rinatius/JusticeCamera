@@ -79,6 +79,7 @@ public class MainActivity extends AppCompatActivity
         navigationView.setItemIconTintList(null);
 
         getInt = getIntent();
+
         listCategory = new ArrayList<>();
         editCarMake = (EditText) findViewById(R.id.editTextCarMake);
         editCarModel = (EditText) findViewById(R.id.editTextCarModel);
@@ -86,12 +87,10 @@ public class MainActivity extends AppCompatActivity
         editCarColor = (EditText) findViewById(R.id.editTextViolatCarColor);
         editViolatCarComment = (EditText) findViewById(R.id.editTextComments);
         editVideoName = (EditText) findViewById(R.id.editTextVideoName);
-        buttonAddVideo = (Button)findViewById(R.id.buttonAddVideo);
+        buttonAddVideo = (Button) findViewById(R.id.buttonAddVideo);
         buttonSendViolation = (Button) findViewById(R.id.buttonSendViolation);
         buttonAddLocaton = (Button) findViewById(R.id.buttonAddLocation);
-       textShowError = (TextView) findViewById(R.id.textShowError);
-
-
+        textShowError = (TextView) findViewById(R.id.textShowError);
 
         String[] data = {"Проезд на красный", "Пересечение двойной сплошной"};
 
@@ -105,7 +104,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
                                        int position, long id) {
-               violationType = spinner.getSelectedItem().toString();
+                violationType = spinner.getSelectedItem().toString();
             }
 
             @Override
@@ -113,16 +112,15 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-
-        buttonAddVideo.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View view){
+        buttonAddVideo.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
                 Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(i, RESULT_LOAD_IMAGE);
             }
         });
 
-        buttonSendViolation.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View view){
+        buttonSendViolation.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
                 try {
                     uploadAsync();
                 } catch (Exception e) {
@@ -131,14 +129,15 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        buttonAddLocaton.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View view){
+        buttonAddLocaton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
                 Intent i = new Intent(MainActivity.this, AddViolationLocation.class);
                 startActivity(i);
             }
         });
 
     }
+
     private void uploadAsync() throws Exception {
         pd = new ProgressDialog(MainActivity.this);
         pd.setTitle("Отправка видео");
@@ -158,20 +157,17 @@ public class MainActivity extends AppCompatActivity
                     public void handleResponse(BackendlessCollection<Category_id> products) {
                         //Если загрузка массива продуктов успешна то передаем ее в наш лист productList
                         listCategory = products.getData();
-                      //  String textToShow = "Успешно скачано, количество элементов " + Integer.toString(listCategory.size());
 
                         Category_id currentViolatCat = listCategory.get(0);
-                        for (int i = 0; i< listCategory.size(); i++){
-                            if (listCategory.get(i).getType().equals(violationType)){
+                        for (int i = 0; i < listCategory.size(); i++) {
+                            if (listCategory.get(i).getType().equals(violationType)) {
                                 currentViolatCat = listCategory.get(i);
                             }
                         }
 
-
                         videoUrl = uploadedFile.getFileURL();
                         Violation currentViolation = new Violation();
-                       // Category_id currentViolationType = new Category_id();
-                       // currentViolationType.setType(violationType);
+
                         currentViolation.setCarMake(editCarMake.getText().toString());
                         currentViolation.setCarModel(editCarModel.getText().toString());
                         currentViolation.setCarNumber(editCarNumber.getText().toString());
@@ -183,10 +179,9 @@ public class MainActivity extends AppCompatActivity
                         currentViolation.setUser_id(user);
                         lat = getInt.getStringExtra(AddViolationLocation.LAT);
                         longt = getInt.getStringExtra(AddViolationLocation.LONGT);
+
                         currentViolation.setLat(lat);
                         currentViolation.setLongt(longt);
-
-
 
                         Backendless.Persistence.save(currentViolation, new AsyncCallback<Violation>() {
                             public void handleResponse(Violation response) {
@@ -210,7 +205,6 @@ public class MainActivity extends AppCompatActivity
                 });
 
 
-
             }
 
             @Override
@@ -219,6 +213,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
+
     public String getRealPathFromURI(Context context, Uri contentUri) {
         Cursor cursor = null;
         try {
@@ -233,6 +228,7 @@ public class MainActivity extends AppCompatActivity
             }
         }
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -240,9 +236,10 @@ public class MainActivity extends AppCompatActivity
         if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && data != null && data.getData() != null) {
             Uri uri = data.getData();
             path = getRealPathFromURI(this, uri);
-            textShowError.setText("Видео готово к отправке");
+            textShowError.append("Видео готово к отправке");
+            // textShowError.setText("Видео готово к отправке");
         } else {
-           textShowError.setText("не прошел if ");
+            textShowError.setText("не прошел if ");
         }
     }
 
@@ -297,16 +294,13 @@ public class MainActivity extends AppCompatActivity
             Intent i = new Intent(MainActivity.this, MapsActivity.class);
             startActivity(i);
         } else if (id == R.id.nav_logout) {
-            Backendless.UserService.logout( new AsyncCallback<Void>()
-            {
-                public void handleResponse( Void response )
-                {
+            Backendless.UserService.logout(new AsyncCallback<Void>() {
+                public void handleResponse(Void response) {
                     startActivity(new Intent(MainActivity.this, Login.class));
                     // user has been logged out.
                 }
 
-                public void handleFault( BackendlessFault fault )
-                {
+                public void handleFault(BackendlessFault fault) {
                     // something went wrong and logout failed, to get the error code call fault.getCode()
                 }
             });

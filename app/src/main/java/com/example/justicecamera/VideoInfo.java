@@ -10,6 +10,7 @@ import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
@@ -23,6 +24,7 @@ import android.widget.VideoView;
 
 import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
+import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.backendless.persistence.BackendlessDataQuery;
@@ -53,7 +55,9 @@ public class VideoInfo extends AppCompatActivity {
     Violation thisViolation;
     List<Violation> listvViolation;
     String videoUrl;
-    String objectId;
+    String objectId = "";
+    String violLat = "";
+    String violLongt = "";
     VideoView video;
 
     @Override
@@ -62,17 +66,16 @@ public class VideoInfo extends AppCompatActivity {
         setContentView(R.layout.activity_video_info);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-      //  buttonBackToList = (Button)findViewById(R.id.buttonBackToList);
         buttonPlayVideo = (Button) findViewById(R.id.buttonPlayVideo);
         buttonDownload = (Button) findViewById(R.id.buttonDownload);
-        textViewVVideoName = (TextView)findViewById(R.id.textViewVVideoName);
-        textViewVCarModel = (TextView)findViewById(R.id.textViewVCarModel);
-        textViewVCarMake = (TextView)findViewById(R.id.textViewVCarMake);
-        textViewVCarColor = (TextView)findViewById(R.id.textViewVCarColor);
-        textViewVCarNumber = (TextView)findViewById(R.id.textViewVCarNumber);
-        textViewVcategory = (TextView)findViewById(R.id.textViewVcategory);
-        textViewVcomment = (TextView)findViewById(R.id.textViewVcomment);
-        textViewVInfo = (TextView)findViewById(R.id.textView10);
+        textViewVVideoName = (TextView) findViewById(R.id.textViewVVideoName);
+        textViewVCarModel = (TextView) findViewById(R.id.textViewVCarModel);
+        textViewVCarMake = (TextView) findViewById(R.id.textViewVCarMake);
+        textViewVCarColor = (TextView) findViewById(R.id.textViewVCarColor);
+        textViewVCarNumber = (TextView) findViewById(R.id.textViewVCarNumber);
+        textViewVcategory = (TextView) findViewById(R.id.textViewVcategory);
+        textViewVcomment = (TextView) findViewById(R.id.textViewVcomment);
+        textViewVInfo = (TextView) findViewById(R.id.textView10);
         listvViolation = new ArrayList<>();
         thisViolation = new Violation();
         video = (VideoView) findViewById(R.id.videoView);
@@ -85,55 +88,73 @@ public class VideoInfo extends AppCompatActivity {
 
         Intent i = getIntent();
         objectId = i.getStringExtra(CheckedVideoList.OBJECTID);
+        violLat = i.getStringExtra(MapsActivity.LATMAP);
+        violLongt = i.getStringExtra(MapsActivity.LONGTMAP);
         loading = new ProgressDialog(VideoInfo.this);
         loading.setTitle("Загрузка информации");
         loading.setMessage("Подождите");
         loading.show();
 
-        BackendlessDataQuery dataQuery2 = new BackendlessDataQuery();
-        Backendless.Data.of(Violation.class).find(dataQuery2, new AsyncCallback<BackendlessCollection<Violation>>() {
-            @Override
-            public void handleResponse(BackendlessCollection<Violation> listOfViolatioons) {
-              listvViolation = listOfViolatioons.getData();
-                for (int i = 0; i < listvViolation.size(); i++){
-                    if (listvViolation.get(i).getObjectId().equals(objectId)){
-                        thisViolation = listvViolation.get(i);
+        if (!(objectId == null)) {
+            BackendlessDataQuery dataQuery2 = new BackendlessDataQuery();
+            Backendless.Data.of(Violation.class).find(dataQuery2, new AsyncCallback<BackendlessCollection<Violation>>() {
+                @Override
+                public void handleResponse(BackendlessCollection<Violation> listOfViolatioons) {
+                    listvViolation = listOfViolatioons.getData();
+                    for (int i = 0; i < listvViolation.size(); i++) {
+                        if (listvViolation.get(i).getObjectId().equals(objectId)) {
+                            thisViolation = listvViolation.get(i);
+                        }
                     }
+
+                    setViolationParams(thisViolation);
+                    loading.dismiss();
+                    video.seekTo(200);
                 }
-                textViewVVideoName.setText(thisViolation.getName());
-                textViewVCarMake.setText(thisViolation.getCarMake());
-                textViewVCarModel.setText(thisViolation.getCarModel());
-                textViewVCarColor.setText(thisViolation.getColor());
-                textViewVCarNumber.setText(thisViolation.getCarNumber());
-                textViewVcategory.setText(thisViolation.getCategory().getType());
-                textViewVcomment.setText(thisViolation.getComment());
-                videoUrl = thisViolation.getVideoUrl();
-                loading.dismiss();
-                String path = videoUrl;
-                Uri uri = Uri.parse(path);
-                video.setVideoURI(uri);
-                video.seekTo(200);
 
-            }
-            @Override
-            public void handleFault(BackendlessFault backendlessFault) {
-                Toast toast2 = Toast.makeText(getApplicationContext(),
-                        "Ошибка загрузки " + "Server reported an error - " + backendlessFault.getMessage(), Toast.LENGTH_LONG);
-                toast2.show();
-            }
-        });
+                @Override
+                public void handleFault(BackendlessFault backendlessFault) {
+                    Toast toast2 = Toast.makeText(getApplicationContext(),
+                            "Ошибка загрузки " + "Server reported an error - " + backendlessFault.getMessage(), Toast.LENGTH_LONG);
+                    toast2.show();
+                }
+            });
+        } else if (!violLongt.equals("")) {
+            BackendlessDataQuery dataQuery2 = new BackendlessDataQuery();
+            Backendless.Data.of(Violation.class).find(dataQuery2, new AsyncCallback<BackendlessCollection<Violation>>() {
+                @Override
+                public void handleResponse(BackendlessCollection<Violation> listOfViolatioons) {
+                    listvViolation = listOfViolatioons.getData();
+                    for (int i = 0; i < listvViolation.size(); i++) {
+                        if (listvViolation.get(i).getLat().equals(violLat)) {
+                            if (listvViolation.get(i).getLongt().equals(violLongt)) {
+                                thisViolation = listvViolation.get(i);
+                            }
+                        }
+                    }
 
-        buttonPlayVideo.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View view){
-                /*
+                    setViolationParams(thisViolation);
+                    loading.dismiss();
+                    video.seekTo(200);
+                }
+
+                @Override
+                public void handleFault(BackendlessFault backendlessFault) {
+                    Toast toast2 = Toast.makeText(getApplicationContext(),
+                            "Ошибка загрузки " + "Server reported an error - " + backendlessFault.getMessage(), Toast.LENGTH_LONG);
+                    toast2.show();
+                }
+            });
+        }
+
+        buttonPlayVideo.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+/*
                 pd = new ProgressDialog(VideoInfo.this);
                 pd.setTitle("Подготовка видео");
                 pd.setMessage("Подождите");
                 pd.show();
 */
-                Toast toast3 = Toast.makeText(getApplicationContext(),
-                        "Тест", Toast.LENGTH_LONG);
-                toast3.show();
                 video.setMediaController(new MediaController(VideoInfo.this));
 
                 video.setOnCompletionListener(myVideoViewCompletionListener);
@@ -145,8 +166,8 @@ public class VideoInfo extends AppCompatActivity {
             }
         });
 
-        buttonDownload.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View view){
+        buttonDownload.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
                 final DownloadTask downloadTask = new DownloadTask(VideoInfo.this);
                 downloadTask.execute(videoUrl);
                 mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
@@ -158,6 +179,7 @@ public class VideoInfo extends AppCompatActivity {
             }
         });
     }
+
     MediaPlayer.OnCompletionListener myVideoViewCompletionListener
             = new MediaPlayer.OnCompletionListener() {
 
@@ -174,7 +196,7 @@ public class VideoInfo extends AppCompatActivity {
 
         @Override
         public void onPrepared(MediaPlayer arg0) {
-          //  pd.dismiss();
+            // pd.dismiss();
             Toast.makeText(getApplicationContext(),
                     "Media file is loaded and ready to go",
                     Toast.LENGTH_LONG).show();
@@ -186,6 +208,7 @@ public class VideoInfo extends AppCompatActivity {
 
         @Override
         public boolean onError(MediaPlayer arg0, int arg1, int arg2) {
+            //  pd.dismiss();
             Toast.makeText(getApplicationContext(),
                     "Error!!!",
                     Toast.LENGTH_LONG).show();
@@ -225,7 +248,8 @@ public class VideoInfo extends AppCompatActivity {
 
                 // download the file
                 input = connection.getInputStream();
-                output = new FileOutputStream("storage/emulated/0/videoDownload.mp4");
+                String pathToDownload = Environment.getExternalStorageDirectory().toString() + "/videoDownload.mp4";
+                output = new FileOutputStream(pathToDownload);
 
                 byte data[] = new byte[4096];
                 long total = 0;
@@ -289,5 +313,19 @@ public class VideoInfo extends AppCompatActivity {
             else
                 Toast.makeText(context, "File downloaded", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public void setViolationParams(Violation thisViolation) {
+        textViewVVideoName.setText(thisViolation.getName());
+        textViewVCarMake.setText(thisViolation.getCarMake());
+        textViewVCarModel.setText(thisViolation.getCarModel());
+        textViewVCarColor.setText(thisViolation.getColor());
+        textViewVCarNumber.setText(thisViolation.getCarNumber());
+        textViewVcategory.setText(thisViolation.getCategory().getType());
+        textViewVcomment.setText(thisViolation.getComment());
+        videoUrl = thisViolation.getVideoUrl();
+        String path = videoUrl;
+        Uri uri = Uri.parse(path);
+        video.setVideoURI(uri);
     }
 }

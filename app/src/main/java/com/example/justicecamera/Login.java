@@ -49,7 +49,7 @@ public class Login extends AppCompatActivity {
 
         final boolean stayLoggedIn = true;
 
-/*
+
         String userToken = UserTokenStorageFactory.instance().getStorage().get();
         if( userToken != null && !userToken.equals( "" ) )
 
@@ -57,7 +57,7 @@ public class Login extends AppCompatActivity {
             Intent i = new Intent(Login.this, MainActivity.class);
             startActivity(i);
         }
-*/
+
 
         buttonLogin.setOnClickListener(new View.OnClickListener(){
             public void onClick(View view){
