@@ -12,6 +12,7 @@ import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
+import com.backendless.persistence.BackendlessDataQuery;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -75,6 +76,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.moveCamera(CameraUpdateFactory.newLatLng(bishkek));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(bishkek, 12));
 
+        Toast.makeText(getApplicationContext(), "Для перехода к видео выберите маркер и нажмите по описанию", Toast.LENGTH_LONG).show();
         UiSettings set = mMap.getUiSettings();
         set.setZoomControlsEnabled(true);
 
@@ -95,7 +97,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void load() {
 
-        Backendless.Persistence.of(Violation.class).find(new AsyncCallback<BackendlessCollection<Violation>>() {
+        BackendlessDataQuery dataQuery = new BackendlessDataQuery();
+        dataQuery.setWhereClause("videoStatus.name = 1");
+        Backendless.Data.of(Violation.class).find(dataQuery, new AsyncCallback<BackendlessCollection<Violation>>() {
             @Override
             public void handleResponse(BackendlessCollection<Violation> foundViolation) {
                 list = foundViolation.getData();
@@ -116,8 +120,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         position = new LatLng(lat3, lng3);
                         MarkerOptions markerOptions = new MarkerOptions();
                         markerOptions.position(position);
-                        //mMap.addMarker(markerOptions);
-                        //mMap.addMarker(new MarkerOptions().position(new LatLng(lat3, lng3)).title(violation.getName()));
                         String snippet = violation.getCarMake() + " " + violation.getCarModel();
                         Marker location = mMap.addMarker(new MarkerOptions().position(position).title(violation.getName()).snippet(snippet));
                     }

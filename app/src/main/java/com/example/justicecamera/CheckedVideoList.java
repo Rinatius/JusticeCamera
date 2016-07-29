@@ -28,7 +28,6 @@ public class CheckedVideoList extends AppCompatActivity {
     static ProgressDialog pd;
     List<Violation> listViolation;
     TextView textViewTester;
-    Button buttonBack;
     String objectId = "";
     static final String OBJECTID = "checking";
 
@@ -45,6 +44,7 @@ public class CheckedVideoList extends AppCompatActivity {
         pd.show();
 
         BackendlessDataQuery dataQuery2 = new BackendlessDataQuery();
+        dataQuery2.setWhereClause("videoStatus.name = 1");
         Backendless.Data.of(Violation.class).find(dataQuery2, new AsyncCallback<BackendlessCollection<Violation>>() {
             @Override
             public void handleResponse(BackendlessCollection<Violation> listOfViolatioons) {
@@ -57,7 +57,7 @@ public class CheckedVideoList extends AppCompatActivity {
                 MyAdapter adapter = new MyAdapter(CheckedVideoList.this, listViolation);
                 list.setAdapter(adapter);
 
-                  pd.dismiss();
+                pd.dismiss();
             }
 
             @Override
@@ -68,6 +68,7 @@ public class CheckedVideoList extends AppCompatActivity {
             }
         });
     }
+
     class MyAdapter extends BaseAdapter {
 
         private Context context;

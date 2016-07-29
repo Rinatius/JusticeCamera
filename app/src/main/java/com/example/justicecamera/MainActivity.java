@@ -13,6 +13,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,6 +23,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
@@ -30,9 +32,11 @@ import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.backendless.files.BackendlessFile;
 import com.backendless.persistence.BackendlessDataQuery;
+import com.backendless.persistence.local.UserTokenStorageFactory;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
@@ -51,6 +55,8 @@ public class MainActivity extends AppCompatActivity
     static String path = "";
     String lat = "";
     String longt = "";
+    String defaultStatusId = "04AB1E82-7B3E-9D1B-FF82-735A8173D500";
+    VideoStatus defaultVideoStatus;
     Button buttonAddVideo;
     Button buttonSendViolation;
     Button buttonAddLocaton;
@@ -136,6 +142,19 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        //defaultVideoStatus = 0
+        Backendless.Persistence.of(VideoStatus.class).findById(defaultStatusId, new AsyncCallback<VideoStatus>() {
+            @Override
+            public void handleResponse(VideoStatus videoStatus) {
+                defaultVideoStatus = videoStatus;
+            }
+
+            @Override
+            public void handleFault(BackendlessFault backendlessFault) {
+                Toast.makeText(MainActivity.this, "Не найден статус", Toast.LENGTH_LONG).show();
+            }
+        });
+
     }
 
     private void uploadAsync() throws Exception {
@@ -155,8 +174,9 @@ public class MainActivity extends AppCompatActivity
                 Backendless.Data.of(Category_id.class).find(dataQuery, new AsyncCallback<BackendlessCollection<Category_id>>() {
                     @Override
                     public void handleResponse(BackendlessCollection<Category_id> products) {
-                        //Если загрузка массива продуктов успешна то передаем ее в наш лист productList
                         listCategory = products.getData();
+
+                        final Violation currentViolation = new Violation();
 
                         Category_id currentViolatCat = listCategory.get(0);
                         for (int i = 0; i < listCategory.size(); i++) {
@@ -166,7 +186,6 @@ public class MainActivity extends AppCompatActivity
                         }
 
                         videoUrl = uploadedFile.getFileURL();
-                        Violation currentViolation = new Violation();
 
                         currentViolation.setCarMake(editCarMake.getText().toString());
                         currentViolation.setCarModel(editCarModel.getText().toString());
@@ -179,15 +198,14 @@ public class MainActivity extends AppCompatActivity
                         currentViolation.setUser_id(user);
                         lat = getInt.getStringExtra(AddViolationLocation.LAT);
                         longt = getInt.getStringExtra(AddViolationLocation.LONGT);
-
                         currentViolation.setLat(lat);
                         currentViolation.setLongt(longt);
+                        currentViolation.setVideoStatus(defaultVideoStatus);
 
                         Backendless.Persistence.save(currentViolation, new AsyncCallback<Violation>() {
                             public void handleResponse(Violation response) {
                                 pd.dismiss();
                                 textShowError.setText("Нарушение отправлено");
-                                // new Contact instance has been saved
                             }
 
                             public void handleFault(BackendlessFault fault) {
@@ -203,12 +221,11 @@ public class MainActivity extends AppCompatActivity
 
                     }
                 });
-
-
             }
 
             @Override
             public void handleFault(BackendlessFault backendlessFault) {
+                pd.dismiss();
                 textShowError.setText("Server reported an error - " + backendlessFault.getMessage());
             }
         });
@@ -289,7 +306,16 @@ public class MainActivity extends AppCompatActivity
             startActivity(i);
 
         } else if (id == R.id.moderation) {
-
+            BackendlessUser user = Backendless.UserService.CurrentUser();
+            HashMap<String, Object> map = (HashMap) user.getProperty("moderator");
+            int stat = (Integer) map.get("status");
+            if (stat == 0) {
+                Toast toast = Toast.makeText(getApplicationContext(),
+                        "У вас нет прав модератора", Toast.LENGTH_LONG);
+                toast.show();
+            } else if (stat == 1) {
+                startActivity(new Intent(MainActivity.this, ModeratorVideoList.class));
+            }
         } else if (id == R.id.mapOfViolations) {
             Intent i = new Intent(MainActivity.this, MapsActivity.class);
             startActivity(i);

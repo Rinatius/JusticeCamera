@@ -203,6 +203,26 @@
                     android:id="@+id/buttonDownload" />
 
             </LinearLayout>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <Button
+                    style="@style/Widget.AppCompat.Button.Colored"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Одобрить"
+                    android:id="@+id/buttonApprove" />
+
+                <Button
+                    style="@style/Widget.AppCompat.Button.Colored"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Отклонить"
+                    android:id="@+id/buttonReject" />
+
+            </LinearLayout>
 
             <View
                 android:layout_width="match_parent"

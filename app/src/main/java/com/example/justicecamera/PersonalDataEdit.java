@@ -21,8 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PersonalDataEdit extends AppCompatActivity {
- //   public final static String BACKENDLESS_APP_ID = "A2A1E1C9-A8F7-C938-FFEF-4D4EA6C0A300";
- //  public final static String BACKENDLESS_SECRET_KEY = "71C79AEF-B5AD-C438-FF02-F87ADD10AB00";
     ImageView imageView;
     Button buttonSavePersonalData;
     EditText editLastname;
@@ -34,15 +32,17 @@ public class PersonalDataEdit extends AppCompatActivity {
     RadioButton radioButtonFeMale;
     TextView textViewTester;
     TextView textViewCard;
+    ModeratorStatus defaultModeratorStatus;
 
     int dayBirthday;
     int monthBirthday;
     int yearBirthday;
     String carNumber = "";
     String passportNo = "";
+    String defaultStatus = "159B452C-5E80-1A8C-FF14-B9443785CD00";
     int phoneNumber = 0;
-    boolean sex= true;
-    String photoUrl="";
+    boolean sex = true;
+    String photoUrl = "";
     String lastName = "";
     String firstName = "";
     View.OnClickListener radioListener;
@@ -74,17 +74,32 @@ public class PersonalDataEdit extends AppCompatActivity {
         month.setMinValue(0);
         year.setMaxValue(2000);
         year.setMinValue(1950);
-        imageView=(ImageView)findViewById(R.id.imageView);
+        imageView = (ImageView) findViewById(R.id.imageView);
 
+        Backendless.Persistence.of(ModeratorStatus.class).findById(defaultStatus, new AsyncCallback<ModeratorStatus>() {
+            @Override
+            public void handleResponse(ModeratorStatus status) {
+                defaultModeratorStatus = status;
+            }
+
+            @Override
+            public void handleFault(BackendlessFault fault) {
+                // an error has occurred, the error code can be retrieved with fault.getCode()
+            }
+        });
+
+        // true = male, false = female
         radioListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-                RadioButton rb = (RadioButton)v;
+                RadioButton rb = (RadioButton) v;
                 switch (rb.getId()) {
-                    case R.id.radioButtonMale: sex = true;
+                    case R.id.radioButtonMale:
+                        sex = true;
                         break;
-                    case R.id.radioButtonFemale: sex = false;
+                    case R.id.radioButtonFemale:
+                        sex = false;
                         break;
                     default:
                         break;
@@ -92,9 +107,8 @@ public class PersonalDataEdit extends AppCompatActivity {
             }
         };
 
-
-        final BackendlessUser user  = Backendless.UserService.CurrentUser();
-        if (!user.getProperty("firstName").toString().equals("")){
+        final BackendlessUser user = Backendless.UserService.CurrentUser();
+        if (!(user.getProperty("firstName") == null)) {
             editFirstname.setText(user.getProperty("firstName").toString());
             editLastname.setText(user.getProperty("lastName").toString());
             editCarNumber.setText(user.getProperty("carNumber").toString());
@@ -103,16 +117,19 @@ public class PersonalDataEdit extends AppCompatActivity {
             year.setValue(Integer.parseInt(user.getProperty("yearBirhday").toString()));
             editPassportNo.setText(user.getProperty("passportNo").toString());
             editPhoneNumber.setText(user.getProperty("phoneNumber").toString());
-            boolean sex = (boolean)user.getProperty("sex");
+            boolean sex = (boolean) user.getProperty("sex");
             radioButtonMale.setChecked(sex);
             radioButtonFeMale.setChecked(!sex);
+
+
+            // Toast.makeText(PersonalDataEdit.this, Integer.toString(stat), Toast.LENGTH_LONG);
+            //  ModeratorStatus stat  = (ModeratorStatus) statww;
 
         }
 
 
-
-        buttonSavePersonalData.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View view){
+        buttonSavePersonalData.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
                 lastName = editLastname.getText().toString();
                 firstName = editFirstname.getText().toString();
                 dayBirthday = day.getValue();
@@ -122,35 +139,35 @@ public class PersonalDataEdit extends AppCompatActivity {
                 passportNo = editPassportNo.getText().toString();
                 phoneNumber = Integer.parseInt(editPhoneNumber.getText().toString());
 
-                 user.setProperty("firstName", firstName);
-                 user.setProperty("lastName", lastName);
-                 user.setProperty("dayBirthday", dayBirthday);
-                 user.setProperty("monthBirthday", monthBirthday);
-                 user.setProperty("yearBirhday", yearBirthday);
-                 user.setProperty("carNumber", carNumber);
-                 user.setProperty("passportNo", passportNo);
-                 user.setProperty("phoneNumber", phoneNumber);
-                 user.setProperty("sex", sex);
-                 user.setProperty("photoUrl", photoUrl);
+                user.setProperty("firstName", firstName);
+                user.setProperty("lastName", lastName);
+                user.setProperty("dayBirthday", dayBirthday);
+                user.setProperty("monthBirthday", monthBirthday);
+                user.setProperty("yearBirhday", yearBirthday);
+                user.setProperty("carNumber", carNumber);
+                user.setProperty("passportNo", passportNo);
+                user.setProperty("phoneNumber", phoneNumber);
+                user.setProperty("sex", sex);
+                user.setProperty("photoUrl", photoUrl);
+
+                if (user.getProperty("moderator") == null) {
+                    user.setProperty("moderator", defaultModeratorStatus);
+                }
 
                 Backendless.UserService.update(user, new AsyncCallback<BackendlessUser>() {
                     @Override
                     public void handleResponse(BackendlessUser backendlessUser) {
 
-                       textViewTester.setText("user has been updated");
+                        textViewTester.setText("user has been updated");
                         //user has been updated
                     }
 
                     @Override
                     public void handleFault(BackendlessFault backendlessFault) {
-                        textViewTester.setText( "error message: "+backendlessFault.getMessage()+ "  code:"+backendlessFault.getCode());
-
+                        textViewTester.setText("error message: " + backendlessFault.getMessage() + "  code:" + backendlessFault.getCode());
                     }
                 });
-
             }
         });
-
-
     }
 }

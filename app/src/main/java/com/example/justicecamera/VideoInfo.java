@@ -44,6 +44,8 @@ public class VideoInfo extends AppCompatActivity {
     ProgressDialog mProgressDialog;
     Button buttonPlayVideo;
     Button buttonDownload;
+    Button buttonApprove;
+    Button buttonReject;
     TextView textViewVVideoName;
     TextView textViewVCarModel;
     TextView textViewVCarMake;
@@ -58,7 +60,11 @@ public class VideoInfo extends AppCompatActivity {
     String objectId = "";
     String violLat = "";
     String violLongt = "";
+    String approvedStatusID = "AF2E98BF-5720-CCC8-FF36-7BA99D19C500";
+    String rejectedStatusId = "6939FC0E-2784-8E4D-FF79-A31425E8FA00";
     VideoView video;
+    VideoStatus approvedStatus;
+    VideoStatus rejectedStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +74,8 @@ public class VideoInfo extends AppCompatActivity {
 
         buttonPlayVideo = (Button) findViewById(R.id.buttonPlayVideo);
         buttonDownload = (Button) findViewById(R.id.buttonDownload);
+        buttonApprove = (Button) findViewById(R.id.buttonApprove);
+        buttonReject = (Button) findViewById(R.id.buttonReject);
         textViewVVideoName = (TextView) findViewById(R.id.textViewVVideoName);
         textViewVCarModel = (TextView) findViewById(R.id.textViewVCarModel);
         textViewVCarMake = (TextView) findViewById(R.id.textViewVCarMake);
@@ -79,6 +87,63 @@ public class VideoInfo extends AppCompatActivity {
         listvViolation = new ArrayList<>();
         thisViolation = new Violation();
         video = (VideoView) findViewById(R.id.videoView);
+
+        buttonReject.setEnabled(false);
+        buttonReject.setVisibility(View.INVISIBLE);
+        buttonApprove.setEnabled(false);
+        buttonApprove.setVisibility(View.INVISIBLE);
+
+        buttonApprove.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                thisViolation.setVideoStatus(approvedStatus);
+
+                Backendless.Persistence.save(thisViolation, new AsyncCallback<Violation>() {
+                    public void handleResponse(Violation response) {
+                        Toast.makeText(getApplicationContext(), "Видео одобрено", Toast.LENGTH_LONG).show();
+                    }
+
+                    public void handleFault(BackendlessFault fault) {
+                    }
+                });
+            }
+        });
+        buttonReject.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                thisViolation.setVideoStatus(rejectedStatus);
+                Backendless.Persistence.save(thisViolation, new AsyncCallback<Violation>() {
+                    public void handleResponse(Violation response) {
+                        Toast.makeText(getApplicationContext(), "Видео отклонено", Toast.LENGTH_LONG).show();
+                    }
+
+                    public void handleFault(BackendlessFault fault) {
+                    }
+                });
+            }
+        });
+
+        Backendless.Persistence.of(VideoStatus.class).findById(approvedStatusID, new AsyncCallback<VideoStatus>() {
+            @Override
+            public void handleResponse(VideoStatus videoStatus) {
+                approvedStatus = videoStatus;
+            }
+
+            @Override
+            public void handleFault(BackendlessFault backendlessFault) {
+                Toast.makeText(getApplicationContext(), "Ошибка", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        Backendless.Persistence.of(VideoStatus.class).findById(rejectedStatusId, new AsyncCallback<VideoStatus>() {
+            @Override
+            public void handleResponse(VideoStatus videoStatus) {
+                rejectedStatus = videoStatus;
+            }
+
+            @Override
+            public void handleFault(BackendlessFault backendlessFault) {
+                Toast.makeText(getApplicationContext(), "Ошибка", Toast.LENGTH_LONG).show();
+            }
+        });
 
         mProgressDialog = new ProgressDialog(VideoInfo.this);
         mProgressDialog.setMessage("Downloading...");
@@ -107,7 +172,9 @@ public class VideoInfo extends AppCompatActivity {
                         }
                     }
 
+
                     setViolationParams(thisViolation);
+
                     loading.dismiss();
                     video.seekTo(200);
                 }
@@ -315,7 +382,14 @@ public class VideoInfo extends AppCompatActivity {
         }
     }
 
-    public void setViolationParams(Violation thisViolation) {
+    public void setViolationParams(final Violation thisViolation) {
+        if (thisViolation.getVideoStatus().getName() == 0) {
+            buttonReject.setEnabled(true);
+            buttonReject.setVisibility(View.VISIBLE);
+            buttonApprove.setEnabled(true);
+            buttonApprove.setVisibility(View.VISIBLE);
+        }
+
         textViewVVideoName.setText(thisViolation.getName());
         textViewVCarMake.setText(thisViolation.getCarMake());
         textViewVCarModel.setText(thisViolation.getCarModel());
@@ -327,5 +401,6 @@ public class VideoInfo extends AppCompatActivity {
         String path = videoUrl;
         Uri uri = Uri.parse(path);
         video.setVideoURI(uri);
+
     }
 }
