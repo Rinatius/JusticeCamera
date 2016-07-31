@@ -31,7 +31,8 @@
         <activity android:name=".PersonalDataSaved" />
         <activity android:name=".VideoInfo"
             android:parentActivityName=".CheckedVideoList"/>
-        <activity android:name=".ModeratorVideoList" />
+        <activity android:name=".ModeratorVideoList"
+            android:parentActivityName=".MainActivity"/>
         <activity android:name=".CheckedVideoList"
             android:parentActivityName=".MainActivity"/>
         <!--

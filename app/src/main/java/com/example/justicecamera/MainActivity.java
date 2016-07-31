@@ -3,6 +3,7 @@ package com.example.justicecamera;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,7 +14,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,7 +32,6 @@ import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.backendless.files.BackendlessFile;
 import com.backendless.persistence.BackendlessDataQuery;
-import com.backendless.persistence.local.UserTokenStorageFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -53,6 +52,14 @@ public class MainActivity extends AppCompatActivity
     static String violationType;
     static String videoUrl;
     static String path = "";
+    String prefCarMake = "CarMake";
+    String prefCarModel = "CarModel";
+    String prefCarNumber = "CarNumber";
+    String prefCarColor = "CarColor";
+    String prefComment = "Comment";
+    String prefVideoName = "VideoName";
+    String prefCategory = "Category";
+    SharedPreferences persData;
     String lat = "";
     String longt = "";
     String defaultStatusId = "04AB1E82-7B3E-9D1B-FF82-735A8173D500";
@@ -84,7 +91,7 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setItemIconTintList(null);
 
-        getInt = getIntent();
+
 
         listCategory = new ArrayList<>();
         editCarMake = (EditText) findViewById(R.id.editTextCarMake);
@@ -118,6 +125,20 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        getInt = getIntent();
+        lat = getInt.getStringExtra(AddViolationLocation.LAT);
+        longt = getInt.getStringExtra(AddViolationLocation.LONGT);
+        if (!(lat==null)&&!(lat.equals(""))){
+            persData = getSharedPreferences("Data", MODE_PRIVATE);
+            editCarColor.setText(persData.getString(prefCarColor, ""));
+            editCarMake.setText(persData.getString(prefCarMake, ""));
+            editViolatCarComment.setText(persData.getString(prefComment, ""));
+            editVideoName.setText(persData.getString(prefVideoName, ""));
+            editCarModel.setText(persData.getString(prefCarModel, ""));
+            editCarNumber.setText(persData.getString(prefCarNumber, ""));
+            spinner.setSelection(persData.getInt(prefCategory, 0));
+        }
+
         buttonAddVideo.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
@@ -137,6 +158,17 @@ public class MainActivity extends AppCompatActivity
 
         buttonAddLocaton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
+                persData = getSharedPreferences("Data", MODE_PRIVATE);
+                SharedPreferences.Editor ed = persData.edit();
+                ed.putString(prefCarMake, editCarMake.getText().toString());
+                ed.putString(prefCarModel, editCarModel.getText().toString());
+                ed.putString(prefCarColor, editCarColor.getText().toString());
+                ed.putString(prefCarNumber, editCarNumber.getText().toString());
+                ed.putString(prefComment, editViolatCarComment.getText().toString());
+                ed.putString(prefVideoName, editVideoName.getText().toString());
+                ed.putInt(prefCategory, spinner.getSelectedItemPosition());
+                ed.commit();
+
                 Intent i = new Intent(MainActivity.this, AddViolationLocation.class);
                 startActivity(i);
             }
@@ -196,8 +228,6 @@ public class MainActivity extends AppCompatActivity
                         currentViolation.setName(editVideoName.getText().toString());
                         currentViolation.setVideoUrl(videoUrl);
                         currentViolation.setUser_id(user);
-                        lat = getInt.getStringExtra(AddViolationLocation.LAT);
-                        longt = getInt.getStringExtra(AddViolationLocation.LONGT);
                         currentViolation.setLat(lat);
                         currentViolation.setLongt(longt);
                         currentViolation.setVideoStatus(defaultVideoStatus);
@@ -207,7 +237,6 @@ public class MainActivity extends AppCompatActivity
                                 pd.dismiss();
                                 textShowError.setText("Нарушение отправлено");
                             }
-
                             public void handleFault(BackendlessFault fault) {
                                 textShowError.setText("error has occured" + fault.getMessage());
                                 // an error has occurred, the error code can be retrieved with fault.getCode()
@@ -218,7 +247,6 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void handleFault(BackendlessFault backendlessFault) {
                         textShowError.setText("Ошибка загрузки Categ " + backendlessFault.getMessage());
-
                     }
                 });
             }
@@ -253,8 +281,7 @@ public class MainActivity extends AppCompatActivity
         if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && data != null && data.getData() != null) {
             Uri uri = data.getData();
             path = getRealPathFromURI(this, uri);
-            textShowError.append("Видео готово к отправке");
-            // textShowError.setText("Видео готово к отправке");
+            textShowError.setText("Видео готово к отправке");
         } else {
             textShowError.setText("не прошел if ");
         }

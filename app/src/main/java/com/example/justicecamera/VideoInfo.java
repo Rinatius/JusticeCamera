@@ -172,9 +172,7 @@ public class VideoInfo extends AppCompatActivity {
                         }
                     }
 
-
                     setViolationParams(thisViolation);
-
                     loading.dismiss();
                     video.seekTo(200);
                 }
