@@ -14,12 +14,16 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -59,6 +63,7 @@ public class MainActivity extends AppCompatActivity
     String prefComment = "Comment";
     String prefVideoName = "VideoName";
     String prefCategory = "Category";
+    String prefVideoPath = "path";
     SharedPreferences persData;
     String lat = "";
     String longt = "";
@@ -67,10 +72,12 @@ public class MainActivity extends AppCompatActivity
     Button buttonAddVideo;
     Button buttonSendViolation;
     Button buttonAddLocaton;
+    CheckBox checkBoxVideo;
+    CheckBox checkBoxText;
+    CheckBox checkBoxLocation;
     private static int RESULT_LOAD_IMAGE = 1;
     static TextView textShowError;
     static final BackendlessUser user = Backendless.UserService.CurrentUser();
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,8 +98,6 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setItemIconTintList(null);
 
-
-
         listCategory = new ArrayList<>();
         editCarMake = (EditText) findViewById(R.id.editTextCarMake);
         editCarModel = (EditText) findViewById(R.id.editTextCarModel);
@@ -104,6 +109,46 @@ public class MainActivity extends AppCompatActivity
         buttonSendViolation = (Button) findViewById(R.id.buttonSendViolation);
         buttonAddLocaton = (Button) findViewById(R.id.buttonAddLocation);
         textShowError = (TextView) findViewById(R.id.textShowError);
+        checkBoxLocation = (CheckBox) findViewById(R.id.checkBoxLocation);
+        checkBoxLocation.setEnabled(false);
+        checkBoxText = (CheckBox) findViewById(R.id.checkBoxText);
+        checkBoxText.setEnabled(false);
+        checkBoxVideo = (CheckBox) findViewById(R.id.checkBoxVideo);
+        checkBoxVideo.setEnabled(false);
+
+        TextWatcher textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                checkText();
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+            }
+        };
+        CompoundButton.OnCheckedChangeListener checkBoxListener = new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (compoundButton.isChecked()) {
+                    checkBox();
+                } else {
+                    buttonSendViolation.setEnabled(false);
+                }
+            }
+        };
+        checkBoxVideo.setOnCheckedChangeListener(checkBoxListener);
+        checkBoxText.setOnCheckedChangeListener(checkBoxListener);
+        checkBoxLocation.setOnCheckedChangeListener(checkBoxListener);
+        editViolatCarComment.addTextChangedListener(textWatcher);
+        editCarMake.addTextChangedListener(textWatcher);
+        editVideoName.addTextChangedListener(textWatcher);
+        editCarNumber.addTextChangedListener(textWatcher);
+        editCarModel.addTextChangedListener(textWatcher);
+        editCarColor.addTextChangedListener(textWatcher);
 
         String[] data = {"Проезд на красный", "Пересечение двойной сплошной"};
 
@@ -128,7 +173,7 @@ public class MainActivity extends AppCompatActivity
         getInt = getIntent();
         lat = getInt.getStringExtra(AddViolationLocation.LAT);
         longt = getInt.getStringExtra(AddViolationLocation.LONGT);
-        if (!(lat==null)&&!(lat.equals(""))){
+        if (!(lat == null) && !(lat.equals(""))) {
             persData = getSharedPreferences("Data", MODE_PRIVATE);
             editCarColor.setText(persData.getString(prefCarColor, ""));
             editCarMake.setText(persData.getString(prefCarMake, ""));
@@ -137,6 +182,19 @@ public class MainActivity extends AppCompatActivity
             editCarModel.setText(persData.getString(prefCarModel, ""));
             editCarNumber.setText(persData.getString(prefCarNumber, ""));
             spinner.setSelection(persData.getInt(prefCategory, 0));
+            checkBoxLocation.setChecked(true);
+            checkBoxLocation.setText("Координаты нарушения добавлены");
+            path = persData.getString(prefVideoPath, "");
+            if (!(path.equals(""))) {
+                checkBoxVideo.setChecked(true);
+                checkBoxVideo.setText("Видеофайл добавлен");
+            } else {
+                checkBoxVideo.setChecked(false);
+                checkBoxVideo.setText("Видеофайл не выбран");
+            }
+        } else {
+            checkBoxLocation.setChecked(false);
+            checkBoxLocation.setText("Необходимо добавить место нарушения");
         }
 
         buttonAddVideo.setOnClickListener(new View.OnClickListener() {
@@ -146,6 +204,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        buttonSendViolation.setEnabled(false);
         buttonSendViolation.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 try {
@@ -167,14 +226,13 @@ public class MainActivity extends AppCompatActivity
                 ed.putString(prefComment, editViolatCarComment.getText().toString());
                 ed.putString(prefVideoName, editVideoName.getText().toString());
                 ed.putInt(prefCategory, spinner.getSelectedItemPosition());
+                ed.putString(prefVideoPath, path);
                 ed.commit();
-
                 Intent i = new Intent(MainActivity.this, AddViolationLocation.class);
                 startActivity(i);
             }
         });
 
-        //defaultVideoStatus = 0
         Backendless.Persistence.of(VideoStatus.class).findById(defaultStatusId, new AsyncCallback<VideoStatus>() {
             @Override
             public void handleResponse(VideoStatus videoStatus) {
@@ -237,6 +295,7 @@ public class MainActivity extends AppCompatActivity
                                 pd.dismiss();
                                 textShowError.setText("Нарушение отправлено");
                             }
+
                             public void handleFault(BackendlessFault fault) {
                                 textShowError.setText("error has occured" + fault.getMessage());
                                 // an error has occurred, the error code can be retrieved with fault.getCode()
@@ -281,9 +340,11 @@ public class MainActivity extends AppCompatActivity
         if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && data != null && data.getData() != null) {
             Uri uri = data.getData();
             path = getRealPathFromURI(this, uri);
-            textShowError.setText("Видео готово к отправке");
+            checkBoxVideo.setChecked(true);
+            checkBoxVideo.setText("Видеофайл добавлен");
         } else {
-            textShowError.setText("не прошел if ");
+            checkBoxVideo.setChecked(false);
+            checkBoxVideo.setText("Видеофайл не выбран");
         }
     }
 
@@ -362,5 +423,23 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void checkText() {
+        if (!(editCarColor.getText().toString().equals("")) && !(editCarNumber.getText().toString().equals("")) && !(editCarModel.getText().toString().equals("")) && !(editVideoName.getText().toString().equals("")) && !(editCarMake.getText().toString().equals("")) && !(editViolatCarComment.getText().toString().equals(""))) {
+            checkBoxText.setChecked(true);
+            checkBoxText.setText("Все поля заполнены");
+        } else {
+            checkBoxText.setChecked(false);
+            checkBoxText.setText("Необходимо заполнить все поля");
+        }
+    }
+
+    public void checkBox() {
+        if(checkBoxText.isChecked()&&checkBoxVideo.isChecked()&&checkBoxLocation.isChecked()){
+            buttonSendViolation.setEnabled(true);
+        } else{
+            buttonSendViolation.setEnabled(false);
+        }
     }
 }

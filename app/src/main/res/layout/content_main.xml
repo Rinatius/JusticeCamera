@@ -174,8 +174,25 @@
                 android:id="@+id/textShowError"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text=""
+                android:text="Необходимо заполнить все данные"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
+
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Координаты нарушения не добавлены"
+                android:id="@+id/checkBoxLocation" />
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Необходимо заполнить все поля"
+                android:id="@+id/checkBoxText" />
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Видеофайл не выбран"
+                android:id="@+id/checkBoxVideo" />
 
             <LinearLayout
                 android:layout_width="match_parent"
