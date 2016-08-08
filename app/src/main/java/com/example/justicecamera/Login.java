@@ -2,11 +2,13 @@ package com.example.justicecamera;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.support.annotation.BoolRes;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,10 +30,12 @@ public class Login extends AppCompatActivity {
     EditText editLogin;
     EditText editPassword;
     TextView textViewInfo;
+    CheckBox checkBox;
 
     @Override
 
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         final BackendlessUser user = new BackendlessUser();
@@ -46,21 +50,13 @@ public class Login extends AppCompatActivity {
         editLogin = (EditText) findViewById(R.id.editLogin);
         editPassword = (EditText) findViewById(R.id.editLogin);
         textViewInfo = (TextView) findViewById(R.id.textViewInfo);
+        checkBox = (CheckBox) findViewById(R.id.checkBox);
 
-        final boolean stayLoggedIn = true;
 
-/*
-        String userToken = UserTokenStorageFactory.instance().getStorage().get();
-        if( userToken != null && !userToken.equals( "" ) )
-
-        {
-            Intent i = new Intent(Login.this, MainActivity.class);
-            startActivity(i);
-        }
-*/
 
         buttonLogin.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
+                 boolean stayLoggedIn = checkBox.isChecked();
                 Backendless.UserService.login(editLogin.getText().toString(), editPassword.getText().toString(), new AsyncCallback<BackendlessUser>() {
                     public void handleResponse(BackendlessUser user) {
                         Intent i = new Intent(Login.this, MainActivity.class);
@@ -87,8 +83,6 @@ public class Login extends AppCompatActivity {
                 Backendless.UserService.register(user, new BackendlessCallback<BackendlessUser>() {
                     @Override
                     public void handleResponse(BackendlessUser backendlessUser) {
-                        //После регистрации снова загружается Login активити
-                        //Затем надо уже войти в зарегистрированный аккаунт
                         Log.i("Registration", backendlessUser.getEmail() + " successfully registered");
                         textViewInfo.setText("Пользователь " + backendlessUser.getEmail() + " зарегистрирован");
                         Intent i = new Intent(Login.this, Login.class);
@@ -105,5 +99,38 @@ public class Login extends AppCompatActivity {
             }
         });
 
+       Backendless.UserService.isValidLogin(new AsyncCallback<Boolean>() {
+           @Override
+           public void handleResponse(Boolean isValidLogin) {
+               if( isValidLogin && Backendless.UserService.CurrentUser() == null )
+               {
+                   String currentUserId = Backendless.UserService.loggedInUser();
+
+                   if( !currentUserId.equals( "" ) )
+                   {
+                       Backendless.UserService.findById( currentUserId, new AsyncCallback<BackendlessUser>()
+                       {
+                           @Override
+                           public void handleResponse( BackendlessUser currentUser )
+                           {
+                               Backendless.UserService.setCurrentUser( currentUser );
+                               startActivity( new Intent( Login.this, MainActivity.class) );
+                               finish();
+                           }
+
+                           @Override
+                           public void handleFault(BackendlessFault backendlessFault) {
+
+                           }
+                       } );
+                   }
+               }
+           }
+
+           @Override
+           public void handleFault(BackendlessFault backendlessFault) {
+
+           }
+       });
     }
 }
