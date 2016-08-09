@@ -26,7 +26,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="Личные данные водителя"
+                android:text="@string/personal_data"
                 android:id="@+id/textViewCard"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true" />
@@ -49,7 +49,7 @@
                     style="@style/Widget.AppCompat.Button.Colored"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Выбрать фото"
+                    android:text="@string/choose_photo"
                     android:id="@+id/buttonAddPhoto" />
             </LinearLayout>
 
@@ -62,7 +62,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="Фамилия"
+                    android:text="@string/last_name"
                     android:id="@+id/textView2" />
 
                 <EditText
@@ -81,7 +81,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="Имя"
+                    android:text="@string/first_name"
                     android:id="@+id/textView3" />
 
                 <EditText
@@ -96,7 +96,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="День/Месяц/Год  Рождения"
+                android:text="@string/date_of_birth"
                 android:id="@+id/textView4" />
 
             <LinearLayout
@@ -130,7 +130,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="Номер машины"
+                    android:text="@string/car_number"
                     android:id="@+id/textViewCarNumber" />
 
                 <EditText
@@ -148,7 +148,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="Серия и номер паспорта"
+                    android:text="@string/passport_no"
                     android:id="@+id/textViewPasswordInfo" />
 
                 <EditText
@@ -166,7 +166,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="Номер телефона"
+                    android:text="@string/phone_number"
                     android:id="@+id/textViewPhone" />
 
                 <EditText
@@ -188,7 +188,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="Пол"
+                    android:text="@string/sex"
                     android:id="@+id/textView5" />
 
                 <RadioGroup
@@ -199,13 +199,13 @@
                     <RadioButton
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Мужской"
+                        android:text="@string/male"
                         android:id="@+id/radioButtonMale" />
 
                     <RadioButton
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Женский"
+                        android:text="@string/female"
                         android:id="@+id/radioButtonFemale" />
                 </RadioGroup>
 
@@ -215,7 +215,7 @@
                 style="@style/Widget.AppCompat.Button.Colored"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Сохранить"
+                android:text="@string/save"
                 android:id="@+id/buttonSavePersonalData" />
 
             <TextView

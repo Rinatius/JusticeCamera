@@ -31,7 +31,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="Добавить место нарушения" />
+                android:text="@string/add_location" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -42,7 +42,7 @@
                     android:id="@+id/textView2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Название видео"
+                    android:text="@string/video_name"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 <EditText
@@ -61,7 +61,7 @@
                     android:id="@+id/textView3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Марка автомобиля нарушителя"
+                    android:text="@string/car_make"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 <EditText
@@ -80,7 +80,7 @@
                     android:id="@+id/textView4"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Модель автомобиля"
+                    android:text="@string/car_model"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 <EditText
@@ -99,7 +99,7 @@
                     android:id="@+id/textView5"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Номер автомобиля"
+                    android:text="@string/car_number"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 <EditText
@@ -118,7 +118,7 @@
                     android:id="@+id/textView6"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Цвет автомобиля"
+                    android:text="@string/car_color"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 <EditText
@@ -137,7 +137,7 @@
                     android:id="@+id/textView8"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Тип нарушения"
+                    android:text="@string/violation_type"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 <Spinner
@@ -160,7 +160,7 @@
                     android:id="@+id/textView7"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Комментарии к видео"
+                    android:text="@string/video_comment"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 <EditText
@@ -175,24 +175,24 @@
                 android:id="@+id/textShowError"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Необходимо заполнить все данные"
+                android:text="@string/fill_all_data"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
 
             <CheckBox
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Координаты нарушения не добавлены"
+                android:text="@string/v_coordinates_notadded"
                 android:id="@+id/checkBoxLocation" />
             <CheckBox
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Необходимо заполнить все поля"
+                android:text="@string/fields_notfilled"
                 android:id="@+id/checkBoxText" />
             <CheckBox
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Видеофайл не выбран"
+                android:text="@string/video_notselected"
                 android:id="@+id/checkBoxVideo" />
 
             <LinearLayout
@@ -206,7 +206,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:text="+Добавить видео" />
+                    android:text="@string/add_video" />
 
                 <Button
                     android:id="@+id/buttonSendViolation"
@@ -214,7 +214,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:text="Отправить" />
+                    android:text="@string/send" />
             </LinearLayout>
 
         </LinearLayout>

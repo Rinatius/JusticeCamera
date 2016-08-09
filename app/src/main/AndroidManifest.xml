@@ -26,15 +26,11 @@
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".PersonalDataEdit"
-            android:parentActivityName=".MainActivity"/>
+        <activity android:name=".PersonalDataEdit"  />
         <activity android:name=".PersonalDataSaved" />
-        <activity android:name=".VideoInfo"
-            android:parentActivityName=".CheckedVideoList"/>
-        <activity android:name=".ModeratorVideoList"
-            android:parentActivityName=".MainActivity"/>
-        <activity android:name=".CheckedVideoList"
-            android:parentActivityName=".MainActivity"/>
+        <activity android:name=".VideoInfo" />
+        <activity android:name=".ModeratorVideoList" />
+        <activity android:name=".CheckedVideoList" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").

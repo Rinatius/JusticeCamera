@@ -76,7 +76,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.moveCamera(CameraUpdateFactory.newLatLng(bishkek));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(bishkek, 12));
 
-        Toast.makeText(getApplicationContext(), "Для перехода к видео выберите маркер и нажмите по описанию", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), getString(R.string.go_to_video), Toast.LENGTH_LONG).show();
         UiSettings set = mMap.getUiSettings();
         set.setZoomControlsEnabled(true);
 

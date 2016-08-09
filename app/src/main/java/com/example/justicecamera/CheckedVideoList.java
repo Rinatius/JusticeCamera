@@ -35,12 +35,13 @@ public class CheckedVideoList extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_checked_video_list);
-        getSupportActionBar().setHomeButtonEnabled(true);
+       // getSupportActionBar().setHomeButtonEnabled(true);
         textViewTester = (TextView) findViewById(R.id.textViewTester);
         listViolation = new ArrayList<>();
+
         pd = new ProgressDialog(CheckedVideoList.this);
-        pd.setTitle("Загрузка списка видео");
-        pd.setMessage("Подождите");
+        pd.setTitle(getString(R.string.videolist_downloading));
+        pd.setMessage(getString(R.string.wait));
         pd.show();
 
         BackendlessDataQuery dataQuery2 = new BackendlessDataQuery();
@@ -49,7 +50,7 @@ public class CheckedVideoList extends AppCompatActivity {
             @Override
             public void handleResponse(BackendlessCollection<Violation> listOfViolatioons) {
                 listViolation = listOfViolatioons.getData();
-                String textToShow = "Количество элементов: " + Integer.toString(listViolation.size());
+                String textToShow = getString(R.string.number_of_elements) + Integer.toString(listViolation.size());
                 textViewTester.setText(textToShow);
 
                 final ListView list = (ListView) findViewById(R.id.listView);
@@ -62,11 +63,14 @@ public class CheckedVideoList extends AppCompatActivity {
 
             @Override
             public void handleFault(BackendlessFault backendlessFault) {
+                pd.dismiss();
                 Toast toast2 = Toast.makeText(getApplicationContext(),
-                        "Ошибка загрузки " + "Server reported an error - " + backendlessFault.getMessage(), Toast.LENGTH_LONG);
+                        "Server reported an error - " + backendlessFault.getMessage(), Toast.LENGTH_LONG);
                 toast2.show();
+
             }
         });
+
     }
 
     class MyAdapter extends BaseAdapter {
@@ -119,4 +123,5 @@ public class CheckedVideoList extends AppCompatActivity {
             return con;
         }
     }
+
 }

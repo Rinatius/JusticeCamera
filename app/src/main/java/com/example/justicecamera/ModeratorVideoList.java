@@ -33,38 +33,8 @@ public class ModeratorVideoList extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_moderator_video_list);
-        getSupportActionBar().setHomeButtonEnabled(true);
         textViewTester = (TextView) findViewById(R.id.textViewTesterM);
         listViolation = new ArrayList<>();
-        pd = new ProgressDialog(ModeratorVideoList.this);
-        pd.setTitle("Загрузка списка видео");
-        pd.setMessage("Подождите");
-        pd.show();
-
-        BackendlessDataQuery dataQuery2 = new BackendlessDataQuery();
-        dataQuery2.setWhereClause("videoStatus.name = 0");
-        Backendless.Data.of(Violation.class).find(dataQuery2, new AsyncCallback<BackendlessCollection<Violation>>() {
-            @Override
-            public void handleResponse(BackendlessCollection<Violation> listOfViolatioons) {
-                listViolation = listOfViolatioons.getData();
-                String textToShow = "Количество элементов: " + Integer.toString(listViolation.size());
-                textViewTester.setText(textToShow);
-
-                final ListView list = (ListView) findViewById(R.id.listView);
-                registerForContextMenu(list);
-                MyAdapter adapter = new MyAdapter(ModeratorVideoList.this, listViolation);
-                list.setAdapter(adapter);
-
-                pd.dismiss();
-            }
-
-            @Override
-            public void handleFault(BackendlessFault backendlessFault) {
-                Toast toast2 = Toast.makeText(getApplicationContext(),
-                        "Ошибка загрузки " + "Server reported an error - " + backendlessFault.getMessage(), Toast.LENGTH_LONG);
-                toast2.show();
-            }
-        });
     }
 
     class MyAdapter extends BaseAdapter {
@@ -117,4 +87,40 @@ public class ModeratorVideoList extends AppCompatActivity {
             return con;
         }
     }
+
+    @Override
+    protected void onStart(){
+        super.onStart();
+        pd = new ProgressDialog(ModeratorVideoList.this);
+        pd.setTitle(getString(R.string.videolist_downloading));
+        pd.setMessage(getString(R.string.wait));
+        pd.show();
+
+        BackendlessDataQuery dataQuery2 = new BackendlessDataQuery();
+        dataQuery2.setWhereClause("videoStatus.name = 0");
+        Backendless.Data.of(Violation.class).find(dataQuery2, new AsyncCallback<BackendlessCollection<Violation>>() {
+            @Override
+            public void handleResponse(BackendlessCollection<Violation> listOfViolatioons) {
+                listViolation = listOfViolatioons.getData();
+                String textToShow = getString(R.string.number_of_elements) + Integer.toString(listViolation.size());
+                textViewTester.setText(textToShow);
+
+                final ListView list = (ListView) findViewById(R.id.listView);
+                registerForContextMenu(list);
+                MyAdapter adapter = new MyAdapter(ModeratorVideoList.this, listViolation);
+                list.setAdapter(adapter);
+
+                pd.dismiss();
+            }
+
+            @Override
+            public void handleFault(BackendlessFault backendlessFault) {
+                pd.dismiss();
+                Toast toast2 = Toast.makeText(getApplicationContext(),
+                        "Server reported an error - " + backendlessFault.getMessage(), Toast.LENGTH_LONG);
+                toast2.show();
+            }
+        });
+    }
+
 }

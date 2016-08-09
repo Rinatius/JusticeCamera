@@ -23,20 +23,12 @@ import java.util.Map;
 public class PersonalDataEdit extends AppCompatActivity {
     ImageView imageView;
     Button buttonSavePersonalData;
-    EditText editLastname;
-    EditText editFirstname;
-    EditText editCarNumber;
-    EditText editPassportNo;
-    EditText editPhoneNumber;
-    RadioButton radioButtonMale;
-    RadioButton radioButtonFeMale;
-    TextView textViewTester;
-    TextView textViewCard;
+    EditText editLastname, editFirstname, editCarNumber, editPassportNo, editPhoneNumber;
+    RadioButton radioButtonMale, radioButtonFeMale;
+    TextView textViewTester, textViewCard;
     ModeratorStatus defaultModeratorStatus;
 
-    int dayBirthday;
-    int monthBirthday;
-    int yearBirthday;
+    int dayBirthday, monthBirthday, yearBirthday;
     String carNumber = "";
     String passportNo = "";
     String defaultStatus = "159B452C-5E80-1A8C-FF14-B9443785CD00";
@@ -46,47 +38,15 @@ public class PersonalDataEdit extends AppCompatActivity {
     String lastName = "";
     String firstName = "";
     View.OnClickListener radioListener;
+    NumberPicker day, month, year;
+    BackendlessUser user = Backendless.UserService.CurrentUser();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_personal_data_edit);
-        getSupportActionBar().setTitle("Личный кабинет");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        editLastname = (EditText) findViewById(R.id.editTextVideoName);
-        editFirstname = (EditText) findViewById(R.id.editTextFirstname);
-        editCarNumber = (EditText) findViewById(R.id.editTextCarNumber);
-        editPassportNo = (EditText) findViewById(R.id.editTextPassportInfo);
-        editPhoneNumber = (EditText) findViewById(R.id.editTextPhoneNumber);
-        buttonSavePersonalData = (Button) findViewById(R.id.buttonSavePersonalData);
-        radioButtonMale = (RadioButton) findViewById(R.id.radioButtonMale);
-        radioButtonFeMale = (RadioButton) findViewById(R.id.radioButtonFemale);
-        textViewTester = (TextView) findViewById(R.id.textViewTester);
-        textViewCard = (TextView) findViewById(R.id.textViewCard);
-
-        final NumberPicker day = (NumberPicker) findViewById(R.id.numberPicker);
-        final NumberPicker month = (NumberPicker) findViewById(R.id.numberPicker2);
-        final NumberPicker year = (NumberPicker) findViewById(R.id.numberPicker3);
-        day.setMaxValue(31);
-        day.setMinValue(0);
-        month.setMaxValue(12);
-        month.setMinValue(0);
-        year.setMaxValue(2000);
-        year.setMinValue(1950);
-        imageView = (ImageView) findViewById(R.id.imageView);
-
-        Backendless.Persistence.of(ModeratorStatus.class).findById(defaultStatus, new AsyncCallback<ModeratorStatus>() {
-            @Override
-            public void handleResponse(ModeratorStatus status) {
-                defaultModeratorStatus = status;
-            }
-
-            @Override
-            public void handleFault(BackendlessFault fault) {
-                // an error has occurred, the error code can be retrieved with fault.getCode()
-            }
-        });
+        getSupportActionBar().setTitle(getString(R.string.dashboard));
+        init();
 
         // true = male, false = female
         radioListener = new View.OnClickListener() {
@@ -107,7 +67,7 @@ public class PersonalDataEdit extends AppCompatActivity {
             }
         };
 
-        final BackendlessUser user = Backendless.UserService.CurrentUser();
+
         if (!(user.getProperty("firstName") == null)) {
             editFirstname.setText(user.getProperty("firstName").toString());
             editLastname.setText(user.getProperty("lastName").toString());
@@ -121,12 +81,7 @@ public class PersonalDataEdit extends AppCompatActivity {
             radioButtonMale.setChecked(sex);
             radioButtonFeMale.setChecked(!sex);
 
-
-            // Toast.makeText(PersonalDataEdit.this, Integer.toString(stat), Toast.LENGTH_LONG);
-            //  ModeratorStatus stat  = (ModeratorStatus) statww;
-
         }
-
 
         buttonSavePersonalData.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
@@ -158,15 +113,48 @@ public class PersonalDataEdit extends AppCompatActivity {
                     @Override
                     public void handleResponse(BackendlessUser backendlessUser) {
 
-                        textViewTester.setText("user has been updated");
+                        textViewTester.setText(getString(R.string.updated_user));
                         //user has been updated
                     }
 
                     @Override
                     public void handleFault(BackendlessFault backendlessFault) {
-                        textViewTester.setText("error message: " + backendlessFault.getMessage() + "  code:" + backendlessFault.getCode());
+                        textViewTester.setText(getString(R.string.error_occurred) + backendlessFault.getMessage() + getString(R.string.code) + backendlessFault.getCode());
                     }
                 });
+            }
+        });
+    }
+    private void init(){
+        editLastname = (EditText) findViewById(R.id.editTextVideoName);
+        editFirstname = (EditText) findViewById(R.id.editTextFirstname);
+        editCarNumber = (EditText) findViewById(R.id.editTextCarNumber);
+        editPassportNo = (EditText) findViewById(R.id.editTextPassportInfo);
+        editPhoneNumber = (EditText) findViewById(R.id.editTextPhoneNumber);
+        buttonSavePersonalData = (Button) findViewById(R.id.buttonSavePersonalData);
+        radioButtonMale = (RadioButton) findViewById(R.id.radioButtonMale);
+        radioButtonFeMale = (RadioButton) findViewById(R.id.radioButtonFemale);
+        textViewTester = (TextView) findViewById(R.id.textViewTester);
+        textViewCard = (TextView) findViewById(R.id.textViewCard);
+        day = (NumberPicker) findViewById(R.id.numberPicker);
+        month = (NumberPicker) findViewById(R.id.numberPicker2);
+        year = (NumberPicker) findViewById(R.id.numberPicker3);
+        day.setMaxValue(31);
+        day.setMinValue(0);
+        month.setMaxValue(12);
+        month.setMinValue(0);
+        year.setMaxValue(2000);
+        year.setMinValue(1950);
+        imageView = (ImageView) findViewById(R.id.imageView);
+        Backendless.Persistence.of(ModeratorStatus.class).findById(defaultStatus, new AsyncCallback<ModeratorStatus>() {
+            @Override
+            public void handleResponse(ModeratorStatus status) {
+                defaultModeratorStatus = status;
+            }
+
+            @Override
+            public void handleFault(BackendlessFault fault) {
+                // an error has occurred, the error code can be retrieved with fault.getCode()
             }
         });
     }

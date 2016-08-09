@@ -24,11 +24,8 @@ public class Login extends AppCompatActivity {
     static ProgressDialog pd;
     public final static String BACKENDLESS_APP_ID = "A2A1E1C9-A8F7-C938-FFEF-4D4EA6C0A300";
     public final static String BACKENDLESS_SECRET_KEY = "71C79AEF-B5AD-C438-FF02-F87ADD10AB00";
-    Button buttonLogin;
-    Button buttonSignUp;
-    Button buttonSkip;
-    EditText editLogin;
-    EditText editPassword;
+    Button buttonLogin, buttonSignUp, buttonSkip;
+    EditText editLogin, editPassword;
     TextView textViewInfo;
     CheckBox checkBox;
 
@@ -45,22 +42,11 @@ public class Login extends AppCompatActivity {
         String appVersion = "v1";
         Backendless.initApp(this, BACKENDLESS_APP_ID, BACKENDLESS_SECRET_KEY, appVersion);
 
-        buttonLogin = (Button) findViewById(R.id.buttonLogin);
-        buttonSignUp = (Button) findViewById(R.id.buttonSignUp);
-        buttonSkip = (Button) findViewById(R.id.buttonSkip);
-        editLogin = (EditText) findViewById(R.id.editLogin);
-        editPassword = (EditText) findViewById(R.id.editLogin);
-        textViewInfo = (TextView) findViewById(R.id.textViewInfo);
-        checkBox = (CheckBox) findViewById(R.id.checkBox);
+        init();
 
         String userToken = UserTokenStorageFactory.instance().getStorage().get();
-
         if( userToken != null && !userToken.equals( "" ) )
         {
-//            pd = new ProgressDialog(Login.this);
-//            pd.setTitle("");
-//            pd.setMessage("Подождите");
-//            pd.show();
             startActivity(new Intent(Login.this, MainActivity.class));
         }
 
@@ -75,10 +61,7 @@ public class Login extends AppCompatActivity {
                     }
 
                     public void handleFault(BackendlessFault fault) {
-                        Toast toast = Toast.makeText(getApplicationContext(),
-                                "Ошибка авторизации", Toast.LENGTH_LONG);
-                        toast.show();
-
+                        Toast.makeText(getApplicationContext(), getString(R.string.author_error), Toast.LENGTH_LONG).show();
                         // login failed, to get the error code call fault.getCode()
                     }
                 }, stayLoggedIn);
@@ -93,7 +76,7 @@ public class Login extends AppCompatActivity {
                 Backendless.UserService.register(user, new BackendlessCallback<BackendlessUser>() {
                     @Override
                     public void handleResponse(BackendlessUser backendlessUser) {
-                        Log.i("Registration", backendlessUser.getEmail() + " successfully registered");
+                        Log.i(getString(R.string.registration), backendlessUser.getEmail() + getString(R.string.havebeen_registered));
                         textViewInfo.setText("Пользователь " + backendlessUser.getEmail() + " зарегистрирован");
                         Intent i = new Intent(Login.this, Login.class);
                         startActivity(i);
@@ -108,8 +91,14 @@ public class Login extends AppCompatActivity {
                 startActivity(i);
             }
         });
-
-
-
+    }
+    private void init() {
+        buttonLogin = (Button) findViewById(R.id.buttonLogin);
+        buttonSignUp = (Button) findViewById(R.id.buttonSignUp);
+        buttonSkip = (Button) findViewById(R.id.buttonSkip);
+        editLogin = (EditText) findViewById(R.id.editLogin);
+        editPassword = (EditText) findViewById(R.id.editLogin);
+        textViewInfo = (TextView) findViewById(R.id.textViewInfo);
+        checkBox = (CheckBox) findViewById(R.id.checkBox);
     }
 }

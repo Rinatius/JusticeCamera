@@ -17,7 +17,6 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -47,16 +46,11 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     Intent getInt;
     static ProgressDialog pd;
-    static EditText editCarMake, editCarModel, editCarNumber,editCarColor, editViolatCarComment, editVideoName;
-   // static EditText editCarModel;
-   /// static EditText editCarNumber;
-   // static EditText editCarColor;
-  //  static EditText editViolatCarComment;
- //   static EditText editVideoName;
+    static EditText editCarMake, editCarModel, editCarNumber, editCarColor, editViolatCarComment, editVideoName;
     static List<Category_id> listCategory;
     static String violationType, videoUrl;
-  //  static String videoUrl;
     static String path = "";
+    private static long back_pressed;
     String prefCarMake = "CarMake";
     String prefCarModel = "CarModel";
     String prefCarNumber = "CarNumber";
@@ -71,16 +65,17 @@ public class MainActivity extends AppCompatActivity
     String defaultStatusId = "04AB1E82-7B3E-9D1B-FF82-735A8173D500";
     VideoStatus defaultVideoStatus;
     Button buttonAddVideo, buttonSendViolation, buttonAddLocaton;
- //   Button buttonSendViolation;
- //   Button buttonAddLocaton;
     CheckBox checkBoxVideo, checkBoxText, checkBoxLocation;
- //   CheckBox checkBoxText;
- //   CheckBox checkBoxLocation;
     private static int RESULT_LOAD_IMAGE = 1;
+    private static int RESULT_ADD_LOC = 2;
+    private static int RESULT_PERSDATA = 3;
+    private static int RESULT_CHECKED_LIST = 4;
+    private static int RESULT_MODERATOR_LIST = 5;
+    private static int RESULT_MAP = 6;
     static TextView textShowError;
-   // static final BackendlessUser user = Backendless.UserService.CurrentUser();
-    Boolean isUserReady = false;
-    private MenuItem userMenu, moderatorMenu;
+    Boolean isUserReady = true;
+    Spinner spinner;
+    BackendlessUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,81 +84,39 @@ public class MainActivity extends AppCompatActivity
 
         init();
 
-        Backendless.UserService.isValidLogin(new AsyncCallback<Boolean>() {
-            @Override
-            public void handleResponse(Boolean isValidLogin) {
-                if (isValidLogin && Backendless.UserService.CurrentUser() == null) {
-                    String currentUserId = Backendless.UserService.loggedInUser();
+        if (user==null) {
+            Backendless.UserService.isValidLogin(new AsyncCallback<Boolean>() {
+                @Override
+                public void handleResponse(Boolean isValidLogin) {
+                    if (isValidLogin && Backendless.UserService.CurrentUser() == null) {
+                        String currentUserId = Backendless.UserService.loggedInUser();
 
-                    if (!currentUserId.equals("")) {
-                        Backendless.UserService.findById(currentUserId, new AsyncCallback<BackendlessUser>() {
-                            @Override
-                            public void handleResponse(BackendlessUser currentUser) {
-                                Backendless.UserService.setCurrentUser(currentUser);
-                                isUserReady = true;
-                                setMenuItems(isUserReady);
-                            }
+                        if (!currentUserId.equals("")) {
+                            Backendless.UserService.findById(currentUserId, new AsyncCallback<BackendlessUser>() {
+                                @Override
+                                public void handleResponse(BackendlessUser currentUser) {
+                                    Backendless.UserService.setCurrentUser(currentUser);
+                                    isUserReady = true;
+                                    setMenuItems(isUserReady);
+                                }
 
-                            @Override
-                            public void handleFault(BackendlessFault backendlessFault) {
-
-                            }
-                        });
+                                @Override
+                                public void handleFault(BackendlessFault backendlessFault) {
+                                    Toast.makeText(getApplicationContext(), " BackendError", Toast.LENGTH_LONG).show();
+                                }
+                            });
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void handleFault(BackendlessFault backendlessFault) {
+                @Override
+                public void handleFault(BackendlessFault backendlessFault) {
 
-            }
-        });
-
-        String[] data = {"Проезд на красный", "Пересечение двойной сплошной"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, data);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        final Spinner spinner = (Spinner) findViewById(R.id.spinner);
-        spinner.setAdapter(adapter);
-        spinner.setPrompt("Тип нарушения");
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view,
-                                       int position, long id) {
-                violationType = spinner.getSelectedItem().toString();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> arg0) {
-            }
-        });
-
-        getInt = getIntent();
-        lat = getInt.getStringExtra(AddViolationLocation.LAT);
-        longt = getInt.getStringExtra(AddViolationLocation.LONGT);
-        if (!(lat == null) && !(lat.equals(""))) {
-            persData = getSharedPreferences("Data", MODE_PRIVATE);
-            editCarColor.setText(persData.getString(prefCarColor, ""));
-            editCarMake.setText(persData.getString(prefCarMake, ""));
-            editViolatCarComment.setText(persData.getString(prefComment, ""));
-            editVideoName.setText(persData.getString(prefVideoName, ""));
-            editCarModel.setText(persData.getString(prefCarModel, ""));
-            editCarNumber.setText(persData.getString(prefCarNumber, ""));
-            spinner.setSelection(persData.getInt(prefCategory, 0));
-
-            path = persData.getString(prefVideoPath, "");
-            if (!(path.equals(""))) {
-                checkBoxVideo.setChecked(true);
-                checkBoxVideo.setText("Видеофайл добавлен");
-            } else {
-                checkBoxVideo.setChecked(false);
-                checkBoxVideo.setText("Видеофайл не выбран");
-            }
-
-            checkBoxLocation.setChecked(true);
-            checkBoxLocation.setText("Координаты нарушения добавлены");
+                }
+            });
         } else {
-            checkBoxLocation.setChecked(false);
-            checkBoxLocation.setText("Необходимо добавить место нарушения");
+            isUserReady=true;
+            setMenuItems(isUserReady);
         }
 
         buttonAddVideo.setOnClickListener(new View.OnClickListener() {
@@ -173,7 +126,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        buttonSendViolation.setEnabled(false);
+
         buttonSendViolation.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 try {
@@ -186,39 +139,17 @@ public class MainActivity extends AppCompatActivity
 
         buttonAddLocaton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                persData = getSharedPreferences("Data", MODE_PRIVATE);
-                SharedPreferences.Editor ed = persData.edit();
-                ed.putString(prefCarMake, editCarMake.getText().toString());
-                ed.putString(prefCarModel, editCarModel.getText().toString());
-                ed.putString(prefCarColor, editCarColor.getText().toString());
-                ed.putString(prefCarNumber, editCarNumber.getText().toString());
-                ed.putString(prefComment, editViolatCarComment.getText().toString());
-                ed.putString(prefVideoName, editVideoName.getText().toString());
-                ed.putInt(prefCategory, spinner.getSelectedItemPosition());
-                ed.putString(prefVideoPath, path);
-                ed.commit();
+                saveCurrentInfo();
                 Intent i = new Intent(MainActivity.this, AddViolationLocation.class);
-                startActivity(i);
-            }
-        });
-
-        Backendless.Persistence.of(VideoStatus.class).findById(defaultStatusId, new AsyncCallback<VideoStatus>() {
-            @Override
-            public void handleResponse(VideoStatus videoStatus) {
-                defaultVideoStatus = videoStatus;
-            }
-
-            @Override
-            public void handleFault(BackendlessFault backendlessFault) {
-                Toast.makeText(MainActivity.this, "Не найден статус", Toast.LENGTH_LONG).show();
+                startActivityForResult(i, RESULT_ADD_LOC);
             }
         });
     }
 
     private void uploadAsync() throws Exception {
         pd = new ProgressDialog(MainActivity.this);
-        pd.setTitle("Отправка видео");
-        pd.setMessage("Подождите");
+        pd.setTitle(getString(R.string.sendingVideo));
+        pd.setMessage(getString(R.string.wait));
         pd.show();
         final File file = new File(path);
 
@@ -226,7 +157,7 @@ public class MainActivity extends AppCompatActivity
         Backendless.Files.upload(file, "/video", new AsyncCallback<BackendlessFile>() {
             @Override
             public void handleResponse(final BackendlessFile uploadedFile) {
-                textShowError.setText("Видео загружено");
+                textShowError.setText(getString(R.string.uploadedVideo));
 
                 BackendlessDataQuery dataQuery = new BackendlessDataQuery();
                 Backendless.Data.of(Category_id.class).find(dataQuery, new AsyncCallback<BackendlessCollection<Category_id>>() {
@@ -260,11 +191,11 @@ public class MainActivity extends AppCompatActivity
                         Backendless.Persistence.save(currentViolation, new AsyncCallback<Violation>() {
                             public void handleResponse(Violation response) {
                                 pd.dismiss();
-                                textShowError.setText("Нарушение отправлено");
+                                textShowError.setText(getString(R.string.uploadedViolation));
                             }
 
                             public void handleFault(BackendlessFault fault) {
-                                textShowError.setText("error has occured" + fault.getMessage());
+                                textShowError.setText(getString(R.string.error_occurred) + fault.getMessage());
                                 // an error has occurred, the error code can be retrieved with fault.getCode()
                             }
                         });
@@ -272,7 +203,7 @@ public class MainActivity extends AppCompatActivity
 
                     @Override
                     public void handleFault(BackendlessFault backendlessFault) {
-                        textShowError.setText("Ошибка загрузки Categ " + backendlessFault.getMessage());
+
                     }
                 });
             }
@@ -280,38 +211,69 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void handleFault(BackendlessFault backendlessFault) {
                 pd.dismiss();
-                textShowError.setText("Server reported an error - " + backendlessFault.getMessage());
+                textShowError.setText(getString(R.string.server_error) + backendlessFault.getMessage());
             }
         });
-    }
-
-    private String getRealPathFromURI(Context context, Uri contentUri) {
-        Cursor cursor = null;
-        try {
-            String[] proj = {MediaStore.Images.Media.DATA};
-            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            Uri uri = data.getData();
-            path = getRealPathFromURI(this, uri);
-            checkBoxVideo.setChecked(true);
-            checkBoxVideo.setText("Видеофайл добавлен");
-        } else {
-            checkBoxVideo.setChecked(false);
-            checkBoxVideo.setText("Видеофайл не выбран");
+        if (requestCode == RESULT_LOAD_IMAGE) {
+            if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+                Uri uri = data.getData();
+                path = getRealPathFromURI(this, uri);
+                checkBoxVideo.setChecked(true);
+                checkBoxVideo.setText(getString(R.string.added_video));
+
+            } else {
+                checkBoxVideo.setChecked(false);
+                checkBoxVideo.setText(getString(R.string.video_notselected));
+            }
+        }
+
+        if (requestCode == RESULT_ADD_LOC) {
+            if (resultCode == RESULT_OK) {
+                lat = data.getStringExtra(AddViolationLocation.LAT);
+                longt = data.getStringExtra(AddViolationLocation.LONGT);
+                loadCurrentInfo();
+            } else {
+                checkBoxLocation.setChecked(false);
+                checkBoxLocation.setText(getString(R.string.add_violation_location));
+            }
+        }
+
+        if (requestCode == RESULT_PERSDATA) {
+            if (resultCode == RESULT_OK) {
+
+            } else {
+                loadCurrentInfo();
+            }
+        }
+
+        if (requestCode == RESULT_CHECKED_LIST){
+            if (resultCode == RESULT_OK){
+
+            } else {
+
+            }
+        }
+
+        if (requestCode == RESULT_MODERATOR_LIST){
+            if (resultCode == RESULT_OK){
+
+            } else {
+
+            }
+        }
+
+        if (requestCode == RESULT_MAP){
+            if (resultCode == RESULT_OK){
+
+            } else {
+
+            }
         }
     }
 
@@ -321,7 +283,16 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+                if (back_pressed + 2000 > System.currentTimeMillis()){
+                    Intent a = new Intent(Intent.ACTION_MAIN);
+                    a.addCategory(Intent.CATEGORY_HOME);
+                    a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(a);
+                }
+                else
+                    Toast.makeText(getBaseContext(), getString(R.string.press_to_exit),
+                            Toast.LENGTH_SHORT).show();
+                back_pressed = System.currentTimeMillis();
         }
     }
 
@@ -355,10 +326,10 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.personalData) {
             Intent i = new Intent(MainActivity.this, PersonalDataEdit.class);
-            startActivity(i);
+            startActivityForResult(i, RESULT_PERSDATA);
         } else if (id == R.id.videoList) {
             Intent i = new Intent(MainActivity.this, CheckedVideoList.class);
-            startActivity(i);
+            startActivityForResult(i, RESULT_CHECKED_LIST);
 
         } else if (id == R.id.moderation) {
             BackendlessUser user = Backendless.UserService.CurrentUser();
@@ -366,14 +337,14 @@ public class MainActivity extends AppCompatActivity
             int stat = (Integer) map.get("status");
             if (stat == 0) {
                 Toast toast = Toast.makeText(getApplicationContext(),
-                        "У вас нет прав модератора", Toast.LENGTH_LONG);
+                        getString(R.string.no_moderator_permission), Toast.LENGTH_LONG);
                 toast.show();
             } else if (stat == 1) {
-                startActivity(new Intent(MainActivity.this, ModeratorVideoList.class));
+                startActivityForResult(new Intent(MainActivity.this, ModeratorVideoList.class), RESULT_MODERATOR_LIST);
             }
         } else if (id == R.id.mapOfViolations) {
             Intent i = new Intent(MainActivity.this, MapsActivity.class);
-            startActivity(i);
+            startActivityForResult(i, RESULT_MAP);
         } else if (id == R.id.nav_logout) {
             Backendless.UserService.logout(new AsyncCallback<Void>() {
                 public void handleResponse(Void response) {
@@ -391,31 +362,47 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    private String getRealPathFromURI(Context context, Uri contentUri) {
+        Cursor cursor = null;
+        try {
+            String[] proj = {MediaStore.Images.Media.DATA};
+            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
     private void checkText() {
         if (!(editCarColor.getText().toString().equals("")) && !(editCarNumber.getText().toString().equals("")) && !(editCarModel.getText().toString().equals("")) && !(editVideoName.getText().toString().equals("")) && !(editCarMake.getText().toString().equals("")) && !(editViolatCarComment.getText().toString().equals(""))) {
             checkBoxText.setChecked(true);
-            checkBoxText.setText("Все поля заполнены");
-            checkBox();
+            checkBoxText.setText(getString(R.string.fields_filled));
         } else {
             checkBoxText.setChecked(false);
-            checkBoxText.setText("Необходимо заполнить все поля");
-            checkBox();
+            checkBoxText.setText(getString(R.string.fields_notfilled));
         }
     }
+
     private void checkBox() {
-        if(checkBoxText.isChecked()&&checkBoxVideo.isChecked()&&checkBoxLocation.isChecked()){
+        if (checkBoxText.isChecked() && checkBoxVideo.isChecked() && checkBoxLocation.isChecked()) {
             buttonSendViolation.setEnabled(true);
-            textShowError.setText("Все готово для отправки");
-        } else{
+            textShowError.setText(getString(R.string.ready_forsend));
+        } else {
             buttonSendViolation.setEnabled(false);
-            textShowError.setText("Необходимо заполнить все данные");
+            textShowError.setText(R.string.fill_all_data);
         }
     }
-    private  void init(){
+
+    private void init() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Justice Camera");
-        getSupportActionBar().setSubtitle("Отправка видео нарушения");
+        getSupportActionBar().setTitle(getString(R.string.app_name));
+        getSupportActionBar().setSubtitle(getString(R.string.send_violation));
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -426,8 +413,7 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setItemIconTintList(null);
-        setMenuItems(isUserReady);
-
+        setMenuItems(false);
 
         listCategory = new ArrayList<>();
         editCarMake = (EditText) findViewById(R.id.editTextCarMake);
@@ -439,6 +425,7 @@ public class MainActivity extends AppCompatActivity
         buttonAddVideo = (Button) findViewById(R.id.buttonAddVideo);
         buttonSendViolation = (Button) findViewById(R.id.buttonSendViolation);
         buttonAddLocaton = (Button) findViewById(R.id.buttonAddLocation);
+        buttonSendViolation.setEnabled(false);
         textShowError = (TextView) findViewById(R.id.textShowError);
         checkBoxLocation = (CheckBox) findViewById(R.id.checkBoxLocation);
         checkBoxLocation.setEnabled(false);
@@ -446,6 +433,7 @@ public class MainActivity extends AppCompatActivity
         checkBoxText.setEnabled(false);
         checkBoxVideo = (CheckBox) findViewById(R.id.checkBoxVideo);
         checkBoxVideo.setEnabled(false);
+        user = Backendless.UserService.CurrentUser();
 
         TextWatcher textWatcher = new TextWatcher() {
             @Override
@@ -482,11 +470,41 @@ public class MainActivity extends AppCompatActivity
         editCarModel.addTextChangedListener(textWatcher);
         editCarColor.addTextChangedListener(textWatcher);
 
+        String[] data = {"Проезд на красный", "Пересечение двойной сплошной"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, data);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner = (Spinner) findViewById(R.id.spinner);
+        spinner.setAdapter(adapter);
+        spinner.setPrompt(getString(R.string.violation_type));
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int position, long id) {
+                violationType = spinner.getSelectedItem().toString();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> arg0) {
+            }
+        });
+
+        Backendless.Persistence.of(VideoStatus.class).findById(defaultStatusId, new AsyncCallback<VideoStatus>() {
+            @Override
+            public void handleResponse(VideoStatus videoStatus) {
+                defaultVideoStatus = videoStatus;
+            }
+
+            @Override
+            public void handleFault(BackendlessFault backendlessFault) {
+
+            }
+        });
     }
-    private void setMenuItems(Boolean isUserReady){
+
+    private void setMenuItems(Boolean isUserReady) {
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         Menu navMenu = navigationView.getMenu();
-        if (isUserReady){
+        if (isUserReady) {
             MenuItem item1 = navMenu.findItem(R.id.personalData);
             item1.setEnabled(true);
             MenuItem item2 = navMenu.findItem(R.id.moderation);
@@ -498,4 +516,46 @@ public class MainActivity extends AppCompatActivity
             item2.setEnabled(false);
         }
     }
+
+    private void saveCurrentInfo() {
+        persData = getSharedPreferences("Data", MODE_PRIVATE);
+        SharedPreferences.Editor ed = persData.edit();
+        ed.putString(prefCarMake, editCarMake.getText().toString());
+        ed.putString(prefCarModel, editCarModel.getText().toString());
+        ed.putString(prefCarColor, editCarColor.getText().toString());
+        ed.putString(prefCarNumber, editCarNumber.getText().toString());
+        ed.putString(prefComment, editViolatCarComment.getText().toString());
+        ed.putString(prefVideoName, editVideoName.getText().toString());
+        ed.putInt(prefCategory, spinner.getSelectedItemPosition());
+        ed.putString(prefVideoPath, path);
+        ed.commit();
+    }
+
+    private void loadCurrentInfo() {
+
+        persData = getSharedPreferences("Data", MODE_PRIVATE);
+        editCarColor.setText(persData.getString(prefCarColor, ""));
+        editCarMake.setText(persData.getString(prefCarMake, ""));
+        editViolatCarComment.setText(persData.getString(prefComment, ""));
+        editVideoName.setText(persData.getString(prefVideoName, ""));
+        editCarModel.setText(persData.getString(prefCarModel, ""));
+        editCarNumber.setText(persData.getString(prefCarNumber, ""));
+        spinner.setSelection(persData.getInt(prefCategory, 0));
+        setMenuItems(isUserReady);
+
+        path = persData.getString(prefVideoPath, "");
+        if (!(path.equals(""))) {
+            checkBoxVideo.setChecked(true);
+            checkBoxVideo.setText(getString(R.string.added_video));
+        } else {
+            checkBoxVideo.setChecked(false);
+            checkBoxVideo.setText(R.string.video_notselected);
+        }
+
+        if (!lat.equals("")) {
+            checkBoxLocation.setChecked(true);
+            checkBoxLocation.setText(getString(R.string.v_coordinates_added));
+        }
+    }
+
 }

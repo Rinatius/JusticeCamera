@@ -52,7 +52,7 @@ public class AddViolationLocation extends FragmentActivity implements OnMapReady
         buttonAddLocation = (Button) findViewById(R.id.buttonAddLocation);
         buttonAddLocation.setEnabled(false);
         Toast showMessage = Toast.makeText(getApplicationContext(),
-                "Выберите место на карте", Toast.LENGTH_LONG);
+                getString(R.string.choose_location), Toast.LENGTH_LONG);
         showMessage.show();
 
         // Add a marker in Sydney and move the camera
@@ -97,7 +97,8 @@ public class AddViolationLocation extends FragmentActivity implements OnMapReady
                  Intent i = new Intent(AddViolationLocation.this, MainActivity.class);
                  i.putExtra(LAT, lat);
                  i.putExtra(LONGT, longt);
-                 startActivity(i);
+                 setResult(RESULT_OK, i);
+                 finish();
             }
         });
     }

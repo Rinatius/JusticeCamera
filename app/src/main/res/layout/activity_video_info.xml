@@ -14,7 +14,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Данные о видеонарушении"
+        android:text="@string/violation_information"
         android:id="@+id/textView10"
         android:background="@android:drawable/editbox_background_normal"
         android:layout_alignParentTop="true"
@@ -46,7 +46,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="Название видео:"
+                    android:text="@string/video_name"
                     android:id="@+id/textView11"
                     android:textColor="#000000" />
 
@@ -66,7 +66,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="Марка автомобиля нарушителя:"
+                    android:text="@string/car_make"
                     android:id="@+id/textView12"
                     android:textColor="#000000" />
 
@@ -86,7 +86,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="Модель автомобиля:"
+                    android:text="@string/car_model"
                     android:id="@+id/textView13"
                     android:textColor="#000000" />
 
@@ -106,7 +106,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="Цвет:"
+                android:text="@string/car_color"
                 android:id="@+id/textView14"
                 android:textColor="#000000" />
 
@@ -126,7 +126,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="Госномер автомобиля:"
+                    android:text="@string/car_number"
                     android:id="@+id/textView15"
                     android:textColor="#000000" />
 
@@ -146,7 +146,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="Тип нарушения:"
+                    android:text="@string/violation_type"
                     android:id="@+id/textView16"
                     android:textColor="#000000" />
 
@@ -166,7 +166,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="Комментарий к видео:"
+                    android:text="@string/video_comment"
                     android:id="@+id/textView17"
                     android:textColor="#000000" />
 
@@ -192,14 +192,14 @@
                     style="@style/Widget.AppCompat.Button.Colored"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Просмотреть видео"
+                    android:text="@string/watch_video"
                     android:id="@+id/buttonPlayVideo" />
 
                 <Button
                     style="@style/Widget.AppCompat.Button.Colored"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Скачать видео"
+                    android:text="@string/download"
                     android:id="@+id/buttonDownload" />
 
             </LinearLayout>
@@ -212,14 +212,14 @@
                     style="@style/Widget.AppCompat.Button.Colored"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Одобрить"
+                    android:text="@string/approve"
                     android:id="@+id/buttonApprove" />
 
                 <Button
                     style="@style/Widget.AppCompat.Button.Colored"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Отклонить"
+                    android:text="@string/reject"
                     android:id="@+id/buttonReject" />
 
             </LinearLayout>
