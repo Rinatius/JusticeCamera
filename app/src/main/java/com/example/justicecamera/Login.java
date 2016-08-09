@@ -32,6 +32,7 @@ public class Login extends AppCompatActivity {
     TextView textViewInfo;
     CheckBox checkBox;
 
+
     @Override
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,11 +53,20 @@ public class Login extends AppCompatActivity {
         textViewInfo = (TextView) findViewById(R.id.textViewInfo);
         checkBox = (CheckBox) findViewById(R.id.checkBox);
 
+        String userToken = UserTokenStorageFactory.instance().getStorage().get();
 
+        if( userToken != null && !userToken.equals( "" ) )
+        {
+//            pd = new ProgressDialog(Login.this);
+//            pd.setTitle("");
+//            pd.setMessage("Подождите");
+//            pd.show();
+            startActivity(new Intent(Login.this, MainActivity.class));
+        }
 
         buttonLogin.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                 boolean stayLoggedIn = checkBox.isChecked();
+                boolean stayLoggedIn = checkBox.isChecked();
                 Backendless.UserService.login(editLogin.getText().toString(), editPassword.getText().toString(), new AsyncCallback<BackendlessUser>() {
                     public void handleResponse(BackendlessUser user) {
                         Intent i = new Intent(Login.this, MainActivity.class);
@@ -99,38 +109,7 @@ public class Login extends AppCompatActivity {
             }
         });
 
-       Backendless.UserService.isValidLogin(new AsyncCallback<Boolean>() {
-           @Override
-           public void handleResponse(Boolean isValidLogin) {
-               if( isValidLogin && Backendless.UserService.CurrentUser() == null )
-               {
-                   String currentUserId = Backendless.UserService.loggedInUser();
 
-                   if( !currentUserId.equals( "" ) )
-                   {
-                       Backendless.UserService.findById( currentUserId, new AsyncCallback<BackendlessUser>()
-                       {
-                           @Override
-                           public void handleResponse( BackendlessUser currentUser )
-                           {
-                               Backendless.UserService.setCurrentUser( currentUser );
-                               startActivity( new Intent( Login.this, MainActivity.class) );
-                               finish();
-                           }
 
-                           @Override
-                           public void handleFault(BackendlessFault backendlessFault) {
-
-                           }
-                       } );
-                   }
-               }
-           }
-
-           @Override
-           public void handleFault(BackendlessFault backendlessFault) {
-
-           }
-       });
     }
 }
