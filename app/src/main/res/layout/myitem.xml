@@ -10,7 +10,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="ThingName"
-        android:textSize="26dp"
+        android:textSize="24dp"
+        android:textColor="#060606"
         android:id="@+id/videoName"
         android:layout_gravity="left" />
 

@@ -2,12 +2,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.justicecamera">
 
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+    <uses-feature android:name="android.hardware.camera"
+        android:required="false" />
+
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+
 
     <application
         android:allowBackup="true"
@@ -26,7 +32,7 @@
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".PersonalDataEdit"  />
+        <activity android:name=".PersonalDataEdit" />
         <activity android:name=".PersonalDataSaved" />
         <activity android:name=".VideoInfo" />
         <activity android:name=".ModeratorVideoList" />
@@ -48,7 +54,7 @@
             android:label="@string/title_activity_add_violation_location" />
         <activity
             android:name=".MapsActivity"
-            android:label="@string/title_activity_maps"></activity>
+            android:label="@string/title_activity_maps" />
     </application>
 
 </manifest>

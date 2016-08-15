@@ -1,12 +1,14 @@
 package com.example.justicecamera;
 
 import android.app.ProgressDialog;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -44,7 +46,6 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    Intent getInt;
     static ProgressDialog pd;
     static EditText editCarMake, editCarModel, editCarNumber, editCarColor, editViolatCarComment, editVideoName;
     static List<Category_id> listCategory;
@@ -62,18 +63,19 @@ public class MainActivity extends AppCompatActivity
     SharedPreferences persData;
     String lat = "";
     String longt = "";
-    String defaultStatusId = "04AB1E82-7B3E-9D1B-FF82-735A8173D500";
     VideoStatus defaultVideoStatus;
-    Button buttonAddVideo, buttonSendViolation, buttonAddLocaton;
-    CheckBox checkBoxVideo, checkBoxText, checkBoxLocation;
-    private static int RESULT_LOAD_IMAGE = 1;
+    Button buttonAddVideo, buttonSendViolation, buttonAddLocaton, buttonAddViolPhoto;
+    CheckBox checkBoxVideo, checkBoxText, checkBoxLocation, checkBoxUser;
+    List<String> listOfPhotoPath;
+    private static int RESULT_LOAD_VIDEO = 1;
+    private static int RESULT_LOAD_IMAGE = 7;
     private static int RESULT_ADD_LOC = 2;
     private static int RESULT_PERSDATA = 3;
     private static int RESULT_CHECKED_LIST = 4;
     private static int RESULT_MODERATOR_LIST = 5;
     private static int RESULT_MAP = 6;
     static TextView textShowError;
-    Boolean isUserReady = true;
+    Boolean isUserReady = false;
     Spinner spinner;
     BackendlessUser user;
 
@@ -84,7 +86,7 @@ public class MainActivity extends AppCompatActivity
 
         init();
 
-        if (user==null) {
+        if (user == null) {
             Backendless.UserService.isValidLogin(new AsyncCallback<Boolean>() {
                 @Override
                 public void handleResponse(Boolean isValidLogin) {
@@ -98,6 +100,7 @@ public class MainActivity extends AppCompatActivity
                                     Backendless.UserService.setCurrentUser(currentUser);
                                     isUserReady = true;
                                     setMenuItems(isUserReady);
+                                    checkUser();
                                 }
 
                                 @Override
@@ -115,17 +118,17 @@ public class MainActivity extends AppCompatActivity
                 }
             });
         } else {
-            isUserReady=true;
+            isUserReady = true;
             setMenuItems(isUserReady);
+            checkUser();
         }
 
         buttonAddVideo.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(i, RESULT_LOAD_IMAGE);
+                startActivityForResult(i, RESULT_LOAD_VIDEO);
             }
         });
-
 
         buttonSendViolation.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
@@ -220,7 +223,7 @@ public class MainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == RESULT_LOAD_IMAGE) {
+        if (requestCode == RESULT_LOAD_VIDEO) {
             if (resultCode == RESULT_OK && data != null && data.getData() != null) {
                 Uri uri = data.getData();
                 path = getRealPathFromURI(this, uri);
@@ -233,7 +236,9 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
-        if (requestCode == RESULT_ADD_LOC) {
+        if (requestCode == RESULT_ADD_LOC)
+
+        {
             if (resultCode == RESULT_OK) {
                 lat = data.getStringExtra(AddViolationLocation.LAT);
                 longt = data.getStringExtra(AddViolationLocation.LONGT);
@@ -244,37 +249,47 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
-        if (requestCode == RESULT_PERSDATA) {
+        if (requestCode == RESULT_PERSDATA)
+
+        {
             if (resultCode == RESULT_OK) {
 
             } else {
-                loadCurrentInfo();
+                checkUser();
             }
         }
 
-        if (requestCode == RESULT_CHECKED_LIST){
-            if (resultCode == RESULT_OK){
+        if (requestCode == RESULT_CHECKED_LIST)
+
+        {
+            if (resultCode == RESULT_OK) {
 
             } else {
 
             }
         }
 
-        if (requestCode == RESULT_MODERATOR_LIST){
-            if (resultCode == RESULT_OK){
+        if (requestCode == RESULT_MODERATOR_LIST)
+
+        {
+            if (resultCode == RESULT_OK) {
 
             } else {
 
             }
         }
 
-        if (requestCode == RESULT_MAP){
-            if (resultCode == RESULT_OK){
+        if (requestCode == RESULT_MAP)
+
+        {
+            if (resultCode == RESULT_OK) {
 
             } else {
 
             }
         }
+
+
     }
 
     @Override
@@ -283,16 +298,16 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-                if (back_pressed + 2000 > System.currentTimeMillis()){
-                    Intent a = new Intent(Intent.ACTION_MAIN);
-                    a.addCategory(Intent.CATEGORY_HOME);
-                    a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(a);
-                }
-                else
-                    Toast.makeText(getBaseContext(), getString(R.string.press_to_exit),
-                            Toast.LENGTH_SHORT).show();
-                back_pressed = System.currentTimeMillis();
+            if (back_pressed + 2000 > System.currentTimeMillis()) {
+                Intent a = new Intent(Intent.ACTION_MAIN);
+                a.addCategory(Intent.CATEGORY_HOME);
+                a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(a);
+            } else {
+                Toast.makeText(getBaseContext(), getString(R.string.press_to_exit),
+                        Toast.LENGTH_SHORT).show();
+            }
+            back_pressed = System.currentTimeMillis();
         }
     }
 
@@ -389,7 +404,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void checkBox() {
-        if (checkBoxText.isChecked() && checkBoxVideo.isChecked() && checkBoxLocation.isChecked()) {
+        if (checkBoxText.isChecked() && checkBoxVideo.isChecked() && checkBoxLocation.isChecked() && checkBoxUser.isChecked()) {
             buttonSendViolation.setEnabled(true);
             textShowError.setText(getString(R.string.ready_forsend));
         } else {
@@ -403,6 +418,11 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(getString(R.string.app_name));
         getSupportActionBar().setSubtitle(getString(R.string.send_violation));
+        File folder = new File(Environment.getExternalStorageDirectory() + File.separator
+                + getString(R.string.app_name));
+        if (!folder.exists()) {
+             folder.mkdir();
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -425,6 +445,7 @@ public class MainActivity extends AppCompatActivity
         buttonAddVideo = (Button) findViewById(R.id.buttonAddVideo);
         buttonSendViolation = (Button) findViewById(R.id.buttonSendViolation);
         buttonAddLocaton = (Button) findViewById(R.id.buttonAddLocation);
+      //  buttonAddViolPhoto = (Button) findViewById(R.id.buttonAddViolPhoto);
         buttonSendViolation.setEnabled(false);
         textShowError = (TextView) findViewById(R.id.textShowError);
         checkBoxLocation = (CheckBox) findViewById(R.id.checkBoxLocation);
@@ -433,7 +454,10 @@ public class MainActivity extends AppCompatActivity
         checkBoxText.setEnabled(false);
         checkBoxVideo = (CheckBox) findViewById(R.id.checkBoxVideo);
         checkBoxVideo.setEnabled(false);
+        checkBoxUser = (CheckBox) findViewById(R.id.checkBoxUser);
+        checkBoxUser.setEnabled(false);
         user = Backendless.UserService.CurrentUser();
+        listOfPhotoPath = new ArrayList<>();
 
         TextWatcher textWatcher = new TextWatcher() {
             @Override
@@ -463,6 +487,7 @@ public class MainActivity extends AppCompatActivity
         checkBoxVideo.setOnCheckedChangeListener(checkBoxListener);
         checkBoxText.setOnCheckedChangeListener(checkBoxListener);
         checkBoxLocation.setOnCheckedChangeListener(checkBoxListener);
+        checkBoxUser.setOnCheckedChangeListener(checkBoxListener);
         editViolatCarComment.addTextChangedListener(textWatcher);
         editCarMake.addTextChangedListener(textWatcher);
         editVideoName.addTextChangedListener(textWatcher);
@@ -488,7 +513,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        Backendless.Persistence.of(VideoStatus.class).findById(defaultStatusId, new AsyncCallback<VideoStatus>() {
+        Backendless.Persistence.of(VideoStatus.class).findById(Defaults.DEFAULT_VIDEO_STATUS_ID, new AsyncCallback<VideoStatus>() {
             @Override
             public void handleResponse(VideoStatus videoStatus) {
                 defaultVideoStatus = videoStatus;
@@ -558,4 +583,22 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void checkUser() {
+        user = Backendless.UserService.CurrentUser();
+        int count = 0;
+        if (!(user.getProperty("firstName")==null)&& !user.getProperty("firstName").toString().equals(""))
+            count++;
+        if (!(user.getProperty("lastName")==null) && (!user.getProperty("lastName").toString().equals("")))
+            count++;
+        if (!(user.getProperty("passportNo") == null) && !user.getProperty("passportNo").toString().equals(""))
+            count++;
+        if (!(user.getProperty("phoneNumber") == null) && !user.getProperty("phoneNumber").toString().equals(""))
+            count++;
+        if (count == 4) {
+            checkBoxUser.setChecked(true);
+        } else {
+            checkBoxUser.setChecked(false);
+            Toast.makeText(getApplicationContext(), getString(R.string.fill_the_form), Toast.LENGTH_LONG).show();
+        }
+    }
 }

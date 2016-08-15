@@ -21,17 +21,12 @@ import com.backendless.exceptions.BackendlessFault;
 import com.backendless.persistence.local.UserTokenStorageFactory;
 
 public class Login extends AppCompatActivity {
-    static ProgressDialog pd;
-    public final static String BACKENDLESS_APP_ID = "A2A1E1C9-A8F7-C938-FFEF-4D4EA6C0A300";
-    public final static String BACKENDLESS_SECRET_KEY = "71C79AEF-B5AD-C438-FF02-F87ADD10AB00";
     Button buttonLogin, buttonSignUp, buttonSkip;
     EditText editLogin, editPassword;
     TextView textViewInfo;
     CheckBox checkBox;
 
-
     @Override
-
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
@@ -39,8 +34,7 @@ public class Login extends AppCompatActivity {
         final BackendlessUser user = new BackendlessUser();
         getSupportActionBar().hide();
 
-        String appVersion = "v1";
-        Backendless.initApp(this, BACKENDLESS_APP_ID, BACKENDLESS_SECRET_KEY, appVersion);
+        Backendless.initApp(this, Defaults.APPLICATION_ID, Defaults.SECRET_KEY, Defaults.VERSION);
 
         init();
 
@@ -78,8 +72,6 @@ public class Login extends AppCompatActivity {
                     public void handleResponse(BackendlessUser backendlessUser) {
                         Log.i(getString(R.string.registration), backendlessUser.getEmail() + getString(R.string.havebeen_registered));
                         textViewInfo.setText("Пользователь " + backendlessUser.getEmail() + " зарегистрирован");
-                        Intent i = new Intent(Login.this, Login.class);
-                        startActivity(i);
                     }
                 });
             }
@@ -92,6 +84,7 @@ public class Login extends AppCompatActivity {
             }
         });
     }
+
     private void init() {
         buttonLogin = (Button) findViewById(R.id.buttonLogin);
         buttonSignUp = (Button) findViewById(R.id.buttonSignUp);

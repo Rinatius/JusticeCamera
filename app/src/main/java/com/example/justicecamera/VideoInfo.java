@@ -29,6 +29,7 @@ import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.backendless.persistence.BackendlessDataQuery;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,8 +50,6 @@ public class VideoInfo extends AppCompatActivity {
     String objectId = "";
     String violLat = "";
     String violLongt = "";
-    String approvedStatusID = "AF2E98BF-5720-CCC8-FF36-7BA99D19C500";
-    String rejectedStatusId = "6939FC0E-2784-8E4D-FF79-A31425E8FA00";
     VideoView video;
     VideoStatus approvedStatus,rejectedStatus;
 
@@ -218,7 +217,8 @@ public class VideoInfo extends AppCompatActivity {
 
                 // download the file
                 input = connection.getInputStream();
-                String pathToDownload = Environment.getExternalStorageDirectory().toString() + "/videoDownload.mp4";
+                String pathToDownload = Environment.getExternalStorageDirectory() + File.separator
+                        + getString(R.string.app_name) + "/videoDownload_" +String.valueOf(System.currentTimeMillis())+".mp4";
                 output = new FileOutputStream(pathToDownload);
 
                 byte data[] = new byte[4096];
@@ -329,7 +329,7 @@ public class VideoInfo extends AppCompatActivity {
         buttonApprove.setEnabled(false);
         buttonApprove.setVisibility(View.INVISIBLE);
 
-        Backendless.Persistence.of(VideoStatus.class).findById(approvedStatusID, new AsyncCallback<VideoStatus>() {
+        Backendless.Persistence.of(VideoStatus.class).findById(Defaults.APPROVED_VIDEO_STATUS_ID, new AsyncCallback<VideoStatus>() {
             @Override
             public void handleResponse(VideoStatus videoStatus) {
                 approvedStatus = videoStatus;
@@ -341,7 +341,7 @@ public class VideoInfo extends AppCompatActivity {
             }
         });
 
-        Backendless.Persistence.of(VideoStatus.class).findById(rejectedStatusId, new AsyncCallback<VideoStatus>() {
+        Backendless.Persistence.of(VideoStatus.class).findById(Defaults.REJECTED_VIDEO_STATUS_ID, new AsyncCallback<VideoStatus>() {
             @Override
             public void handleResponse(VideoStatus videoStatus) {
                 rejectedStatus = videoStatus;

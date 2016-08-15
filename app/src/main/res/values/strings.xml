@@ -51,15 +51,15 @@
     <string name="remember">Remember me?</string>
     <string name="personal_data">Personal data</string>
     <string name="choose_photo">Choose photo</string>
-    <string name="last_name">Last name</string>
-    <string name="first_name">First name</string>
+    <string name="last_name">Last name*</string>
+    <string name="first_name">First name*</string>
     <string name="date_of_birth">Date of birth: Day/ Month/ Year</string>
     <string name="car_number">Car number</string>
-    <string name="passport_no">Passport No.</string>
+    <string name="passport_no">Passport No. *</string>
     <string name="sex">Sex</string>
     <string name="male">Male</string>
     <string name="female">Female</string>
-    <string name="phone_number">Phone No.</string>
+    <string name="phone_number">Phone No. *</string>
     <string name="save">Save</string>
     <string name="violation_information">Violation information</string>
     <string name="video_name">Name of video:</string>
@@ -75,5 +75,11 @@
     <string name="v_coordinates_notadded">Coordinates of violation not added</string>
     <string name="add_video">+Add video</string>
     <string name="send">Send</string>
+    <string name="add_photo">+Add photo</string>
+    <string name="photo_count">Number of chosen photos:</string>
+    <string name="photos_notchosen">No photos are chosen</string>
+    <string name="fill_the_form">Fill in the forms in Dashboard</string>
+    <string name="required_fields">*Fields are required</string>
+    <string name="updating_user">Uploading data...</string>
 
 </resources>
