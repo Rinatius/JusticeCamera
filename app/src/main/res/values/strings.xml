@@ -81,5 +81,6 @@
     <string name="fill_the_form">Fill in the forms in Dashboard</string>
     <string name="required_fields">*Fields are required</string>
     <string name="updating_user">Uploading data...</string>
+    <string name="photo_path_backend" translatable="false">UsersPhoto</string>
 
 </resources>

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -15,6 +16,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.ThemedSpinnerAdapter;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -78,6 +80,7 @@ public class MainActivity extends AppCompatActivity
     Boolean isUserReady = false;
     Spinner spinner;
     BackendlessUser user;
+    Violation current;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,11 +135,15 @@ public class MainActivity extends AppCompatActivity
 
         buttonSendViolation.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
+                /*
                 try {
                     uploadAsync();
                 } catch (Exception e) {
                     textShowError.setText(e.getLocalizedMessage());
                 }
+                */
+                setViolationParams(current);
+                new UploadViolationTask().execute(current);
             }
         });
 
@@ -458,6 +465,7 @@ public class MainActivity extends AppCompatActivity
         checkBoxUser.setEnabled(false);
         user = Backendless.UserService.CurrentUser();
         listOfPhotoPath = new ArrayList<>();
+        current = new Violation();
 
         TextWatcher textWatcher = new TextWatcher() {
             @Override
@@ -599,6 +607,57 @@ public class MainActivity extends AppCompatActivity
         } else {
             checkBoxUser.setChecked(false);
             Toast.makeText(getApplicationContext(), getString(R.string.fill_the_form), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public void setViolationParams(Violation currentViolation){
+        currentViolation.setCarMake(editCarMake.getText().toString());
+        currentViolation.setCarModel(editCarModel.getText().toString());
+        currentViolation.setCarNumber(editCarNumber.getText().toString());
+        currentViolation.setColor(editCarColor.getText().toString());
+        currentViolation.setComment(editViolatCarComment.getText().toString());
+        currentViolation.setName(editVideoName.getText().toString());
+        currentViolation.setLat(lat);
+        currentViolation.setLongt(longt);
+        currentViolation.setVideoStatus(defaultVideoStatus);
+    }
+
+    private class UploadViolationTask extends AsyncTask <Violation, Void, Void>{
+
+        @Override
+        protected void onPreExecute() {
+            pd = new ProgressDialog(MainActivity.this);
+            pd.setTitle(getString(R.string.sendingVideo));
+            pd.setMessage(getString(R.string.wait));
+            pd.show();
+        }
+
+        @Override
+        protected Void doInBackground(Violation... violations) {
+            final  File file = new File(path);
+            try {
+                Helper.uploadVideo(file);
+                listCategory = Helper.getAllCategories().getData();
+
+                Category_id currentViolatCat = listCategory.get(0);
+                for (int i = 0; i < listCategory.size(); i++) {
+                    if (listCategory.get(i).getType().equals(violationType)) {
+                        currentViolatCat = listCategory.get(i);
+                    }
+                }
+
+                violations[0].setCategory(currentViolatCat);
+                violations[0].setVideoUrl("https://api.backendless.com/" + Defaults.APPLICATION_ID + "/" + Defaults.VERSION + "/files/video/"  +file.getName());
+                violations[0] = Backendless.Persistence.save(violations[0]);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        protected void onPostExecute(Void result) {
+            pd.dismiss();
         }
     }
 }

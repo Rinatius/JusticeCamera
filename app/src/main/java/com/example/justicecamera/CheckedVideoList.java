@@ -3,8 +3,10 @@ package com.example.justicecamera;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.ThemedSpinnerAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,8 +30,10 @@ public class CheckedVideoList extends AppCompatActivity {
     static ProgressDialog pd;
     List<Violation> listViolation;
     TextView textViewTester;
+    ListView list;
     String objectId = "";
     static final String OBJECTID = "checking";
+    String dataQuery ="videoStatus.name = 1";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,8 +41,12 @@ public class CheckedVideoList extends AppCompatActivity {
         setContentView(R.layout.activity_checked_video_list);
        // getSupportActionBar().setHomeButtonEnabled(true);
         textViewTester = (TextView) findViewById(R.id.textViewTester);
+        list = (ListView) findViewById(R.id.listView);
         listViolation = new ArrayList<>();
 
+        new ListOfViolationTask().execute();
+
+        /*
         pd = new ProgressDialog(CheckedVideoList.this);
         pd.setTitle(getString(R.string.videolist_downloading));
         pd.setMessage(getString(R.string.wait));
@@ -46,6 +54,7 @@ public class CheckedVideoList extends AppCompatActivity {
 
         BackendlessDataQuery dataQuery2 = new BackendlessDataQuery();
         dataQuery2.setWhereClause("videoStatus.name = 1");
+      // Backendless.Data.of(Violation.class).find(dataQuery2);
         Backendless.Data.of(Violation.class).find(dataQuery2, new AsyncCallback<BackendlessCollection<Violation>>() {
             @Override
             public void handleResponse(BackendlessCollection<Violation> listOfViolatioons) {
@@ -53,7 +62,7 @@ public class CheckedVideoList extends AppCompatActivity {
                 String textToShow = getString(R.string.number_of_elements) + Integer.toString(listViolation.size());
                 textViewTester.setText(textToShow);
 
-                final ListView list = (ListView) findViewById(R.id.listView);
+
                 registerForContextMenu(list);
                 MyAdapter adapter = new MyAdapter(CheckedVideoList.this, listViolation);
                 list.setAdapter(adapter);
@@ -70,7 +79,7 @@ public class CheckedVideoList extends AppCompatActivity {
 
             }
         });
-
+*/
     }
 
     class MyAdapter extends BaseAdapter {
@@ -122,6 +131,36 @@ public class CheckedVideoList extends AppCompatActivity {
             });
             return con;
         }
+    }
+
+    private class ListOfViolationTask extends AsyncTask<Void, Void, BackendlessCollection<Violation>>{
+        @Override
+        protected void onPreExecute() {
+            pd = new ProgressDialog(CheckedVideoList.this);
+            pd.setTitle(getString(R.string.videolist_downloading));
+            pd.setMessage(getString(R.string.wait));
+            pd.show();
+        }
+
+        @Override
+        protected BackendlessCollection<Violation> doInBackground(Void... voids) {
+            return Helper.getAllViolations(dataQuery);
+        }
+
+        protected void onPostExecute(BackendlessCollection<Violation> result) {
+            showViolationList(result);
+            pd.dismiss();
+        }
+    }
+
+    private void showViolationList(BackendlessCollection<Violation> listOfViolatioons){
+        listViolation = listOfViolatioons.getData();
+        String textToShow = getString(R.string.number_of_elements) + Integer.toString(listViolation.size());
+        textViewTester.setText(textToShow);
+        registerForContextMenu(list);
+        MyAdapter adapter = new MyAdapter(CheckedVideoList.this, listViolation);
+        list.setAdapter(adapter);
+        pd.dismiss();
     }
 
 }
