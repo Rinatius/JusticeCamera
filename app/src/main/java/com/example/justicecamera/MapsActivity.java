@@ -31,6 +31,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Violation violation;
     String latToSend = "";
     String longtToSend = "";
+    String searchParameter = "status = 1";
     static final String LATMAP = "lat";
     static final String LONGTMAP = "longt";
 
@@ -98,7 +99,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void load() {
 
         BackendlessDataQuery dataQuery = new BackendlessDataQuery();
-        dataQuery.setWhereClause("videoStatus.name = 1");
+        dataQuery.setWhereClause(searchParameter);
         Backendless.Data.of(Violation.class).find(dataQuery, new AsyncCallback<BackendlessCollection<Violation>>() {
             @Override
             public void handleResponse(BackendlessCollection<Violation> foundViolation) {

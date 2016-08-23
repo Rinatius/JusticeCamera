@@ -170,9 +170,9 @@
                     android:id="@+id/textViewPhone" />
 
                 <EditText
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="number"
+                    android:inputType="phone"
                     android:ems="10"
                     android:id="@+id/editTextPhoneNumber"
                     android:background="@android:drawable/editbox_background_normal"/>

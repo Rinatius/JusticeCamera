@@ -1,8 +1,14 @@
 package com.example.justicecamera;
 
+import android.content.Context;
+import android.widget.Toast;
+
 import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
 import com.backendless.BackendlessUser;
+import com.backendless.Files;
+import com.backendless.async.callback.UploadCallback;
+import com.backendless.files.BackendlessFile;
 import com.backendless.persistence.BackendlessDataQuery;
 
 import java.io.File;
@@ -25,6 +31,18 @@ public final class Helper extends Object {
 
     public static void uploadVideo(File file) throws Exception {
         Backendless.Files.upload(file, VIDEO_DIRECTORY, OVERWRITE );
+    }
+
+    public static void upload(File file)  throws Exception {
+        Backendless.Files.upload(file,
+                VIDEO_DIRECTORY,
+                OVERWRITE,
+                new UploadCallback() {
+                    @Override
+                    public void onProgressUpdate(Integer integer) {
+
+                    }
+                });
     }
 
     public static void updateUser (BackendlessUser user){
@@ -53,4 +71,24 @@ public final class Helper extends Object {
         dataQ.setWhereClause(dataQuery);
         return Backendless.Data.of(Violation.class).find(dataQ);
     }
+
+    public static void deleteVideo(Violation violation){
+
+    }
+
+    public static void deleteViolation(Violation violation){
+        String fullUrl = violation.getVideoUrl();
+        String fileName = fullUrl.substring(fullUrl.lastIndexOf('/') + 1);
+        Backendless.Files.remove( VIDEO_DIRECTORY+"/"+fileName) ;
+        Backendless.Persistence.of( Violation.class ).remove( violation);
+    }
+
+    public static void showToast(String text, Context context){
+        Toast.makeText(context, text, Toast.LENGTH_LONG).show();
+    }
+
+    public static void updateViolation (Violation violation){
+        Backendless.Persistence.save( violation );
+    }
+
 }

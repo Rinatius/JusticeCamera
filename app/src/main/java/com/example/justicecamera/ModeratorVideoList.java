@@ -27,6 +27,7 @@ public class ModeratorVideoList extends AppCompatActivity {
     List<Violation> listViolation;
     TextView textViewTester;
     String objectId = "";
+    String searchParameter ="status = 0";
     static final String OBJECTID = "checking";
 
     @Override
@@ -97,7 +98,7 @@ public class ModeratorVideoList extends AppCompatActivity {
         pd.show();
 
         BackendlessDataQuery dataQuery2 = new BackendlessDataQuery();
-        dataQuery2.setWhereClause("videoStatus.name = 0");
+        dataQuery2.setWhereClause(searchParameter);
         Backendless.Data.of(Violation.class).find(dataQuery2, new AsyncCallback<BackendlessCollection<Violation>>() {
             @Override
             public void handleResponse(BackendlessCollection<Violation> listOfViolatioons) {

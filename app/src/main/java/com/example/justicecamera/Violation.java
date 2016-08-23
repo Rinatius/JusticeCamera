@@ -13,11 +13,12 @@ public class Violation
   private java.util.Date updated;
   private String carModel;
   private String name;
+  private String status;
   private String objectId;
   private java.util.Date created;
   private String lat;
   private String ownerId;
-  private String information;
+  private String feedback;
   private String videoUrl;
   private String longt;
   private String carNumber;
@@ -62,6 +63,16 @@ public class Violation
     this.name = name;
   }
 
+  public String getStatus()
+  {
+    return status;
+  }
+
+  public void setStatus( String status )
+  {
+    this.status = status;
+  }
+
   public String getObjectId()
   {
     return objectId;
@@ -87,14 +98,14 @@ public class Violation
     return ownerId;
   }
 
-  public String getInformation()
+  public String getFeedback()
   {
-    return information;
+    return feedback;
   }
 
-  public void setInformation( String information )
+  public void setFeedback( String feedback )
   {
-    this.information = information;
+    this.feedback = feedback;
   }
 
   public String getVideoUrl()

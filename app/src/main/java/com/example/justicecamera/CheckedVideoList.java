@@ -6,25 +6,17 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.ThemedSpinnerAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
-import com.backendless.persistence.BackendlessDataQuery;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 public class CheckedVideoList extends AppCompatActivity {
     static ProgressDialog pd;
@@ -33,7 +25,7 @@ public class CheckedVideoList extends AppCompatActivity {
     ListView list;
     String objectId = "";
     static final String OBJECTID = "checking";
-    String dataQuery ="videoStatus.name = 1";
+    String searchParameter ="status = 1";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,7 +136,7 @@ public class CheckedVideoList extends AppCompatActivity {
 
         @Override
         protected BackendlessCollection<Violation> doInBackground(Void... voids) {
-            return Helper.getAllViolations(dataQuery);
+            return Helper.getAllViolations(searchParameter);
         }
 
         protected void onPostExecute(BackendlessCollection<Violation> result) {

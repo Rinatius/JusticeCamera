@@ -15,6 +15,7 @@ import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.ThemedSpinnerAdapter;
 import android.view.View;
 import android.widget.Button;
 import android.widget.MediaController;
@@ -52,6 +53,7 @@ public class VideoInfo extends AppCompatActivity {
     String violLongt = "";
     VideoView video;
     VideoStatus approvedStatus,rejectedStatus;
+    ProgressDialog pd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -286,7 +288,16 @@ public class VideoInfo extends AppCompatActivity {
     }
 
     public void setViolationParams(final Violation thisViolation) {
+        /*
         if (thisViolation.getVideoStatus().getName() == 0) {
+            buttonReject.setEnabled(true);
+            buttonReject.setVisibility(View.VISIBLE);
+            buttonApprove.setEnabled(true);
+            buttonApprove.setVisibility(View.VISIBLE);
+        }
+        */
+
+        if (thisViolation.getStatus().equals("0")) {
             buttonReject.setEnabled(true);
             buttonReject.setVisibility(View.VISIBLE);
             buttonApprove.setEnabled(true);
@@ -355,6 +366,7 @@ public class VideoInfo extends AppCompatActivity {
 
         buttonApprove.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
+                /*
                 thisViolation.setVideoStatus(approvedStatus);
                 Backendless.Persistence.save(thisViolation, new AsyncCallback<Violation>() {
                     public void handleResponse(Violation response) {
@@ -364,10 +376,15 @@ public class VideoInfo extends AppCompatActivity {
                     public void handleFault(BackendlessFault fault) {
                     }
                 });
+                */
+                thisViolation.setStatus("1");
+                new UpdateViolationTask().execute(thisViolation);
             }
         });
         buttonReject.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
+                new DeleteViolation().execute(thisViolation);
+                /*
                 thisViolation.setVideoStatus(rejectedStatus);
                 Backendless.Persistence.save(thisViolation, new AsyncCallback<Violation>() {
                     public void handleResponse(Violation response) {
@@ -377,6 +394,9 @@ public class VideoInfo extends AppCompatActivity {
                     public void handleFault(BackendlessFault fault) {
                     }
                 });
+                */
+
+
             }
         });
 
@@ -385,5 +405,48 @@ public class VideoInfo extends AppCompatActivity {
         mProgressDialog.setIndeterminate(true);
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         mProgressDialog.setCancelable(true);
+    }
+
+    private  class DeleteViolation extends AsyncTask<Violation , Void, Void>{
+
+        @Override
+        protected void onPreExecute() {
+            pd = new ProgressDialog(VideoInfo.this);
+            pd.setTitle("Удаление ...");
+            pd.setMessage(getString(R.string.wait));
+            pd.show();
+        }
+
+        @Override
+        protected Void doInBackground(Violation... violations) {
+            Helper.deleteViolation(violations[0]);
+            return null;
+        }
+
+        protected void onPostExecute(Void result) {
+            buttonPlayVideo.setEnabled(false);
+            buttonDownload.setEnabled(false);
+            buttonApprove.setEnabled(false);
+            buttonReject.setEnabled(false);
+            pd.dismiss();
+            Helper.showToast("Успешно удалено", VideoInfo.this);
+        }
+    }
+
+    private  class UpdateViolationTask extends AsyncTask<Violation, Void, Void>{
+        @Override
+        protected void onPreExecute() {
+
+        }
+
+        @Override
+        protected Void doInBackground(Violation... violations) {
+            Helper.updateViolation(violations[0]);
+            return null;
+        }
+
+        protected void onPostExecute(Void result) {
+            Helper.showToast(getString(R.string.approved), VideoInfo.this);
+        }
     }
 }

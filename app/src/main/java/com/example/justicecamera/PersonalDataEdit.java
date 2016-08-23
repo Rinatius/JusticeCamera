@@ -56,9 +56,9 @@ public class PersonalDataEdit extends AppCompatActivity {
     int dayBirthday, monthBirthday, yearBirthday;
     String carNumber = "";
     String passportNo = "";
-    int phoneNumber = 0;
+    String phoneNumber = "";
     boolean sex = true;
-    String photoUrl = "";
+   // String photoUrl = "";
     String lastName = "";
     String firstName = "";
     View.OnClickListener radioListener;
@@ -372,7 +372,7 @@ public class PersonalDataEdit extends AppCompatActivity {
         yearBirthday = year.getValue();
         carNumber = editCarNumber.getText().toString();
         passportNo = editPassportNo.getText().toString();
-        phoneNumber = Integer.parseInt(editPhoneNumber.getText().toString());
+        phoneNumber = editPhoneNumber.getText().toString();
 
         user.setProperty("firstName", firstName);
         user.setProperty("lastName", lastName);
@@ -384,9 +384,14 @@ public class PersonalDataEdit extends AppCompatActivity {
         user.setProperty("phoneNumber", phoneNumber);
         user.setProperty("sex", sex);
 
+        if (user.getProperty("status") == null){
+            user.setProperty("status", "0");
+        }
+        /*
         if (user.getProperty("moderator") == null) {
             user.setProperty("moderator", defaultModeratorStatus);
         }
+        */
     }
 
     private class UpdateUser extends AsyncTask<File, Void, Void> {
