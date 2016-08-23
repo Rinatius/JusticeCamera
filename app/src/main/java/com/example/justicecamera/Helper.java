@@ -33,18 +33,6 @@ public final class Helper extends Object {
         Backendless.Files.upload(file, VIDEO_DIRECTORY, OVERWRITE );
     }
 
-    public static void upload(File file)  throws Exception {
-        Backendless.Files.upload(file,
-                VIDEO_DIRECTORY,
-                OVERWRITE,
-                new UploadCallback() {
-                    @Override
-                    public void onProgressUpdate(Integer integer) {
-
-                    }
-                });
-    }
-
     public static void updateUser (BackendlessUser user){
         Backendless.UserService.update(user);
     }
@@ -71,9 +59,9 @@ public final class Helper extends Object {
         dataQ.setWhereClause(dataQuery);
         return Backendless.Data.of(Violation.class).find(dataQ);
     }
+    public static BackendlessCollection<Violation> getAllViolations(){
 
-    public static void deleteVideo(Violation violation){
-
+        return Backendless.Data.of(Violation.class).find();
     }
 
     public static void deleteViolation(Violation violation){
@@ -89,6 +77,10 @@ public final class Helper extends Object {
 
     public static void updateViolation (Violation violation){
         Backendless.Persistence.save( violation );
+    }
+
+    public static Offerta findLastOffer(){
+        return Backendless.Persistence.of(Offerta.class).findLast();
     }
 
 }

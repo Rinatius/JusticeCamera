@@ -31,12 +31,11 @@ public class CheckedVideoList extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_checked_video_list);
-       // getSupportActionBar().setHomeButtonEnabled(true);
         textViewTester = (TextView) findViewById(R.id.textViewTester);
         list = (ListView) findViewById(R.id.listView);
         listViolation = new ArrayList<>();
 
-        new ListOfViolationTask().execute();
+        new ListOfViolationTask().execute(searchParameter);
 
         /*
         pd = new ProgressDialog(CheckedVideoList.this);
@@ -125,7 +124,9 @@ public class CheckedVideoList extends AppCompatActivity {
         }
     }
 
-    private class ListOfViolationTask extends AsyncTask<Void, Void, BackendlessCollection<Violation>>{
+    private class ListOfViolationTask extends AsyncTask<String, Void, BackendlessCollection<Violation>>{
+
+
         @Override
         protected void onPreExecute() {
             pd = new ProgressDialog(CheckedVideoList.this);
@@ -135,8 +136,8 @@ public class CheckedVideoList extends AppCompatActivity {
         }
 
         @Override
-        protected BackendlessCollection<Violation> doInBackground(Void... voids) {
-            return Helper.getAllViolations(searchParameter);
+        protected BackendlessCollection<Violation> doInBackground(String... strings) {
+            return Helper.getAllViolations(strings[0]);
         }
 
         protected void onPostExecute(BackendlessCollection<Violation> result) {

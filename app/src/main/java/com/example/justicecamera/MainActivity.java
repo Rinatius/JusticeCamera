@@ -1,7 +1,9 @@
 package com.example.justicecamera;
 
+import android.annotation.TargetApi;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -14,10 +16,12 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,24 +36,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.backendless.Backendless;
-import com.backendless.BackendlessCollection;
 import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
-import com.backendless.files.BackendlessFile;
-import com.backendless.persistence.BackendlessDataQuery;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    static ProgressDialog pd;
+    ProgressDialog pd;
+    ProgressDialog offerD;
     static EditText editCarMake, editCarModel, editCarNumber, editCarColor, editViolatCarComment, editVideoName;
     static List<Category_id> listCategory;
-    static String violationType, videoUrl;
+    static String violationType;
     static String path = "";
     private static long back_pressed;
     String prefCarMake = "CarMake";
@@ -63,20 +64,22 @@ public class MainActivity extends AppCompatActivity
     SharedPreferences persData;
     String lat = "";
     String longt = "";
-    VideoStatus defaultVideoStatus;
     String defaultStatus = "0";
     Button buttonAddVideo, buttonSendViolation, buttonAddLocaton, buttonAddViolPhoto;
     CheckBox checkBoxVideo, checkBoxText, checkBoxLocation, checkBoxUser;
     List<String> listOfPhotoPath;
+    Offerta offerta;
     private static int RESULT_LOAD_VIDEO = 1;
     private static int RESULT_LOAD_IMAGE = 7;
     private static int RESULT_ADD_LOC = 2;
+    private static int RESULT_PUBLIC_OFFER = 8;
     private static int RESULT_PERSDATA = 3;
     private static int RESULT_CHECKED_LIST = 4;
     private static int RESULT_MODERATOR_LIST = 5;
     private static int RESULT_MAP = 6;
     static TextView textShowError;
     Boolean isUserReady = false;
+    Boolean valid = false;
     Spinner spinner;
     BackendlessUser user;
     Violation current;
@@ -98,15 +101,10 @@ public class MainActivity extends AppCompatActivity
 
         buttonSendViolation.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                /*
-                try {
-                    uploadAsync();
-                } catch (Exception e) {
-                    textShowError.setText(e.getLocalizedMessage());
-                }
-                */
-                setViolationParams(current);
-                new UploadViolationTask().execute(current);
+                //    checkOfferVersion();
+                //    showDialog();
+                new FindOfferTask().execute();
+
             }
         });
 
@@ -115,76 +113,6 @@ public class MainActivity extends AppCompatActivity
                 saveCurrentInfo();
                 Intent i = new Intent(MainActivity.this, AddViolationLocation.class);
                 startActivityForResult(i, RESULT_ADD_LOC);
-            }
-        });
-    }
-
-    private void uploadAsync() throws Exception {
-        pd = new ProgressDialog(MainActivity.this);
-        pd.setTitle(getString(R.string.sendingVideo));
-        pd.setMessage(getString(R.string.wait));
-        pd.show();
-        final File file = new File(path);
-
-        // now upload the file
-        Backendless.Files.upload(file, "/video", new AsyncCallback<BackendlessFile>() {
-            @Override
-            public void handleResponse(final BackendlessFile uploadedFile) {
-                textShowError.setText(getString(R.string.uploadedVideo));
-
-                BackendlessDataQuery dataQuery = new BackendlessDataQuery();
-                Backendless.Data.of(Category_id.class).find(dataQuery, new AsyncCallback<BackendlessCollection<Category_id>>() {
-                    @Override
-                    public void handleResponse(BackendlessCollection<Category_id> products) {
-                        listCategory = products.getData();
-
-                        final Violation currentViolation = new Violation();
-
-                        Category_id currentViolatCat = listCategory.get(0);
-                        for (int i = 0; i < listCategory.size(); i++) {
-                            if (listCategory.get(i).getType().equals(violationType)) {
-                                currentViolatCat = listCategory.get(i);
-                            }
-                        }
-
-                        videoUrl = uploadedFile.getFileURL();
-
-                        currentViolation.setCarMake(editCarMake.getText().toString());
-                        currentViolation.setCarModel(editCarModel.getText().toString());
-                        currentViolation.setCarNumber(editCarNumber.getText().toString());
-                        currentViolation.setCategory(currentViolatCat);
-                        currentViolation.setColor(editCarColor.getText().toString());
-                        currentViolation.setComment(editViolatCarComment.getText().toString());
-                        currentViolation.setName(editVideoName.getText().toString());
-                        currentViolation.setVideoUrl(videoUrl);
-                        currentViolation.setLat(lat);
-                        currentViolation.setLongt(longt);
-                        currentViolation.setVideoStatus(defaultVideoStatus);
-
-                        Backendless.Persistence.save(currentViolation, new AsyncCallback<Violation>() {
-                            public void handleResponse(Violation response) {
-                                pd.dismiss();
-                                textShowError.setText(getString(R.string.uploadedViolation));
-                            }
-
-                            public void handleFault(BackendlessFault fault) {
-                                textShowError.setText(getString(R.string.error_occurred) + fault.getMessage());
-                                // an error has occurred, the error code can be retrieved with fault.getCode()
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void handleFault(BackendlessFault backendlessFault) {
-
-                    }
-                });
-            }
-
-            @Override
-            public void handleFault(BackendlessFault backendlessFault) {
-                pd.dismiss();
-                textShowError.setText(getString(R.string.server_error) + backendlessFault.getMessage());
             }
         });
     }
@@ -259,6 +187,16 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
+        if (requestCode == RESULT_PUBLIC_OFFER)
+
+        {
+            if (resultCode == RESULT_OK) {
+
+            } else {
+
+            }
+        }
+
 
     }
 
@@ -297,6 +235,8 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(MainActivity.this, PublicOffer.class);
+            startActivityForResult(intent, RESULT_PUBLIC_OFFER);
             return true;
         }
 
@@ -318,20 +258,8 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.moderation) {
             BackendlessUser user = Backendless.UserService.CurrentUser();
-            /*
-            HashMap<String, Object> map = (HashMap) user.getProperty("moderator");
-            int stat = (Integer) map.get("status");
-            if (stat == 0) {
-                Toast toast = Toast.makeText(getApplicationContext(),
-                        getString(R.string.no_moderator_permission), Toast.LENGTH_LONG);
-                toast.show();
-            } else if (stat == 1) {
-                startActivityForResult(new Intent(MainActivity.this, ModeratorVideoList.class), RESULT_MODERATOR_LIST);
-            }
-            */
+
             String status = user.getProperty("status").toString();
-            HashMap<String, Object> map = (HashMap) user.getProperty("moderator");
-            int stat = (Integer) map.get("status");
             if (status.equals("0")) {
                 Toast toast = Toast.makeText(getApplicationContext(),
                         getString(R.string.no_moderator_permission), Toast.LENGTH_LONG);
@@ -403,7 +331,7 @@ public class MainActivity extends AppCompatActivity
         File folder = new File(Environment.getExternalStorageDirectory() + File.separator
                 + getString(R.string.app_name));
         if (!folder.exists()) {
-             folder.mkdir();
+            folder.mkdir();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -427,7 +355,7 @@ public class MainActivity extends AppCompatActivity
         buttonAddVideo = (Button) findViewById(R.id.buttonAddVideo);
         buttonSendViolation = (Button) findViewById(R.id.buttonSendViolation);
         buttonAddLocaton = (Button) findViewById(R.id.buttonAddLocation);
-      //  buttonAddViolPhoto = (Button) findViewById(R.id.buttonAddViolPhoto);
+        //  buttonAddViolPhoto = (Button) findViewById(R.id.buttonAddViolPhoto);
         buttonSendViolation.setEnabled(false);
         textShowError = (TextView) findViewById(R.id.textShowError);
         checkBoxLocation = (CheckBox) findViewById(R.id.checkBoxLocation);
@@ -441,6 +369,7 @@ public class MainActivity extends AppCompatActivity
         user = Backendless.UserService.CurrentUser();
         listOfPhotoPath = new ArrayList<>();
         current = new Violation();
+        offerta = new Offerta();
 
         TextWatcher textWatcher = new TextWatcher() {
             @Override
@@ -495,32 +424,19 @@ public class MainActivity extends AppCompatActivity
             public void onNothingSelected(AdapterView<?> arg0) {
             }
         });
-
-        Backendless.Persistence.of(VideoStatus.class).findById(Defaults.DEFAULT_VIDEO_STATUS_ID, new AsyncCallback<VideoStatus>() {
-            @Override
-            public void handleResponse(VideoStatus videoStatus) {
-                defaultVideoStatus = videoStatus;
-            }
-
-            @Override
-            public void handleFault(BackendlessFault backendlessFault) {
-
-            }
-        });
     }
 
     private void setMenuItems(Boolean isUserReady) {
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         Menu navMenu = navigationView.getMenu();
+
+        MenuItem item2 = navMenu.findItem(R.id.moderation);
+        MenuItem item1 = navMenu.findItem(R.id.personalData);
         if (isUserReady) {
-            MenuItem item1 = navMenu.findItem(R.id.personalData);
             item1.setEnabled(true);
-            MenuItem item2 = navMenu.findItem(R.id.moderation);
             item2.setEnabled(true);
         } else {
-            MenuItem item1 = navMenu.findItem(R.id.personalData);
             item1.setEnabled(false);
-            MenuItem item2 = navMenu.findItem(R.id.moderation);
             item2.setEnabled(false);
         }
     }
@@ -569,9 +485,9 @@ public class MainActivity extends AppCompatActivity
     private void checkUserData() {
         user = Backendless.UserService.CurrentUser();
         int count = 0;
-        if (!(user.getProperty("firstName")==null)&& !user.getProperty("firstName").toString().equals(""))
+        if (!(user.getProperty("firstName") == null) && !user.getProperty("firstName").toString().equals(""))
             count++;
-        if (!(user.getProperty("lastName")==null) && (!user.getProperty("lastName").toString().equals("")))
+        if (!(user.getProperty("lastName") == null) && (!user.getProperty("lastName").toString().equals("")))
             count++;
         if (!(user.getProperty("passportNo") == null) && !user.getProperty("passportNo").toString().equals(""))
             count++;
@@ -585,7 +501,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void checkCurrentUser(){
+    private void checkCurrentUser() {
         if (user == null) {
             Backendless.UserService.isValidLogin(new AsyncCallback<Boolean>() {
                 @Override
@@ -624,7 +540,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void setViolationParams(Violation currentViolation){
+    public void setViolationParams(Violation currentViolation) {
         currentViolation.setCarMake(editCarMake.getText().toString());
         currentViolation.setCarModel(editCarModel.getText().toString());
         currentViolation.setCarNumber(editCarNumber.getText().toString());
@@ -633,11 +549,10 @@ public class MainActivity extends AppCompatActivity
         currentViolation.setName(editVideoName.getText().toString());
         currentViolation.setLat(lat);
         currentViolation.setLongt(longt);
-      //  currentViolation.setVideoStatus(defaultVideoStatus);
         currentViolation.setStatus(defaultStatus);
     }
 
-    private class UploadViolationTask extends AsyncTask <Violation, Integer, Void>{
+    private class UploadViolationTask extends AsyncTask<Violation, Integer, Void> {
 
         @Override
         protected void onPreExecute() {
@@ -649,7 +564,7 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected Void doInBackground(Violation... violations) {
-            final  File file = new File(path);
+            final File file = new File(path);
             try {
 
                 Helper.uploadVideo(file);
@@ -663,58 +578,99 @@ public class MainActivity extends AppCompatActivity
                 }
 
                 violations[0].setCategory(currentViolatCat);
-                violations[0].setVideoUrl("https://api.backendless.com/" + Defaults.APPLICATION_ID + "/" + Defaults.VERSION + "/files/video/"  +file.getName());
+                violations[0].setVideoUrl("https://api.backendless.com/" + Defaults.APPLICATION_ID + "/" + Defaults.VERSION + "/files/video/" + file.getName());
                 violations[0] = Backendless.Persistence.save(violations[0]);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
             return null;
         }
 
-/*
-        @Override
-        protected Void doInBackground(Violation... violations) {
-            final  File file = new File(path);
-            try {
-                Backendless.Files.upload(file,
-                        "video",
-                        true,
-                        new UploadCallback() {
-                            @Override
-                            public void onProgressUpdate(Integer integer) {
-                                publishProgress(integer);
-                            }
-                        });
-                listCategory = Helper.getAllCategories().getData();
-
-                Category_id currentViolatCat = listCategory.get(0);
-                for (int i = 0; i < listCategory.size(); i++) {
-                    if (listCategory.get(i).getType().equals(violationType)) {
-                        currentViolatCat = listCategory.get(i);
-                    }
-                }
-
-                violations[0].setCategory(currentViolatCat);
-                violations[0].setVideoUrl("https://api.backendless.com/" + Defaults.APPLICATION_ID + "/" + Defaults.VERSION + "/files/video/"  +file.getName());
-                violations[0] = Backendless.Persistence.save(violations[0]);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-            super.onProgressUpdate(values);
-            textShowError.setText("Uploaded " + values[0] + " %");
-        }
-
-*/
         protected void onPostExecute(Void result) {
             Helper.showToast(getString(R.string.uploadedViolation), MainActivity.this);
             pd.dismiss();
+        }
+    }
+
+    private class FindOfferTask extends AsyncTask<Void, Void, Offerta> {
+
+        @Override
+        protected void onPreExecute() {
+            offerD = new ProgressDialog(MainActivity.this);
+            offerD.setTitle(getString(R.string.checking));
+            offerD.setMessage(getString(R.string.wait));
+            offerD.show();
+        }
+
+        @Override
+        protected Offerta doInBackground(Void... voids) {
+            return Helper.findLastOffer();
+
+        }
+
+        protected void onPostExecute(Offerta result) {
+            offerta = result;
+            String lastVersion = offerta.getName();
+            offerD.dismiss();
+            if ((user.getProperty("offerVersion") == null) || !(user.getProperty("offerVersion").toString().equals(lastVersion))) {
+                showDialog();
+            } else {
+                setViolationParams(current);
+                new UploadViolationTask().execute(current);
+            }
+        }
+    }
+
+    public void showDialog() {
+
+        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View myView = inflater.inflate(R.layout.my_dialog, null, false);
+
+        TextView tv = (TextView) myView
+                .findViewById(R.id.textViewDialog);
+        tv.setText("");
+
+        tv.append("Пользователь соглашается с условиями договора публичной оферты. Основные положения представлены ниже:\n\n");
+        tv.append("Пользователь обязан предоставить достоверную информацию о себе и о нарушении ПДД.\n\n");
+        tv.append("Пользователь соглашается на отправку информации и заявления о ПДД в милицию от его имени.\n\n");
+        tv.append("Пользователь соглашается в случае необходимости явиться в милицию в качестве свидетеля для подтверждения заявления.");
+
+
+        new AlertDialog.Builder(MainActivity.this).setView(myView)
+                .setTitle(getString(R.string.short_agreement))
+                .setPositiveButton(getString(R.string.agree), new DialogInterface.OnClickListener() {
+                    @TargetApi(11)
+                    public void onClick(DialogInterface dialog, int id) {
+                        user.setProperty("offerVersion", offerta.getName());
+                        new UpdateUserTask().execute(user);
+                        setViolationParams(current);
+                        new UploadViolationTask().execute(current);
+                        dialog.dismiss();
+                    }
+
+                })
+                .setNegativeButton(getString(R.string.disagree), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        Helper.showToast("Чтобы отправить видеонарушение, необходимо принять публичную оферту", MainActivity.this);
+                        dialog.dismiss();
+                    }
+                })
+                .setNeutralButton(getString(R.string.public_offer), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        Intent intent = new Intent(MainActivity.this, PublicOffer.class);
+                        startActivityForResult(intent, RESULT_PUBLIC_OFFER);
+
+                    }
+
+                }).show();
+    }
+
+    private class UpdateUserTask extends AsyncTask<BackendlessUser, Void, Void> {
+
+        @Override
+        protected Void doInBackground(BackendlessUser... backendlessUsers) {
+            Helper.updateUser(backendlessUsers[0]);
+            return null;
         }
     }
 }

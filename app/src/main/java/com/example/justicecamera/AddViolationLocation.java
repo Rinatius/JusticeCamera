@@ -60,7 +60,6 @@ public class AddViolationLocation extends FragmentActivity implements OnMapReady
         mMap.moveCamera(CameraUpdateFactory.newLatLng(bishkek));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(bishkek, 12));
 
-
         UiSettings set = mMap.getUiSettings();
         set.setZoomControlsEnabled(true);
 

@@ -44,7 +44,6 @@ public class PersonalDataEdit extends AppCompatActivity {
     EditText editLastname, editFirstname, editCarNumber, editPassportNo, editPhoneNumber;
     RadioButton radioButtonMale, radioButtonFeMale;
     TextView textViewTester, textViewCard;
-    ModeratorStatus defaultModeratorStatus;
 
     private static final int PICK_FROM_CAMERA = 1;
     private static final int CROP_FROM_CAMERA = 2;
@@ -58,7 +57,6 @@ public class PersonalDataEdit extends AppCompatActivity {
     String passportNo = "";
     String phoneNumber = "";
     boolean sex = true;
-   // String photoUrl = "";
     String lastName = "";
     String firstName = "";
     View.OnClickListener radioListener;
@@ -104,7 +102,6 @@ public class PersonalDataEdit extends AppCompatActivity {
             boolean sex = (boolean) user.getProperty("sex");
             radioButtonMale.setChecked(sex);
             radioButtonFeMale.setChecked(!sex);
-
         }
     }
 
@@ -131,18 +128,6 @@ public class PersonalDataEdit extends AppCompatActivity {
         month.setMinValue(1);
         year.setMaxValue(2000);
         year.setMinValue(1950);
-
-        Backendless.Persistence.of(ModeratorStatus.class).findById(Defaults.DEFAULT_USER_STATUS_ID, new AsyncCallback<ModeratorStatus>() {
-            @Override
-            public void handleResponse(ModeratorStatus status) {
-                defaultModeratorStatus = status;
-            }
-
-            @Override
-            public void handleFault(BackendlessFault fault) {
-                // an error has occurred, the error code can be retrieved with fault.getCode()
-            }
-        });
 
         File file = new File(Environment.getExternalStorageDirectory() + File.separator
                 + getString(R.string.app_name), "user_photo.jpg");
@@ -387,17 +372,13 @@ public class PersonalDataEdit extends AppCompatActivity {
         if (user.getProperty("status") == null){
             user.setProperty("status", "0");
         }
-        /*
-        if (user.getProperty("moderator") == null) {
-            user.setProperty("moderator", defaultModeratorStatus);
-        }
-        */
+
     }
 
     private class UpdateUser extends AsyncTask<File, Void, Void> {
         @Override
         protected void onPreExecute() {
-            //  super.onPreExecute();
+
             updatingUser = new ProgressDialog(PersonalDataEdit.this);
             updatingUser.setTitle(getString(R.string.updating_user));
             updatingUser.setMessage(getString(R.string.wait));

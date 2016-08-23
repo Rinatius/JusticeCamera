@@ -72,4 +72,9 @@
     <string name="fill_the_form">Заполните данные в личном кабинете</string>
     <string name="required_fields">*Поля обязательны для заполнения</string>
     <string name="updating_user">Обновление данных...</string>
+    <string name="short_agreement">Соглашение</string>
+    <string name="agree">Согласен</string>
+    <string name="disagree">Не согласен</string>
+    <string name="public_offer">Полный текст публичной оферты</string>
+    <string name="checking">Проверка...</string>
 </resources>

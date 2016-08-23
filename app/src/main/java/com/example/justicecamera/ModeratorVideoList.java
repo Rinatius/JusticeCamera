@@ -3,6 +3,7 @@ package com.example.justicecamera;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -25,6 +26,7 @@ import java.util.List;
 public class ModeratorVideoList extends AppCompatActivity {
     static ProgressDialog pd;
     List<Violation> listViolation;
+    ListView list;
     TextView textViewTester;
     String objectId = "";
     String searchParameter ="status = 0";
@@ -36,6 +38,7 @@ public class ModeratorVideoList extends AppCompatActivity {
         setContentView(R.layout.activity_moderator_video_list);
         textViewTester = (TextView) findViewById(R.id.textViewTesterM);
         listViolation = new ArrayList<>();
+        list = (ListView) findViewById(R.id.listView);
     }
 
     class MyAdapter extends BaseAdapter {
@@ -92,36 +95,40 @@ public class ModeratorVideoList extends AppCompatActivity {
     @Override
     protected void onStart(){
         super.onStart();
-        pd = new ProgressDialog(ModeratorVideoList.this);
-        pd.setTitle(getString(R.string.videolist_downloading));
-        pd.setMessage(getString(R.string.wait));
-        pd.show();
+        new ListOfViolationTask().execute(searchParameter);
 
-        BackendlessDataQuery dataQuery2 = new BackendlessDataQuery();
-        dataQuery2.setWhereClause(searchParameter);
-        Backendless.Data.of(Violation.class).find(dataQuery2, new AsyncCallback<BackendlessCollection<Violation>>() {
-            @Override
-            public void handleResponse(BackendlessCollection<Violation> listOfViolatioons) {
-                listViolation = listOfViolatioons.getData();
-                String textToShow = getString(R.string.number_of_elements) + Integer.toString(listViolation.size());
-                textViewTester.setText(textToShow);
+    }
 
-                final ListView list = (ListView) findViewById(R.id.listView);
-                registerForContextMenu(list);
-                MyAdapter adapter = new MyAdapter(ModeratorVideoList.this, listViolation);
-                list.setAdapter(adapter);
+    private class ListOfViolationTask extends AsyncTask<String, Void, BackendlessCollection<Violation>> {
 
-                pd.dismiss();
-            }
 
-            @Override
-            public void handleFault(BackendlessFault backendlessFault) {
-                pd.dismiss();
-                Toast toast2 = Toast.makeText(getApplicationContext(),
-                        "Server reported an error - " + backendlessFault.getMessage(), Toast.LENGTH_LONG);
-                toast2.show();
-            }
-        });
+        @Override
+        protected void onPreExecute() {
+            pd = new ProgressDialog(ModeratorVideoList.this);
+            pd.setTitle(getString(R.string.videolist_downloading));
+            pd.setMessage(getString(R.string.wait));
+            pd.show();
+        }
+
+        @Override
+        protected BackendlessCollection<Violation> doInBackground(String... strings) {
+            return Helper.getAllViolations(strings[0]);
+        }
+
+        protected void onPostExecute(BackendlessCollection<Violation> result) {
+            showViolationList(result);
+            pd.dismiss();
+        }
+    }
+
+    private void showViolationList(BackendlessCollection<Violation> listOfViolatioons){
+        listViolation = listOfViolatioons.getData();
+        String textToShow = getString(R.string.number_of_elements) + Integer.toString(listViolation.size());
+        textViewTester.setText(textToShow);
+        registerForContextMenu(list);
+        MyAdapter adapter = new MyAdapter(ModeratorVideoList.this, listViolation);
+        list.setAdapter(adapter);
+        pd.dismiss();
     }
 
 }
