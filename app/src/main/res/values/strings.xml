@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">JusticeCamera</string>
-    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_main">Send Video</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -48,7 +48,7 @@
     <string name="sign_in">Sign in</string>
     <string name="sign_up">Sign Up</string>
     <string name="skip">Skip</string>
-    <string name="remember">Remember me?</string>
+    <string name="remember">Remember me</string>
     <string name="personal_data">Personal data</string>
     <string name="choose_photo">Choose photo</string>
     <string name="last_name">Last name*</string>
@@ -87,5 +87,82 @@
     <string name="disagree">Disagree</string>
     <string name="public_offer">Public offer</string>
     <string name="checking">Checking...</string>
+    <string name="check_email">Please confirm your email address</string>
+    <string name="take_from_camera">Take from camera</string>
+    <string name="select_from_gallery">Select from gallery</string>
+    <string name="select_image">Select image</string>
+    <string name="feedback" translatable="false">Feedback</string>
+
+
+
+
+
+
+    <string name="login_success_message">Login successful! This concludes an example.</string>
+
+    <string name="login_text">Log in</string>
+
+    <string name="logout_text">Log out</string>
+
+    <string name="register_text">Register</string>
+
+    <string name="restore_link">Restore</string>
+
+    <string name="password_recovered_message">We sent an email to your email address with a link to a password change page. Please check your email and follow the link for further instructions.</string>
+
+    <string name="restore_password_page_name">Password Restoration</string>
+
+    <string name="registration_page_name">Registration</string>
+
+    <string name="login_prompt">Login:</string>
+
+    <string name="password_prompt">Password:</string>
+
+    <string name="password_recovery_page_name">Password Recovery</string>
+
+    <string name="warning_icon_description">warning icon</string>
+
+    <string name="remember_login_text">Remember me</string>
+
+    <string name="carNumber_field_prompt">CarNumber:</string>
+
+    <string name="dayBirthday_field_prompt">DayBirthday:</string>
+
+    <string name="email_field_prompt" translatable="false">Email:</string>
+
+    <string name="firstName_field_prompt">FirstName:</string>
+
+    <string name="lastName_field_prompt">LastName:</string>
+
+    <string name="monthBirthday_field_prompt">MonthBirthday:</string>
+
+    <string name="offerVersion_field_prompt">OfferVersion:</string>
+
+    <string name="passportNo_field_prompt">PassportNo:</string>
+
+    <string name="password_field_prompt">Password:</string>
+
+    <string name="phoneNumber_field_prompt">PhoneNumber:</string>
+
+    <string name="photoUrl_field_prompt">PhotoUrl:</string>
+
+    <string name="rating_field_prompt">Rating:</string>
+
+    <string name="sex_field_prompt">Sex:</string>
+
+    <string name="status_field_prompt">Status:</string>
+
+    <string name="yearBirhday_field_prompt">YearBirhday:</string>
+
+    <string name="registration_confirmation_message">We sent an email to your email address. The email contains a link you must visit to confirm your email address. Once you visit the link, you will be able to login to the application.</string>
+    <string-array name="booleans">
+
+    <item/>
+
+    <item>true</item>
+
+    <item>false</item>
+
+</string-array>
 
 </resources>

@@ -39,7 +39,7 @@
     <string name="sign_in">Войти</string>
     <string name="sign_up">Регистрация</string>
     <string name="skip">Пропустить</string>
-    <string name="remember">Запомнить?</string>
+    <string name="remember">Запомнить</string>
     <string name="personal_data">Личные данные водителя</string>
     <string name="choose_photo">Выбрать фото</string>
     <string name="last_name">Фамилия*</string>
@@ -77,4 +77,16 @@
     <string name="disagree">Не согласен</string>
     <string name="public_offer">Полный текст публичной оферты</string>
     <string name="checking">Проверка...</string>
+    <string name="check_email">Пожалуйста, подтвердите свой почтовый адрес</string>
+    <string name="take_from_camera">Фото с камеры</string>
+    <string name="select_from_gallery">Выбрать из галереи</string>
+    <string name="select_image">Выберите фотографию</string>
+    <string name="password_field_prompt">Пароль:</string>
+    <string name="register_text">Регистрация</string>
+    <string name="restore_password_page_name">Восстановление пароля</string>
+    <string name="password_prompt">Пароль:</string>
+    <string name="password_recovered_message">Мы отправили вам письмо на ваш почтовый адрес с инструкцией по восстановлению пароля. Пожалуйста, проверьте ваш email.</string>
+    <string name="registration_confirmation_message">Мы отправили вам письмо на ваш почтовый ящик. Для подтверждения email перейдите по ссылке в письме. </string>
+    <string name="registration_page_name">Регистрация</string>
+    <string name="restore_link">Восстановление пароля</string>
 </resources>

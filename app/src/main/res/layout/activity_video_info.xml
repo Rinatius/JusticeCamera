@@ -180,7 +180,7 @@
 
             <VideoView
                 android:layout_width="match_parent"
-                android:layout_height="170dp"
+                android:layout_height="160dp"
                 android:id="@+id/videoView" />
 
             <LinearLayout
@@ -223,6 +223,12 @@
                     android:id="@+id/buttonReject" />
 
             </LinearLayout>
+            <Button
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text = "@string/feedback"
+                android:id="@+id/buttonFeedback"/>
 
             <View
                 android:layout_width="match_parent"

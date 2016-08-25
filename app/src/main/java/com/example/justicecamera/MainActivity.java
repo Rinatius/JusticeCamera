@@ -79,7 +79,6 @@ public class MainActivity extends AppCompatActivity
     private static int RESULT_MAP = 6;
     static TextView textShowError;
     Boolean isUserReady = false;
-    Boolean valid = false;
     Spinner spinner;
     BackendlessUser user;
     Violation current;
@@ -90,6 +89,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         init();
+
         checkCurrentUser();
 
         buttonAddVideo.setOnClickListener(new View.OnClickListener() {
@@ -101,8 +101,7 @@ public class MainActivity extends AppCompatActivity
 
         buttonSendViolation.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                //    checkOfferVersion();
-                //    showDialog();
+
                 new FindOfferTask().execute();
 
             }
@@ -264,7 +263,7 @@ public class MainActivity extends AppCompatActivity
                 Toast toast = Toast.makeText(getApplicationContext(),
                         getString(R.string.no_moderator_permission), Toast.LENGTH_LONG);
                 toast.show();
-            } else if (status.equals("1")) {
+            } else if (status.equals("1")||status.equals("2")) {
                 startActivityForResult(new Intent(MainActivity.this, ModeratorVideoList.class), RESULT_MODERATOR_LIST);
             }
         } else if (id == R.id.mapOfViolations) {
@@ -273,7 +272,8 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_logout) {
             Backendless.UserService.logout(new AsyncCallback<Void>() {
                 public void handleResponse(Void response) {
-                    startActivity(new Intent(MainActivity.this, Login.class));
+                    startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                   // startActivity(new Intent(MainActivity.this, Login1.class));
                     // user has been logged out.
                 }
 
@@ -288,7 +288,7 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    private String getRealPathFromURI(Context context, Uri contentUri) {
+    public static String getRealPathFromURI(Context context, Uri contentUri) {
         Cursor cursor = null;
         try {
             String[] proj = {MediaStore.Images.Media.DATA};
@@ -424,6 +424,8 @@ public class MainActivity extends AppCompatActivity
             public void onNothingSelected(AdapterView<?> arg0) {
             }
         });
+
+        checkIntent();
     }
 
     private void setMenuItems(Boolean isUserReady) {
@@ -671,6 +673,16 @@ public class MainActivity extends AppCompatActivity
         protected Void doInBackground(BackendlessUser... backendlessUsers) {
             Helper.updateUser(backendlessUsers[0]);
             return null;
+        }
+    }
+
+    private void checkIntent() {
+        Intent outer = getIntent();
+        if (outer.getStringExtra(Login1.PATH) != null) {
+            path = outer.getStringExtra(Login1.PATH);
+            checkBoxVideo.setChecked(true);
+            checkBoxVideo.setText(getString(R.string.added_video));
+            Helper.showToast(getString(R.string.added_video), MainActivity.this);
         }
     }
 }

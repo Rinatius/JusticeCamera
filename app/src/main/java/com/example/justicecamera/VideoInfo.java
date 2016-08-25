@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.PowerManager;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -18,7 +19,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
+import com.backendless.BackendlessUser;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -33,7 +36,8 @@ import java.util.List;
 public class VideoInfo extends AppCompatActivity {
     static ProgressDialog loading;
     ProgressDialog mProgressDialog;
-    Button buttonPlayVideo, buttonDownload, buttonApprove, buttonReject;
+    ProgressDialog play;
+    Button buttonPlayVideo, buttonDownload, buttonApprove, buttonReject, buttonFeedback;
     TextView textViewVVideoName, textViewVCarModel, textViewVCarMake, textViewVCarColor, textViewVCarNumber, textViewVcategory, textViewVcomment, textViewVInfo;
     Violation thisViolation;
     List<Violation> listViolation;
@@ -43,6 +47,7 @@ public class VideoInfo extends AppCompatActivity {
     String violLongt = "";
     VideoView video;
     ProgressDialog pd;
+    BackendlessUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,13 +65,18 @@ public class VideoInfo extends AppCompatActivity {
 
         buttonPlayVideo.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
+//                play = new ProgressDialog(VideoInfo.this);
+//                play.setTitle(getString(R.string.loading_info));
+//                play.setMessage(getString(R.string.wait));
+//                play.show();
 
+//                String path = videoUrl;
+//                Uri uri = Uri.parse(path);
+//                video.setVideoURI(uri);
                 video.setMediaController(new MediaController(VideoInfo.this));
-
                 video.setOnCompletionListener(myVideoViewCompletionListener);
                 video.setOnPreparedListener(MyVideoViewPreparedListener);
                 video.setOnErrorListener(myVideoViewErrorListener);
-
                 video.requestFocus();
                 video.start();
             }
@@ -102,7 +112,7 @@ public class VideoInfo extends AppCompatActivity {
 
         @Override
         public void onPrepared(MediaPlayer arg0) {
-            // pd.dismiss();
+        //    play.dismiss();
             Toast.makeText(getApplicationContext(),
                     getString(R.string.media_loaded),
                     Toast.LENGTH_LONG).show();
@@ -230,6 +240,10 @@ public class VideoInfo extends AppCompatActivity {
             buttonApprove.setEnabled(true);
             buttonApprove.setVisibility(View.VISIBLE);
         }
+        if (user.getProperty("status").toString().equals("2")){
+            buttonFeedback.setEnabled(true);
+            buttonFeedback.setVisibility(View.VISIBLE);
+        }
 
         textViewVVideoName.setText(thisViolation.getName());
         textViewVCarMake.setText(thisViolation.getCarMake());
@@ -242,7 +256,7 @@ public class VideoInfo extends AppCompatActivity {
         String path = videoUrl;
         Uri uri = Uri.parse(path);
         video.setVideoURI(uri);
-
+        video.seekTo(200);
     }
 
     private void init() {
@@ -250,6 +264,7 @@ public class VideoInfo extends AppCompatActivity {
         buttonDownload = (Button) findViewById(R.id.buttonDownload);
         buttonApprove = (Button) findViewById(R.id.buttonApprove);
         buttonReject = (Button) findViewById(R.id.buttonReject);
+        buttonFeedback = (Button) findViewById(R.id.buttonFeedback);
         textViewVVideoName = (TextView) findViewById(R.id.textViewVVideoName);
         textViewVCarModel = (TextView) findViewById(R.id.textViewVCarModel);
         textViewVCarMake = (TextView) findViewById(R.id.textViewVCarMake);
@@ -266,7 +281,10 @@ public class VideoInfo extends AppCompatActivity {
         buttonReject.setVisibility(View.INVISIBLE);
         buttonApprove.setEnabled(false);
         buttonApprove.setVisibility(View.INVISIBLE);
+        buttonFeedback.setEnabled(false);
+        buttonFeedback.setVisibility(View.INVISIBLE);
 
+        user = Backendless.UserService.CurrentUser();
 
         buttonApprove.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
@@ -278,6 +296,14 @@ public class VideoInfo extends AppCompatActivity {
         buttonReject.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 new DeleteViolation().execute(thisViolation);
+            }
+        });
+
+        buttonFeedback.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(VideoInfo.this, Feedback.class);
+                startActivity(i);
             }
         });
 
@@ -364,7 +390,7 @@ public class VideoInfo extends AppCompatActivity {
             }
 
             setViolationParams(thisViolation);
-            video.seekTo(200);
+          //  video.seekTo(200);
         } else if (!violLongt.equals("")) {
 
             for (int i = 0; i < listViolation.size(); i++) {
@@ -376,7 +402,7 @@ public class VideoInfo extends AppCompatActivity {
             }
 
             setViolationParams(thisViolation);
-            video.seekTo(200);
+         //   video.seekTo(200);
         }
     }
 

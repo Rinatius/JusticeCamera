@@ -300,11 +300,11 @@ public class PersonalDataEdit extends AppCompatActivity {
     }
 
     private void preparePhotoDialog() {
-        final String[] items = new String[]{"Take from camera", "Select from gallery"};
+        final String[] items = new String[]{getString(R.string.take_from_camera), getString(R.string.select_from_gallery)};
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_item, items);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        builder.setTitle("Select Image");
+        builder.setTitle(getString(R.string.select_image));
         builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int item) { //pick from camera
                 if (item == 0) {
@@ -327,7 +327,6 @@ public class PersonalDataEdit extends AppCompatActivity {
 
                     intent.setType("image/*");
                     intent.setAction(Intent.ACTION_GET_CONTENT);
-
                     startActivityForResult(Intent.createChooser(intent, "Complete action using"), PICK_FROM_FILE);
                 }
             }
