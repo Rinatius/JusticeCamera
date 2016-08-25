@@ -24,13 +24,7 @@
         android:theme="@style/AppTheme">
         <activity android:name=".Login1">
 
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:mimeType="video/*" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".MainActivity"
@@ -41,17 +35,24 @@
         <activity android:name=".VideoInfo" />
         <activity android:name=".ModeratorVideoList" />
         <activity android:name=".CheckedVideoList" />
-        <activity android:name=".LoginActivity" >
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
+        <activity android:name=".LoginActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="video/*" />
+            </intent-filter>
         </activity>
-        <activity android:name=".PasswordRecoveryRequestedActivity"/>
-        <activity android:name=".RegisterActivity"/>
-        <activity android:name=".RestorePasswordActivity"/>
-        <activity android:name=".RegistrationSuccessActivity"/>
+        <activity android:name=".PasswordRecoveryRequestedActivity" />
+        <activity android:name=".RegisterActivity" />
+        <activity android:name=".RestorePasswordActivity" />
+        <activity android:name=".RegistrationSuccessActivity" />
 
 
         <!--

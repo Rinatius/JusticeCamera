@@ -2,6 +2,7 @@ package com.example.justicecamera;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
@@ -24,6 +25,7 @@ public class LoginActivity extends Activity {
     private EditText identityField, passwordField;
     private Button loginButton, buttonSkip;
     private CheckBox rememberLoginBox;
+    public final static String PATH = "path2";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -47,8 +49,20 @@ public class LoginActivity extends Activity {
                             public void handleResponse(BackendlessUser currentUser) {
                                 super.handleResponse(currentUser);
                                 Backendless.UserService.setCurrentUser(currentUser);
-                                startActivity(new Intent(getBaseContext(), MainActivity.class));
-                                finish();
+
+                                Intent outer = getIntent();
+
+                                if (outer.hasExtra(Intent.EXTRA_STREAM)){
+                                    Uri videoUri = (Uri) getIntent().getExtras().get(Intent.EXTRA_STREAM);
+                                    String path = MainActivity.getRealPathFromURI(LoginActivity.this, videoUri);
+                                    Intent toMain = new Intent(LoginActivity.this, MainActivity.class);
+                                    toMain.putExtra(PATH, path);
+                                    startActivity(toMain);
+                                    finish();
+                                } else {
+                                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                                    finish();
+                                }
                             }
                         });
                     }

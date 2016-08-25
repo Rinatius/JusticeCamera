@@ -678,8 +678,8 @@ public class MainActivity extends AppCompatActivity
 
     private void checkIntent() {
         Intent outer = getIntent();
-        if (outer.getStringExtra(Login1.PATH) != null) {
-            path = outer.getStringExtra(Login1.PATH);
+        if (outer.getStringExtra(LoginActivity.PATH) != null) {
+            path = outer.getStringExtra(LoginActivity.PATH);
             checkBoxVideo.setChecked(true);
             checkBoxVideo.setText(getString(R.string.added_video));
             Helper.showToast(getString(R.string.added_video), MainActivity.this);
