@@ -94,10 +94,6 @@
     <string name="feedback" translatable="false">Feedback</string>
 
 
-
-
-
-
     <string name="login_success_message">Login successful! This concludes an example.</string>
 
     <string name="login_text">Log in</string>
@@ -157,12 +153,14 @@
     <string name="registration_confirmation_message">We sent an email to your email address. The email contains a link you must visit to confirm your email address. Once you visit the link, you will be able to login to the application.</string>
     <string-array name="booleans">
 
-    <item/>
+        <item />
 
-    <item>true</item>
+        <item>true</item>
 
-    <item>false</item>
+        <item>false</item>
 
-</string-array>
+    </string-array>
+    <string name="middle_name">Middle Name*</string>
+    <string name="myVideo">My videos</string>
 
 </resources>

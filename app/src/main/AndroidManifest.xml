@@ -17,19 +17,17 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
+        android:name="android.support.multidex.MultiDexApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Login1">
-
-
-        </activity>
+        <activity android:name=".Login1"></activity>
         <activity
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".PersonalDataEdit" />
         <activity android:name=".PersonalDataSaved" />
         <activity android:name=".VideoInfo" />
@@ -41,19 +39,12 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:mimeType="video/*" />
-            </intent-filter>
         </activity>
         <activity android:name=".PasswordRecoveryRequestedActivity" />
         <activity android:name=".RegisterActivity" />
         <activity android:name=".RestorePasswordActivity" />
         <activity android:name=".RegistrationSuccessActivity" />
-
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -74,7 +65,8 @@
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps" />
         <activity android:name=".PublicOffer" />
-        <activity android:name=".Feedback"></activity>
+        <activity android:name=".Feedback" />
+        <activity android:name=".VideoActivity"></activity>
     </application>
 
 </manifest>

@@ -89,4 +89,6 @@
     <string name="registration_confirmation_message">Мы отправили вам письмо на ваш почтовый ящик. Для подтверждения email перейдите по ссылке в письме. </string>
     <string name="registration_page_name">Регистрация</string>
     <string name="restore_link">Восстановление пароля</string>
+    <string name="middle_name">Отчество*</string>
+    <string name="myVideo">Мои видео</string>
 </resources>

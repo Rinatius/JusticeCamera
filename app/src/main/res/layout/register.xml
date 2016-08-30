@@ -123,6 +123,34 @@
             android:layout_width="match_parent"
             android:background="@android:drawable/editbox_background_normal"/>
 
+    </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/dp48"
+                android:layout_marginRight="@dimen/dp4"
+                android:paddingRight="@dimen/dp4"
+                android:text="@string/middle_name"
+                android:textSize="@dimen/text_medium"
+                android:textColor="@color/white"
+                android:gravity="left"/>
+
+            <EditText
+
+                android:id="@+id/middleNameField"
+                android:layout_height="@dimen/dp48"
+                android:layout_marginLeft="@dimen/dp4"
+                android:gravity="center_vertical"
+                android:inputType="text"
+                android:textSize="@dimen/text_medium"
+                android:layout_width="match_parent"
+                android:background="@android:drawable/editbox_background_normal"/>
+
         </LinearLayout>
 
         <LinearLayout

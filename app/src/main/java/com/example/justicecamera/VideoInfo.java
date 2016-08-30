@@ -38,13 +38,16 @@ public class VideoInfo extends AppCompatActivity {
     ProgressDialog mProgressDialog;
     ProgressDialog play;
     Button buttonPlayVideo, buttonDownload, buttonApprove, buttonReject, buttonFeedback;
-    TextView textViewVVideoName, textViewVCarModel, textViewVCarMake, textViewVCarColor, textViewVCarNumber, textViewVcategory, textViewVcomment, textViewVInfo;
+    TextView textViewVVideoName, textViewVCarModel, textViewVCarMake, textViewVCarColor, textViewVCarNumber, textViewVcategory, textViewVcomment, textViewVInfo, textViewVFeedback;
     Violation thisViolation;
     List<Violation> listViolation;
     String videoUrl;
     String objectId = "";
     String violLat = "";
     String violLongt = "";
+    String thisObjectId;
+    public static String THIS_OBJECT_ID = "objectId";
+    public static String VIDEO_URL = "url";
     VideoView video;
     ProgressDialog pd;
     BackendlessUser user;
@@ -73,12 +76,18 @@ public class VideoInfo extends AppCompatActivity {
 //                String path = videoUrl;
 //                Uri uri = Uri.parse(path);
 //                video.setVideoURI(uri);
-                video.setMediaController(new MediaController(VideoInfo.this));
+
+
+/*                video.setMediaController(new MediaController(VideoInfo.this));
                 video.setOnCompletionListener(myVideoViewCompletionListener);
                 video.setOnPreparedListener(MyVideoViewPreparedListener);
                 video.setOnErrorListener(myVideoViewErrorListener);
                 video.requestFocus();
-                video.start();
+                video.start();*/
+
+                Intent i = new Intent(VideoInfo.this, VideoActivity.class);
+                i.putExtra(VIDEO_URL, videoUrl);
+                startActivity(i);
             }
         });
 
@@ -245,6 +254,7 @@ public class VideoInfo extends AppCompatActivity {
             buttonFeedback.setVisibility(View.VISIBLE);
         }
 
+
         textViewVVideoName.setText(thisViolation.getName());
         textViewVCarMake.setText(thisViolation.getCarMake());
         textViewVCarModel.setText(thisViolation.getCarModel());
@@ -252,11 +262,14 @@ public class VideoInfo extends AppCompatActivity {
         textViewVCarNumber.setText(thisViolation.getCarNumber());
         textViewVcategory.setText(thisViolation.getCategory().getType());
         textViewVcomment.setText(thisViolation.getComment());
+        textViewVFeedback.setText(thisViolation.getFeedback());
         videoUrl = thisViolation.getVideoUrl();
-        String path = videoUrl;
+
+
+/*        String path = videoUrl;
         Uri uri = Uri.parse(path);
         video.setVideoURI(uri);
-        video.seekTo(200);
+        video.seekTo(200);*/
     }
 
     private void init() {
@@ -272,6 +285,7 @@ public class VideoInfo extends AppCompatActivity {
         textViewVCarNumber = (TextView) findViewById(R.id.textViewVCarNumber);
         textViewVcategory = (TextView) findViewById(R.id.textViewVcategory);
         textViewVcomment = (TextView) findViewById(R.id.textViewVcomment);
+        textViewVFeedback = (TextView) findViewById(R.id.textViewVFeedback);
         textViewVInfo = (TextView) findViewById(R.id.textView10);
         listViolation = new ArrayList<>();
         thisViolation = new Violation();
@@ -295,7 +309,11 @@ public class VideoInfo extends AppCompatActivity {
 
         buttonReject.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                new DeleteViolation().execute(thisViolation);
+                try {
+                    new DeleteViolation().execute(thisViolation);
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -303,6 +321,7 @@ public class VideoInfo extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(VideoInfo.this, Feedback.class);
+                i.putExtra(THIS_OBJECT_ID, thisObjectId);
                 startActivity(i);
             }
         });
@@ -335,6 +354,7 @@ public class VideoInfo extends AppCompatActivity {
             buttonDownload.setEnabled(false);
             buttonApprove.setEnabled(false);
             buttonReject.setEnabled(false);
+            buttonFeedback.setEnabled(false);
             pd.dismiss();
             Helper.showToast("Успешно удалено", VideoInfo.this);
         }
@@ -386,6 +406,7 @@ public class VideoInfo extends AppCompatActivity {
             for (int i = 0; i < listViolation.size(); i++) {
                 if (listViolation.get(i).getObjectId().equals(objectId)) {
                     thisViolation = listViolation.get(i);
+                    thisObjectId = thisViolation.getObjectId();
                 }
             }
 
@@ -397,6 +418,7 @@ public class VideoInfo extends AppCompatActivity {
                 if (listViolation.get(i).getLat().equals(violLat)) {
                     if (listViolation.get(i).getLongt().equals(violLongt)) {
                         thisViolation = listViolation.get(i);
+                        thisObjectId = thisViolation.getObjectId();
                     }
                 }
             }

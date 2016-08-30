@@ -22,12 +22,10 @@ public final class Helper extends Object {
     private static final String PHOTO_DIRECTORY = "UsersPhoto";
     private static final String VIDEO_DIRECTORY = "video";
     private static final boolean OVERWRITE = true;
+    private static String report;
+
 
     private Helper(){}
-
-    public static void deletePreviousPhoto(String pathToPhoto){
-        Backendless.Files.remove(pathToPhoto);
-    }
 
     public static void uploadVideo(File file) throws Exception {
         Backendless.Files.upload(file, VIDEO_DIRECTORY, OVERWRITE );
@@ -41,7 +39,7 @@ public final class Helper extends Object {
         Backendless.Files.upload(file, PHOTO_DIRECTORY, OVERWRITE );
         String photoUrl = "https://api.backendless.com/" + Defaults.APPLICATION_ID + "/" + Defaults.VERSION + "/files/" + PHOTO_DIRECTORY +
                 "/" + "userPhoto_" + user.getProperty("objectId")+".jpg";
-//        String photoUrl = "test";
+
         user.setProperty("photoUrl", photoUrl);
         Backendless.UserService.update(user);
     }
@@ -59,6 +57,7 @@ public final class Helper extends Object {
         dataQ.setWhereClause(dataQuery);
         return Backendless.Data.of(Violation.class).find(dataQ);
     }
+
     public static BackendlessCollection<Violation> getAllViolations(){
 
         return Backendless.Data.of(Violation.class).find();
@@ -81,6 +80,10 @@ public final class Helper extends Object {
 
     public static Offerta findLastOffer(){
         return Backendless.Persistence.of(Offerta.class).findLast();
+    }
+
+    public static Violation findViolationById (String objectId){
+        return Backendless.Data.of(Violation.class).findById(objectId);
     }
 
 }

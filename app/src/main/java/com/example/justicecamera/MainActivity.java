@@ -42,6 +42,8 @@ import com.backendless.exceptions.BackendlessFault;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
@@ -71,12 +73,14 @@ public class MainActivity extends AppCompatActivity
     Offerta offerta;
     private static int RESULT_LOAD_VIDEO = 1;
     private static int RESULT_LOAD_IMAGE = 7;
+    private static int RESULT_MY_VIDEO = 8;
     private static int RESULT_ADD_LOC = 2;
     private static int RESULT_PUBLIC_OFFER = 8;
     private static int RESULT_PERSDATA = 3;
     private static int RESULT_CHECKED_LIST = 4;
     private static int RESULT_MODERATOR_LIST = 5;
     private static int RESULT_MAP = 6;
+    public static String MY_VIDEO = "my video";
     static TextView textShowError;
     Boolean isUserReady = false;
     Spinner spinner;
@@ -157,6 +161,16 @@ public class MainActivity extends AppCompatActivity
         }
 
         if (requestCode == RESULT_CHECKED_LIST)
+
+        {
+            if (resultCode == RESULT_OK) {
+
+            } else {
+
+            }
+        }
+
+        if (requestCode == RESULT_MY_VIDEO)
 
         {
             if (resultCode == RESULT_OK) {
@@ -269,6 +283,10 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.mapOfViolations) {
             Intent i = new Intent(MainActivity.this, MapsActivity.class);
             startActivityForResult(i, RESULT_MAP);
+        } else if (id == R.id.myVideo){
+            Intent i = new Intent(MainActivity.this, CheckedVideoList.class);
+            i.putExtra(MY_VIDEO, "my video");
+            startActivityForResult(i, RESULT_MY_VIDEO);
         } else if (id == R.id.nav_logout) {
             Backendless.UserService.logout(new AsyncCallback<Void>() {
                 public void handleResponse(Void response) {
@@ -304,7 +322,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void checkText() {
-        if (!(editCarColor.getText().toString().equals("")) && !(editCarNumber.getText().toString().equals("")) && !(editCarModel.getText().toString().equals("")) && !(editVideoName.getText().toString().equals("")) && !(editCarMake.getText().toString().equals("")) && !(editViolatCarComment.getText().toString().equals(""))) {
+        if (!(editCarColor.getText().toString().equals("")) && !(editCarNumber.getText().toString().equals("")) && !(editCarModel.getText().toString().equals("")) && !(editVideoName.getText().toString().equals("")) && !(editCarMake.getText().toString().equals(""))) {
             checkBoxText.setChecked(true);
             checkBoxText.setText(getString(R.string.fields_filled));
         } else {
@@ -495,7 +513,9 @@ public class MainActivity extends AppCompatActivity
             count++;
         if (!(user.getProperty("phoneNumber") == null) && !user.getProperty("phoneNumber").toString().equals(""))
             count++;
-        if (count == 4) {
+        if ((user.getProperty("middleName")!=null) && !user.getProperty("middleName").toString().equals(""))
+            count++;
+        if (count == 5) {
             checkBoxUser.setChecked(true);
         } else {
             checkBoxUser.setChecked(false);
@@ -617,8 +637,10 @@ public class MainActivity extends AppCompatActivity
             if ((user.getProperty("offerVersion") == null) || !(user.getProperty("offerVersion").toString().equals(lastVersion))) {
                 showDialog();
             } else {
-                setViolationParams(current);
-                new UploadViolationTask().execute(current);
+
+                showReport();
+               // setViolationParams(current);
+               // new UploadViolationTask().execute(current);
             }
         }
     }
@@ -645,8 +667,9 @@ public class MainActivity extends AppCompatActivity
                     public void onClick(DialogInterface dialog, int id) {
                         user.setProperty("offerVersion", offerta.getName());
                         new UpdateUserTask().execute(user);
-                        setViolationParams(current);
-                        new UploadViolationTask().execute(current);
+                        //setViolationParams(current);
+                       // new UploadViolationTask().execute(current);
+                        showReport();
                         dialog.dismiss();
                     }
 
@@ -667,6 +690,34 @@ public class MainActivity extends AppCompatActivity
                 }).show();
     }
 
+    private void showReport(){
+        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View myView = inflater.inflate(R.layout.my_report, null, false);
+
+        TextView tv = (TextView) myView
+                .findViewById(R.id.textViewReport);
+        makeReport(tv);
+
+        new AlertDialog.Builder(MainActivity.this).setView(myView)
+                .setTitle("Пример заявления")
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @TargetApi(11)
+                    public void onClick(DialogInterface dialog, int id) {
+                        setViolationParams(current);
+                        new UploadViolationTask().execute(current);
+                        dialog.dismiss();
+                    }
+
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        Helper.showToast("Нарушение не отправлено", MainActivity.this);
+                        dialog.dismiss();
+                    }
+                })
+                .show();
+    }
+
     private class UpdateUserTask extends AsyncTask<BackendlessUser, Void, Void> {
 
         @Override
@@ -684,5 +735,34 @@ public class MainActivity extends AppCompatActivity
             checkBoxVideo.setText(getString(R.string.added_video));
             Helper.showToast(getString(R.string.added_video), MainActivity.this);
         }
+    }
+
+    private void makeReport(TextView report){
+        Calendar calendar = Calendar.getInstance();
+        String date = Integer.toString(calendar.get(Calendar.DATE));
+        String month = Integer.toString(calendar.get(Calendar.MONTH)+1);
+        String year = Integer.toString(calendar.get(Calendar.YEAR));
+        report.setText("");
+        report.append("Главное управление патрульной милиции Министерства внутренних дел Кыргызской Республики (ГУПМ МВД КР) от ");
+        report.append(user.getProperty("lastName").toString()+"."+user.getProperty("firstName").toString().toCharArray()[0]+"."+user.getProperty("middleName").toString().toCharArray()[0]+".\n");
+        report.append("Заявление \n");
+        report.append("на основании закона КР «О порядке рассмотрения обращений граждан»\n");
+        report.append("Я, " +
+                user.getProperty("lastName").toString()+" " +
+                user.getProperty("firstName").toString()+" " +
+                user.getProperty("middleName").toString()+ " " +
+                "2016 году стал очевидцем нарушения правил дорожного движения автомашиной марки " +
+                editCarMake.getText().toString()+", модель " +
+                editCarModel.getText().toString()+", цвет машины " +
+                editCarColor.getText().toString()+", с государственным номерным знаком " +
+                editCarNumber.getText().toString()+", тип нарушения: " +
+                violationType+". Данное правонарушение было зафиксировано на видеозапись, которую я прилагаю к заявлению.\n");
+        report.append("В соответствии с изложенными обстоятельствами, Прошу вас принять меры в отношении автовладельца, " +
+                "а именно проверить факт нарушения «Правилам дорожного движения» утвержденного постановлением Правительства КР от 4 августа 1999 года №421 и " +
+                "применить в отношении автовладельца соответствующую(ие) статью(и) Кодекса «Об административной ответственности КР».\n");
+        report.append("Прошу предоставить мне соответствующий ответ о принятых мерах в отношении автовладельца," +
+                " нарушившего ПДД  в срок установленный статьей 8 закона КР «О порядке рассмотрения обращений граждан».\n");
+        report.append(user.getProperty("lastName").toString()+"."+user.getProperty("firstName").toString().toCharArray()[0]+"."+user.getProperty("middleName").toString().toCharArray()[0]+".\n");
+        report.append(date+"."+month+"."+year);
     }
 }

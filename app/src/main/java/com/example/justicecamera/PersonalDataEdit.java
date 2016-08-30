@@ -41,7 +41,7 @@ import java.util.List;
 public class PersonalDataEdit extends AppCompatActivity {
     private ImageView mImageView;
     Button buttonSavePersonalData, buttonAddUserPhoto;
-    EditText editLastname, editFirstname, editCarNumber, editPassportNo, editPhoneNumber;
+    EditText editLastname, editFirstname, editMiddlename, editCarNumber, editPassportNo, editPhoneNumber;
     RadioButton radioButtonMale, radioButtonFeMale;
     TextView textViewTester, textViewCard;
 
@@ -59,6 +59,7 @@ public class PersonalDataEdit extends AppCompatActivity {
     boolean sex = true;
     String lastName = "";
     String firstName = "";
+    String middleName;
     View.OnClickListener radioListener;
     NumberPicker day, month, year;
     BackendlessUser user = Backendless.UserService.CurrentUser();
@@ -90,16 +91,28 @@ public class PersonalDataEdit extends AppCompatActivity {
     }
 
     private void setUserParams() {
-        if (!(user.getProperty("firstName") == null)) {
+        if (user.getProperty("firstName") != null) {
             editFirstname.setText(user.getProperty("firstName").toString());
-            editLastname.setText(user.getProperty("lastName").toString());
-            editCarNumber.setText(user.getProperty("carNumber").toString());
-            day.setValue(Integer.parseInt(user.getProperty("dayBirthday").toString()));
-            month.setValue(Integer.parseInt(user.getProperty("monthBirthday").toString()));
-            year.setValue(Integer.parseInt(user.getProperty("yearBirhday").toString()));
-            editPassportNo.setText(user.getProperty("passportNo").toString());
-            editPhoneNumber.setText(user.getProperty("phoneNumber").toString());
-            boolean sex = (boolean) user.getProperty("sex");
+
+            if (user.getProperty("lastName")!= null){
+                editLastname.setText(user.getProperty("lastName").toString());
+            }
+            if (user.getProperty("carNumber")!=null){
+            editCarNumber.setText(user.getProperty("carNumber").toString());}
+            if (user.getProperty("middleName")!=null){
+            editMiddlename.setText(user.getProperty("middleName").toString());}
+            if (user.getProperty("dayBirthday")!=null){
+            day.setValue(Integer.parseInt(user.getProperty("dayBirthday").toString()));}
+            if (user.getProperty("monthBirhday")!=null){
+            month.setValue(Integer.parseInt(user.getProperty("monthBirthday").toString()));}
+            if (user.getProperty("yearBirhday")!= null){
+            year.setValue(Integer.parseInt(user.getProperty("yearBirhday").toString()));}
+            if (user.getProperty("passportNo")!=null){
+            editPassportNo.setText(user.getProperty("passportNo").toString());}
+            if (user.getProperty("phoneNumber")!=null){
+            editPhoneNumber.setText(user.getProperty("phoneNumber").toString());}
+            if (user.getProperty("sex")!=null){
+            boolean sex = (boolean) user.getProperty("sex");}
             radioButtonMale.setChecked(sex);
             radioButtonFeMale.setChecked(!sex);
         }
@@ -109,6 +122,7 @@ public class PersonalDataEdit extends AppCompatActivity {
         mImageView = (ImageView) findViewById(R.id.imageView2);
         editLastname = (EditText) findViewById(R.id.editTextVideoName);
         editFirstname = (EditText) findViewById(R.id.editTextFirstname);
+        editMiddlename = (EditText) findViewById(R.id.editTextMiddlename);
         editCarNumber = (EditText) findViewById(R.id.editTextCarNumber);
         editPassportNo = (EditText) findViewById(R.id.editTextPassportInfo);
         editPhoneNumber = (EditText) findViewById(R.id.editTextPhoneNumber);
@@ -129,13 +143,19 @@ public class PersonalDataEdit extends AppCompatActivity {
         year.setMaxValue(2000);
         year.setMinValue(1950);
 
+        File folder = new File(Environment.getExternalStorageDirectory() + File.separator
+                + getString(R.string.app_name)+File.separator+"user_"+user.getUserId());
+        if (!folder.exists()) {
+            folder.mkdir();
+        }
+
         File file = new File(Environment.getExternalStorageDirectory() + File.separator
-                + getString(R.string.app_name), "user_photo.jpg");
+                + getString(R.string.app_name)+File.separator+"user_"+user.getUserId(), "user_photo.jpg");
         if (file.exists()) {
             Uri userPhoto = Uri.fromFile(file);
             mImageView.setImageURI(userPhoto);
             pathToUserPhoto = Environment.getExternalStorageDirectory() + File.separator
-                    + getString(R.string.app_name) + "/user_photo.jpg";
+                    + getString(R.string.app_name)+File.separator+"user_"+user.getUserId() + "/user_photo.jpg";
         }
 
         // true = male, false = female
@@ -190,7 +210,7 @@ public class PersonalDataEdit extends AppCompatActivity {
                 }
 
                 File f = new File(Environment.getExternalStorageDirectory() + File.separator
-                        + getString(R.string.app_name), "user_photo.jpg");
+                        + getString(R.string.app_name)+File.separator+"user_"+user.getUserId(), "user_photo.jpg");
                 pathToUserPhoto = f.getAbsolutePath();
                 // Toast.makeText(getApplicationContext(), pathToUserPhoto, Toast.LENGTH_LONG).show();
 
@@ -311,7 +331,7 @@ public class PersonalDataEdit extends AppCompatActivity {
                     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
                     mImageCaptureUri = Uri.fromFile(new File(Environment.getExternalStorageDirectory() + File.separator
-                            + getString(R.string.app_name), "user_photo.jpg"));
+                            + getString(R.string.app_name)+File.separator+"user_"+user.getUserId(), "user_photo.jpg"));
 
                     intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, mImageCaptureUri);
 
@@ -351,6 +371,7 @@ public class PersonalDataEdit extends AppCompatActivity {
     private void prepareFields() {
         lastName = editLastname.getText().toString();
         firstName = editFirstname.getText().toString();
+        middleName = editMiddlename.getText().toString();
         dayBirthday = day.getValue();
         monthBirthday = month.getValue();
         yearBirthday = year.getValue();
@@ -367,6 +388,7 @@ public class PersonalDataEdit extends AppCompatActivity {
         user.setProperty("passportNo", passportNo);
         user.setProperty("phoneNumber", phoneNumber);
         user.setProperty("sex", sex);
+        user.setProperty("middleName", middleName);
 
         if (user.getProperty("status") == null){
             user.setProperty("status", "0");

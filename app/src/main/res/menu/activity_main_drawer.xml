@@ -18,6 +18,10 @@
             android:id="@+id/mapOfViolations"
             android:icon="@drawable/map"
             android:title="Карта нарушений" />
+        <item
+            android:id="@+id/myVideo"
+            android:icon="@drawable/viewvideo"
+            android:title="@string/myVideo" />
     </group>
 
     <item android:title="">
