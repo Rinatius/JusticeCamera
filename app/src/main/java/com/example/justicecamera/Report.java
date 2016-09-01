@@ -13,8 +13,9 @@ public class Report
   private String text;
   private java.util.Date created;
   private java.util.Date updated;
-  private String name;
+  private String FIO;
   private String objectId;
+  private String email;
   public String getOwnerId()
   {
     return ownerId;
@@ -40,19 +41,29 @@ public class Report
     return updated;
   }
 
-  public String getName()
+  public String getFIO()
   {
-    return name;
+    return FIO;
   }
 
-  public void setName( String name )
+  public void setFIO( String FIO )
   {
-    this.name = name;
+    this.FIO = FIO;
   }
 
   public String getObjectId()
   {
     return objectId;
+  }
+
+  public String getEmail()
+  {
+    return email;
+  }
+
+  public void setEmail( String email )
+  {
+    this.email = email;
   }
 
                                                     

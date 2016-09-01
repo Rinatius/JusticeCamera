@@ -43,7 +43,6 @@ import com.backendless.exceptions.BackendlessFault;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
@@ -74,6 +73,7 @@ public class MainActivity extends AppCompatActivity
     private static int RESULT_LOAD_VIDEO = 1;
     private static int RESULT_LOAD_IMAGE = 7;
     private static int RESULT_MY_VIDEO = 8;
+    private static int RESULT_LEAVE_FEEDBACK = 9;
     private static int RESULT_ADD_LOC = 2;
     private static int RESULT_PUBLIC_OFFER = 8;
     private static int RESULT_PERSDATA = 3;
@@ -210,6 +210,15 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
+        if (requestCode == RESULT_LEAVE_FEEDBACK)
+
+        {
+            if (resultCode == RESULT_OK) {
+
+            } else {
+
+            }
+        }
 
     }
 
@@ -247,9 +256,15 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_public_offer) {
             Intent intent = new Intent(MainActivity.this, PublicOffer.class);
             startActivityForResult(intent, RESULT_PUBLIC_OFFER);
+            return true;
+        }
+
+        if (id == R.id.action_leave_feedback){
+            Intent i = new Intent(MainActivity.this, AppComment.class);
+            startActivityForResult(i, RESULT_LEAVE_FEEDBACK);
             return true;
         }
 

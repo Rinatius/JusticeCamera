@@ -54,6 +54,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textSize="@dimen/sp18"
                     android:text=""
                     android:id="@+id/textViewVVideoName" />
             </LinearLayout>
@@ -74,6 +75,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textSize="@dimen/sp18"
                     android:text=""
                     android:id="@+id/textViewVCarMake" />
             </LinearLayout>
@@ -94,6 +96,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textSize="@dimen/sp18"
                     android:text=""
                     android:id="@+id/textViewVCarModel" />
             </LinearLayout>
@@ -114,6 +117,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textSize="@dimen/sp18"
                 android:text=""
                 android:id="@+id/textViewVCarColor" />
             </LinearLayout>
@@ -134,6 +138,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textSize="@dimen/sp18"
                     android:text=""
                     android:id="@+id/textViewVCarNumber" />
             </LinearLayout>
@@ -154,6 +159,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textSize="@dimen/sp18"
                     android:text=""
                     android:id="@+id/textViewVcategory" />
             </LinearLayout>
@@ -174,6 +180,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textSize="@dimen/sp18"
                     android:text=""
                     android:id="@+id/textViewVcomment" />
             </LinearLayout>
@@ -194,6 +201,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textSize="@dimen/sp18"
                     android:text=""
                     android:id="@+id/textViewVFeedback" />
             </LinearLayout>

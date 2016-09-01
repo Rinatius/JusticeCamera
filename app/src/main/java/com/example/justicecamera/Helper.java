@@ -86,4 +86,21 @@ public final class Helper extends Object {
         return Backendless.Data.of(Violation.class).findById(objectId);
     }
 
+    public static BackendlessUser findUserById (String userID){
+        try {
+        return Backendless.UserService.findById(userID);
+        } catch (Exception e){
+            return null;
+        }
+    }
+
+    public static String saveReport(Report report){
+        try {
+            Backendless.Persistence.save(report);
+            return "1";
+        } catch (Exception e){
+            return "0";
+        }
+    }
+
 }

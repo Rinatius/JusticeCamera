@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -12,6 +13,7 @@ import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.ThemedSpinnerAdapter;
 import android.view.View;
 import android.widget.Button;
 import android.widget.MediaController;
@@ -22,6 +24,8 @@ import android.widget.VideoView;
 import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
 import com.backendless.BackendlessUser;
+import com.backendless.async.callback.AsyncCallback;
+import com.backendless.exceptions.BackendlessFault;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -59,12 +63,9 @@ public class VideoInfo extends AppCompatActivity {
 
         init();
 
-        Intent i = getIntent();
-        objectId = i.getStringExtra(CheckedVideoList.OBJECTID);
-        violLat = i.getStringExtra(MapsActivity.LATMAP);
-        violLongt = i.getStringExtra(MapsActivity.LONGTMAP);
 
         new FindViolationTask().execute();
+        //  checkUserStatus();
 
         buttonPlayVideo.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
@@ -121,7 +122,7 @@ public class VideoInfo extends AppCompatActivity {
 
         @Override
         public void onPrepared(MediaPlayer arg0) {
-        //    play.dismiss();
+            //    play.dismiss();
             Toast.makeText(getApplicationContext(),
                     getString(R.string.media_loaded),
                     Toast.LENGTH_LONG).show();
@@ -249,10 +250,54 @@ public class VideoInfo extends AppCompatActivity {
             buttonApprove.setEnabled(true);
             buttonApprove.setVisibility(View.VISIBLE);
         }
-        if (user.getProperty("status").toString().equals("2")){
+        if (user.getProperty("status").toString().equals("2")) {
             buttonFeedback.setEnabled(true);
             buttonFeedback.setVisibility(View.VISIBLE);
         }
+
+
+/*            String videoOwnerID = thisViolation.getOwnerId();
+
+            if (!videoOwnerID.equals("")) {
+                Backendless.UserService.findById(videoOwnerID, new AsyncCallback<BackendlessUser>() {
+                    @Override
+                    public void handleResponse(BackendlessUser videoOwner) {
+                        textViewVVideoName.setText(thisViolation.getName());
+                        textViewVCarMake.setText(thisViolation.getCarMake());
+                        textViewVCarModel.setText(thisViolation.getCarModel());
+                        textViewVCarColor.setText(thisViolation.getColor());
+                        textViewVCarNumber.setText(thisViolation.getCarNumber());
+                        textViewVcategory.setText(thisViolation.getCategory().getType());
+                        textViewVcomment.setText(thisViolation.getComment());
+                        textViewVcomment.append("\n");
+                        textViewVcomment.append("Информация о пользователе: \n");
+                        textViewVcomment.append(videoOwner.getProperty("lastName").toString()+" " +
+                                videoOwner.getProperty("firstName").toString()+" " +
+                                videoOwner.getProperty("middleName").toString()+"\n");
+                        textViewVcomment.append(videoOwner.getEmail()+"\n");
+                        textViewVcomment.append(videoOwner.getProperty("passportNo").toString()+"\n");
+                        textViewVcomment.append(videoOwner.getProperty("phoneNumber").toString());
+                        textViewVFeedback.setText(thisViolation.getFeedback());
+                        videoUrl = thisViolation.getVideoUrl();
+                    }
+
+                    @Override
+                    public void handleFault(BackendlessFault backendlessFault) {
+                        Toast.makeText(getApplicationContext(), " BackendError", Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        } else {
+            textViewVVideoName.setText(thisViolation.getName());
+            textViewVCarMake.setText(thisViolation.getCarMake());
+            textViewVCarModel.setText(thisViolation.getCarModel());
+            textViewVCarColor.setText(thisViolation.getColor());
+            textViewVCarNumber.setText(thisViolation.getCarNumber());
+            textViewVcategory.setText(thisViolation.getCategory().getType());
+            textViewVcomment.setText(thisViolation.getComment());
+            textViewVFeedback.setText(thisViolation.getFeedback());
+            videoUrl = thisViolation.getVideoUrl();
+        }*/
 
 
         textViewVVideoName.setText(thisViolation.getName());
@@ -264,6 +309,9 @@ public class VideoInfo extends AppCompatActivity {
         textViewVcomment.setText(thisViolation.getComment());
         textViewVFeedback.setText(thisViolation.getFeedback());
         videoUrl = thisViolation.getVideoUrl();
+
+
+
 
 
 /*        String path = videoUrl;
@@ -311,7 +359,7 @@ public class VideoInfo extends AppCompatActivity {
             public void onClick(View view) {
                 try {
                     new DeleteViolation().execute(thisViolation);
-                } catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -331,6 +379,11 @@ public class VideoInfo extends AppCompatActivity {
         mProgressDialog.setIndeterminate(true);
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         mProgressDialog.setCancelable(true);
+
+        Intent i = getIntent();
+        objectId = i.getStringExtra(CheckedVideoList.OBJECTID);
+        violLat = i.getStringExtra(MapsActivity.LATMAP);
+        violLongt = i.getStringExtra(MapsActivity.LONGTMAP);
     }
 
     private class DeleteViolation extends AsyncTask<Violation, Void, Void> {
@@ -397,6 +450,41 @@ public class VideoInfo extends AppCompatActivity {
             listViolation = result.getData();
             showDetails();
             loading.dismiss();
+
+            checkUserStatus();
+        }
+    }
+
+    private class FindUserByIdTask extends AsyncTask<String, Void, BackendlessUser> {
+
+        @Override
+        protected void onPreExecute() {
+            loading = new ProgressDialog(VideoInfo.this);
+            loading.setTitle("Загрузка данных пользователя");
+            loading.setMessage(getString(R.string.wait));
+            loading.show();
+        }
+
+        @Override
+        protected BackendlessUser doInBackground(String... strings) {
+
+            return Helper.findUserById(strings[0]);
+        }
+
+        protected void onPostExecute(BackendlessUser videoOwner) {
+
+            if (videoOwner != null) {
+                textViewVcomment.append("\n");
+                textViewVcomment.append("Информация о пользователе: \n");
+                textViewVcomment.append(videoOwner.getProperty("lastName").toString() + " " +
+                        videoOwner.getProperty("firstName").toString() + " " +
+                        videoOwner.getProperty("middleName").toString() + "\n");
+                textViewVcomment.append(videoOwner.getEmail() + "\n");
+                textViewVcomment.append(getString(R.string.passport_no)+": "+ videoOwner.getProperty("passportNo").toString() + "\n");
+                textViewVcomment.append(getString(R.string.phone_number)+": "+ videoOwner.getProperty("phoneNumber").toString());
+            }
+
+            loading.dismiss();
         }
     }
 
@@ -411,7 +499,7 @@ public class VideoInfo extends AppCompatActivity {
             }
 
             setViolationParams(thisViolation);
-          //  video.seekTo(200);
+            //  video.seekTo(200);
         } else if (!violLongt.equals("")) {
 
             for (int i = 0; i < listViolation.size(); i++) {
@@ -424,7 +512,18 @@ public class VideoInfo extends AppCompatActivity {
             }
 
             setViolationParams(thisViolation);
-         //   video.seekTo(200);
+            //   video.seekTo(200);
+        }
+    }
+
+    private void checkUserStatus() {
+        if (user.getProperty("status").toString().equals("2")) {
+            buttonFeedback.setEnabled(true);
+            buttonFeedback.setVisibility(View.VISIBLE);
+
+            String videoOwnerId = thisViolation.getOwnerId();
+            new FindUserByIdTask().execute(videoOwnerId);
+
         }
     }
 

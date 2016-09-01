@@ -2,8 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/action_public_offer"
         android:orderInCategory="100"
         android:title="@string/public_offer"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_leave_feedback"
+        android:orderInCategory="100"
+        android:title="@string/leave_feedback"
         app:showAsAction="never" />
 </menu>

@@ -162,5 +162,6 @@
     </string-array>
     <string name="middle_name">Middle Name*</string>
     <string name="myVideo">My videos</string>
+    <string name="leave_feedback">Leave feedback</string>
 
 </resources>
