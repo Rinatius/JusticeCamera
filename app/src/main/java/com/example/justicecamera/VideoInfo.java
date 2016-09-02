@@ -244,7 +244,7 @@ public class VideoInfo extends AppCompatActivity {
 
     public void setViolationParams(final Violation thisViolation) {
 
-        if (thisViolation.getStatus().equals("0")) {
+        if (thisViolation.getStatus().equals("0")&& (user.getProperty("status").toString().equals("2")||user.getProperty("status").toString().equals("1"))) {
             buttonReject.setEnabled(true);
             buttonReject.setVisibility(View.VISIBLE);
             buttonApprove.setEnabled(true);

@@ -27,6 +27,11 @@
     <item android:title="">
         <menu>
             <item
+                android:id="@+id/nav_about_app"
+                android:icon="@drawable/faq"
+                android:title="@string/about" />
+
+            <item
                 android:id="@+id/nav_logout"
                 android:icon="@drawable/logout"
                 android:title="LogOut" />

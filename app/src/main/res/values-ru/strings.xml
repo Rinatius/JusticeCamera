@@ -92,4 +92,6 @@
     <string name="middle_name">Отчество*</string>
     <string name="myVideo">Мои видео</string>
     <string name="leave_feedback">Оставить отзыв</string>
+    <string name="action_settings">Настройки</string>
+    <string name="about">О программе</string>
 </resources>

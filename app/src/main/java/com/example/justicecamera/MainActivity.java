@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity
     private static int RESULT_ADD_LOC = 2;
     private static int RESULT_PUBLIC_OFFER = 8;
     private static int RESULT_PERSDATA = 3;
+    private static int RESULT_ABOUT = 10;
     private static int RESULT_CHECKED_LIST = 4;
     private static int RESULT_MODERATOR_LIST = 5;
     private static int RESULT_MAP = 6;
@@ -220,6 +221,16 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
+        if (requestCode == RESULT_ABOUT)
+
+        {
+            if (resultCode == RESULT_OK) {
+
+            } else {
+
+            }
+        }
+
     }
 
     @Override
@@ -263,9 +274,16 @@ public class MainActivity extends AppCompatActivity
         }
 
         if (id == R.id.action_leave_feedback){
+
+            if (checkBoxUser.isChecked()){
             Intent i = new Intent(MainActivity.this, AppComment.class);
             startActivityForResult(i, RESULT_LEAVE_FEEDBACK);
             return true;
+            } else {
+                Toast.makeText(getApplicationContext(), getString(R.string.fill_the_form), Toast.LENGTH_LONG).show();
+                return true;
+            }
+
         }
 
         return super.onOptionsItemSelected(item);
@@ -314,6 +332,9 @@ public class MainActivity extends AppCompatActivity
                     // something went wrong and logout failed, to get the error code call fault.getCode()
                 }
             });
+        } else if (id == R.id.nav_about_app) {
+            Intent i = new Intent(MainActivity.this, AboutApp.class);
+            startActivityForResult(i, RESULT_ABOUT);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -625,6 +646,16 @@ public class MainActivity extends AppCompatActivity
 
         protected void onPostExecute(Void result) {
             Helper.showToast(getString(R.string.uploadedViolation), MainActivity.this);
+
+            editCarMake.setText("");
+            editCarModel.setText("");
+            editCarNumber.setText("");
+            editCarColor.setText("");
+            editViolatCarComment.setText("");
+            editVideoName.setText("");
+            checkBoxLocation.setChecked(false);
+            checkBoxVideo.setChecked(false);
+
             pd.dismiss();
         }
     }
@@ -652,13 +683,11 @@ public class MainActivity extends AppCompatActivity
             if ((user.getProperty("offerVersion") == null) || !(user.getProperty("offerVersion").toString().equals(lastVersion))) {
                 showDialog();
             } else {
-
                 showReport();
-               // setViolationParams(current);
-               // new UploadViolationTask().execute(current);
             }
         }
     }
+
 
     public void showDialog() {
 
