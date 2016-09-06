@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -25,6 +26,7 @@ import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
 import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
+import com.backendless.exceptions.BackendlessException;
 import com.backendless.exceptions.BackendlessFault;
 
 import java.io.File;
@@ -63,28 +65,10 @@ public class VideoInfo extends AppCompatActivity {
 
         init();
 
-
         new FindViolationTask().execute();
-        //  checkUserStatus();
 
         buttonPlayVideo.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-//                play = new ProgressDialog(VideoInfo.this);
-//                play.setTitle(getString(R.string.loading_info));
-//                play.setMessage(getString(R.string.wait));
-//                play.show();
-
-//                String path = videoUrl;
-//                Uri uri = Uri.parse(path);
-//                video.setVideoURI(uri);
-
-
-/*                video.setMediaController(new MediaController(VideoInfo.this));
-                video.setOnCompletionListener(myVideoViewCompletionListener);
-                video.setOnPreparedListener(MyVideoViewPreparedListener);
-                video.setOnErrorListener(myVideoViewErrorListener);
-                video.requestFocus();
-                video.start();*/
 
                 Intent i = new Intent(VideoInfo.this, VideoActivity.class);
                 i.putExtra(VIDEO_URL, videoUrl);
@@ -105,43 +89,6 @@ public class VideoInfo extends AppCompatActivity {
             }
         });
     }
-
-    MediaPlayer.OnCompletionListener myVideoViewCompletionListener
-            = new MediaPlayer.OnCompletionListener() {
-
-        @Override
-        public void onCompletion(MediaPlayer arg0) {
-            Toast.makeText(getApplicationContext(),
-                    getString(R.string.end_of_video),
-                    Toast.LENGTH_LONG).show();
-        }
-    };
-
-    MediaPlayer.OnPreparedListener MyVideoViewPreparedListener
-            = new MediaPlayer.OnPreparedListener() {
-
-        @Override
-        public void onPrepared(MediaPlayer arg0) {
-            //    play.dismiss();
-            Toast.makeText(getApplicationContext(),
-                    getString(R.string.media_loaded),
-                    Toast.LENGTH_LONG).show();
-        }
-    };
-
-    MediaPlayer.OnErrorListener myVideoViewErrorListener
-            = new MediaPlayer.OnErrorListener() {
-
-        @Override
-        public boolean onError(MediaPlayer arg0, int arg1, int arg2) {
-
-            Toast.makeText(getApplicationContext(),
-                    "Error!!!",
-                    Toast.LENGTH_LONG).show();
-            return true;
-        }
-    };
-
 
     private class DownloadTask extends AsyncTask<String, Integer, String> {
 
@@ -244,7 +191,7 @@ public class VideoInfo extends AppCompatActivity {
 
     public void setViolationParams(final Violation thisViolation) {
 
-        if (thisViolation.getStatus().equals("0")&& (user.getProperty("status").toString().equals("2")||user.getProperty("status").toString().equals("1"))) {
+        if (thisViolation.getStatus().equals("0") && (user.getProperty("status").toString().equals("2") || user.getProperty("status").toString().equals("1"))) {
             buttonReject.setEnabled(true);
             buttonReject.setVisibility(View.VISIBLE);
             buttonApprove.setEnabled(true);
@@ -254,51 +201,6 @@ public class VideoInfo extends AppCompatActivity {
             buttonFeedback.setEnabled(true);
             buttonFeedback.setVisibility(View.VISIBLE);
         }
-
-
-/*            String videoOwnerID = thisViolation.getOwnerId();
-
-            if (!videoOwnerID.equals("")) {
-                Backendless.UserService.findById(videoOwnerID, new AsyncCallback<BackendlessUser>() {
-                    @Override
-                    public void handleResponse(BackendlessUser videoOwner) {
-                        textViewVVideoName.setText(thisViolation.getName());
-                        textViewVCarMake.setText(thisViolation.getCarMake());
-                        textViewVCarModel.setText(thisViolation.getCarModel());
-                        textViewVCarColor.setText(thisViolation.getColor());
-                        textViewVCarNumber.setText(thisViolation.getCarNumber());
-                        textViewVcategory.setText(thisViolation.getCategory().getType());
-                        textViewVcomment.setText(thisViolation.getComment());
-                        textViewVcomment.append("\n");
-                        textViewVcomment.append("Информация о пользователе: \n");
-                        textViewVcomment.append(videoOwner.getProperty("lastName").toString()+" " +
-                                videoOwner.getProperty("firstName").toString()+" " +
-                                videoOwner.getProperty("middleName").toString()+"\n");
-                        textViewVcomment.append(videoOwner.getEmail()+"\n");
-                        textViewVcomment.append(videoOwner.getProperty("passportNo").toString()+"\n");
-                        textViewVcomment.append(videoOwner.getProperty("phoneNumber").toString());
-                        textViewVFeedback.setText(thisViolation.getFeedback());
-                        videoUrl = thisViolation.getVideoUrl();
-                    }
-
-                    @Override
-                    public void handleFault(BackendlessFault backendlessFault) {
-                        Toast.makeText(getApplicationContext(), " BackendError", Toast.LENGTH_LONG).show();
-                    }
-                });
-            }
-        } else {
-            textViewVVideoName.setText(thisViolation.getName());
-            textViewVCarMake.setText(thisViolation.getCarMake());
-            textViewVCarModel.setText(thisViolation.getCarModel());
-            textViewVCarColor.setText(thisViolation.getColor());
-            textViewVCarNumber.setText(thisViolation.getCarNumber());
-            textViewVcategory.setText(thisViolation.getCategory().getType());
-            textViewVcomment.setText(thisViolation.getComment());
-            textViewVFeedback.setText(thisViolation.getFeedback());
-            videoUrl = thisViolation.getVideoUrl();
-        }*/
-
 
         textViewVVideoName.setText(thisViolation.getName());
         textViewVCarMake.setText(thisViolation.getCarMake());
@@ -310,14 +212,6 @@ public class VideoInfo extends AppCompatActivity {
         textViewVFeedback.setText(thisViolation.getFeedback());
         videoUrl = thisViolation.getVideoUrl();
 
-
-
-
-
-/*        String path = videoUrl;
-        Uri uri = Uri.parse(path);
-        video.setVideoURI(uri);
-        video.seekTo(200);*/
     }
 
     private void init() {
@@ -386,10 +280,52 @@ public class VideoInfo extends AppCompatActivity {
         violLongt = i.getStringExtra(MapsActivity.LONGTMAP);
     }
 
-    private class DeleteViolation extends AsyncTask<Violation, Void, Void> {
+    private void showDetails() {
+
+        if (!(objectId == null)) {
+            for (int i = 0; i < listViolation.size(); i++) {
+                if (listViolation.get(i).getObjectId().equals(objectId)) {
+                    thisViolation = listViolation.get(i);
+                    thisObjectId = thisViolation.getObjectId();
+                }
+            }
+
+            setViolationParams(thisViolation);
+
+        } else if (!violLongt.equals("")) {
+
+            for (int i = 0; i < listViolation.size(); i++) {
+                if (listViolation.get(i).getLat().equals(violLat)) {
+                    if (listViolation.get(i).getLongt().equals(violLongt)) {
+                        thisViolation = listViolation.get(i);
+                        thisObjectId = thisViolation.getObjectId();
+                    }
+                }
+            }
+
+            setViolationParams(thisViolation);
+
+        }
+    }
+
+    private void checkUserStatus() {
+        if (user.getProperty("status").toString().equals("2")) {
+            buttonFeedback.setEnabled(true);
+            buttonFeedback.setVisibility(View.VISIBLE);
+
+            String videoOwnerId = thisViolation.getOwnerId();
+            new FindUserByIdTask().execute(videoOwnerId);
+
+        } else {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+        }
+    }
+
+    private class DeleteViolation extends AsyncTask<Violation, Void, String> {
 
         @Override
         protected void onPreExecute() {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
             pd = new ProgressDialog(VideoInfo.this);
             pd.setTitle("Удаление ...");
             pd.setMessage(getString(R.string.wait));
@@ -397,36 +333,56 @@ public class VideoInfo extends AppCompatActivity {
         }
 
         @Override
-        protected Void doInBackground(Violation... violations) {
-            Helper.deleteViolation(violations[0]);
-            return null;
+        protected String doInBackground(Violation... violations) {
+            try {
+                Helper.deleteViolation(violations[0]);
+                return "deleted";
+            } catch (Exception e) {
+                return "error";
+            }
         }
 
-        protected void onPostExecute(Void result) {
+        protected void onPostExecute(String result) {
+            if (result.equals("deleted")){
+                Helper.showToast("Успешно удалено", VideoInfo.this);
+            } else if (result.equals("error")){
+                Helper.showToast("Error, something went wrong", VideoInfo.this);
+            }
+
             buttonPlayVideo.setEnabled(false);
             buttonDownload.setEnabled(false);
             buttonApprove.setEnabled(false);
             buttonReject.setEnabled(false);
             buttonFeedback.setEnabled(false);
             pd.dismiss();
-            Helper.showToast("Успешно удалено", VideoInfo.this);
+
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
         }
     }
 
-    private class UpdateViolationTask extends AsyncTask<Violation, Void, Void> {
+    private class UpdateViolationTask extends AsyncTask<Violation, Void, String> {
         @Override
         protected void onPreExecute() {
-
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
         }
 
         @Override
-        protected Void doInBackground(Violation... violations) {
-            Helper.updateViolation(violations[0]);
-            return null;
+        protected String doInBackground(Violation... violations) {
+            try {
+                Helper.updateViolation(violations[0]);
+                return "updated";
+            } catch (BackendlessException e) {
+                return "error";
+            }
         }
 
-        protected void onPostExecute(Void result) {
-            Helper.showToast(getString(R.string.approved), VideoInfo.this);
+        protected void onPostExecute(String result) {
+            if (result.equals("updated")) {
+                Helper.showToast(getString(R.string.approved), VideoInfo.this);
+            } else if (result.equals("error")){
+                Helper.showToast("Error, something went wrong", VideoInfo.this);
+            }
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
         }
     }
 
@@ -434,6 +390,7 @@ public class VideoInfo extends AppCompatActivity {
 
         @Override
         protected void onPreExecute() {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
             loading = new ProgressDialog(VideoInfo.this);
             loading.setTitle(getString(R.string.loading_info));
             loading.setMessage(getString(R.string.wait));
@@ -446,7 +403,7 @@ public class VideoInfo extends AppCompatActivity {
         }
 
         protected void onPostExecute(BackendlessCollection<Violation> result) {
-            // showViolationList(result);
+
             listViolation = result.getData();
             showDetails();
             loading.dismiss();
@@ -474,58 +431,19 @@ public class VideoInfo extends AppCompatActivity {
         protected void onPostExecute(BackendlessUser videoOwner) {
 
             if (videoOwner != null) {
-                textViewVcomment.append("\n");
+                textViewVcomment.append("  \n\n");
                 textViewVcomment.append("Информация о пользователе: \n");
                 textViewVcomment.append(videoOwner.getProperty("lastName").toString() + " " +
                         videoOwner.getProperty("firstName").toString() + " " +
                         videoOwner.getProperty("middleName").toString() + "\n");
                 textViewVcomment.append(videoOwner.getEmail() + "\n");
-                textViewVcomment.append(getString(R.string.passport_no)+": "+ videoOwner.getProperty("passportNo").toString() + "\n");
-                textViewVcomment.append(getString(R.string.phone_number)+": "+ videoOwner.getProperty("phoneNumber").toString());
+                textViewVcomment.append(getString(R.string.passport_no) + ": " + videoOwner.getProperty("passportNo").toString() + "\n");
+                textViewVcomment.append(getString(R.string.phone_number) + ": " + videoOwner.getProperty("phoneNumber").toString());
             }
 
             loading.dismiss();
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
         }
     }
-
-    private void showDetails() {
-
-        if (!(objectId == null)) {
-            for (int i = 0; i < listViolation.size(); i++) {
-                if (listViolation.get(i).getObjectId().equals(objectId)) {
-                    thisViolation = listViolation.get(i);
-                    thisObjectId = thisViolation.getObjectId();
-                }
-            }
-
-            setViolationParams(thisViolation);
-            //  video.seekTo(200);
-        } else if (!violLongt.equals("")) {
-
-            for (int i = 0; i < listViolation.size(); i++) {
-                if (listViolation.get(i).getLat().equals(violLat)) {
-                    if (listViolation.get(i).getLongt().equals(violLongt)) {
-                        thisViolation = listViolation.get(i);
-                        thisObjectId = thisViolation.getObjectId();
-                    }
-                }
-            }
-
-            setViolationParams(thisViolation);
-            //   video.seekTo(200);
-        }
-    }
-
-    private void checkUserStatus() {
-        if (user.getProperty("status").toString().equals("2")) {
-            buttonFeedback.setEnabled(true);
-            buttonFeedback.setVisibility(View.VISIBLE);
-
-            String videoOwnerId = thisViolation.getOwnerId();
-            new FindUserByIdTask().execute(videoOwnerId);
-
-        }
-    }
-
 }
 

@@ -5,6 +5,7 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -27,6 +28,7 @@ import android.widget.Toast;
 import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
+import com.backendless.exceptions.BackendlessException;
 import com.backendless.exceptions.BackendlessFault;
 
 import java.io.File;
@@ -396,10 +398,10 @@ public class PersonalDataEdit extends AppCompatActivity {
 
     }
 
-    private class UpdateUser extends AsyncTask<File, Void, Void> {
+    private class UpdateUser extends AsyncTask<File, Void, String> {
         @Override
         protected void onPreExecute() {
-
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
             updatingUser = new ProgressDialog(PersonalDataEdit.this);
             updatingUser.setTitle(getString(R.string.updating_user));
             updatingUser.setMessage(getString(R.string.wait));
@@ -407,20 +409,30 @@ public class PersonalDataEdit extends AppCompatActivity {
         }
 
         @Override
-        protected Void doInBackground(File... files) {
+        protected String doInBackground(File... files) {
             try {
                 Helper.updateUserWithPhoto(user, files[0]);
+                return "updated";
+            } catch (BackendlessException exception) {
+                return "error";
             } catch (Exception e) {
-                e.printStackTrace();
+                return "error";
             }
-            return null;
+
         }
 
-        protected void onPostExecute(Void result) {
+        protected void onPostExecute(String result) {
+
             super.onPostExecute(result);
-            Toast.makeText(getApplicationContext(), getString(R.string.updated_user), Toast.LENGTH_LONG).show();
+            if (result.equals("updated")) {
+                Toast.makeText(getApplicationContext(), getString(R.string.updated_user), Toast.LENGTH_LONG).show();
+            } else if (result.equals("error")){
+                Toast.makeText(getApplicationContext(), "Error, something went wrong", Toast.LENGTH_LONG);
+            }
+
             fileUpl.delete();
             updatingUser.dismiss();
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
         }
     }
 }

@@ -1,6 +1,8 @@
 package com.example.justicecamera;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.widget.Toast;
 
 import com.backendless.Backendless;
@@ -8,6 +10,7 @@ import com.backendless.BackendlessCollection;
 import com.backendless.BackendlessUser;
 import com.backendless.Files;
 import com.backendless.async.callback.UploadCallback;
+import com.backendless.exceptions.BackendlessException;
 import com.backendless.files.BackendlessFile;
 import com.backendless.persistence.BackendlessDataQuery;
 
@@ -27,25 +30,22 @@ public final class Helper extends Object {
     private Helper() {
     }
 
-    public static void uploadVideo(File file) throws Exception {
-        Backendless.Files.upload(file, VIDEO_DIRECTORY, OVERWRITE);
+    public static String uploadVideo(File file) throws Exception {
+        BackendlessFile uploadedFile = Backendless.Files.upload(file, VIDEO_DIRECTORY, OVERWRITE);
+        return uploadedFile.getFileURL();
+
     }
 
-    public static void updateUser(BackendlessUser user) {
+    public static void updateUser(BackendlessUser user) throws BackendlessException {
         Backendless.UserService.update(user);
     }
 
     public static void updateUserWithPhoto(BackendlessUser user, File file) throws Exception {
-        Backendless.Files.upload(file, PHOTO_DIRECTORY, OVERWRITE);
-        String photoUrl = "https://api.backendless.com/" + Defaults.APPLICATION_ID + "/" + Defaults.VERSION + "/files/" + PHOTO_DIRECTORY +
-                "/" + "userPhoto_" + user.getProperty("objectId") + ".jpg";
+        BackendlessFile uploadedUserPhoto = Backendless.Files.upload(file, PHOTO_DIRECTORY, OVERWRITE);
+        String photoUrl = uploadedUserPhoto.getFileURL();
 
         user.setProperty("photoUrl", photoUrl);
         Backendless.UserService.update(user);
-    }
-
-    public static void uploadViolation(File file) throws Exception {
-        Backendless.Files.upload(file, PHOTO_DIRECTORY, OVERWRITE);
     }
 
     public static BackendlessCollection<Category_id> getAllCategories() {
@@ -63,7 +63,7 @@ public final class Helper extends Object {
         return Backendless.Data.of(Violation.class).find();
     }
 
-    public static void deleteViolation(Violation violation) {
+    public static void deleteViolation(Violation violation) throws Exception {
         String fullUrl = violation.getVideoUrl();
         String fileName = fullUrl.substring(fullUrl.lastIndexOf('/') + 1);
         Backendless.Files.remove(VIDEO_DIRECTORY + "/" + fileName);
@@ -74,7 +74,7 @@ public final class Helper extends Object {
         Toast.makeText(context, text, Toast.LENGTH_LONG).show();
     }
 
-    public static void updateViolation(Violation violation) {
+    public static void updateViolation(Violation violation) throws BackendlessException {
         Backendless.Persistence.save(violation);
     }
 
@@ -94,13 +94,8 @@ public final class Helper extends Object {
         }
     }
 
-    public static String saveReport(Report report) {
-        try {
+    public static void saveReport(Report report) throws BackendlessException{
             Backendless.Persistence.save(report);
-            return "1";
-        } catch (Exception e) {
-            return "0";
-        }
     }
 
 }

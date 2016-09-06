@@ -34,23 +34,11 @@ public class VideoActivity extends AppCompatActivity {
         video.setVideoURI(uri);
 
         video.setMediaController(new MediaController(VideoActivity.this));
-        video.setOnCompletionListener(myVideoViewCompletionListener);
         video.setOnPreparedListener(MyVideoViewPreparedListener);
         video.setOnErrorListener(myVideoViewErrorListener);
         video.requestFocus();
         video.start();
     }
-
-    MediaPlayer.OnCompletionListener myVideoViewCompletionListener
-            = new MediaPlayer.OnCompletionListener() {
-
-        @Override
-        public void onCompletion(MediaPlayer arg0) {
-            Toast.makeText(getApplicationContext(),
-                    getString(R.string.end_of_video),
-                    Toast.LENGTH_LONG).show();
-        }
-    };
 
     MediaPlayer.OnPreparedListener MyVideoViewPreparedListener
             = new MediaPlayer.OnPreparedListener() {

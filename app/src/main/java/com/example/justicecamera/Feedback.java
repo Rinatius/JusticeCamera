@@ -2,12 +2,15 @@ package com.example.justicecamera;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+
+import com.backendless.exceptions.BackendlessException;
 
 public class Feedback extends AppCompatActivity {
     ProgressDialog loading;
@@ -38,9 +41,15 @@ public class Feedback extends AppCompatActivity {
 
     }
 
+    private void onButtonFeedbackClicked() {
+        currentViolation.setFeedback(editTextFeedback.getText().toString());
+        new UpdateViolationTask().execute(currentViolation);
+    }
+
     private class FindViolationTask extends AsyncTask<String, Void, Violation> {
         @Override
         protected void onPreExecute() {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
             loading = new ProgressDialog(Feedback.this);
             loading.setTitle(getString(R.string.loading_info));
             loading.setMessage(getString(R.string.wait));
@@ -56,12 +65,14 @@ public class Feedback extends AppCompatActivity {
             currentViolation = result;
             editTextFeedback.setText(currentViolation.getFeedback());
             loading.dismiss();
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
         }
     }
 
-    private class UpdateViolationTask extends AsyncTask<Violation, Void, Void> {
+    private class UpdateViolationTask extends AsyncTask<Violation, Void, String> {
         @Override
         protected void onPreExecute() {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
             updating = new ProgressDialog(Feedback.this);
             updating.setTitle(getString(R.string.updating_user));
             updating.setMessage(getString(R.string.wait));
@@ -69,22 +80,25 @@ public class Feedback extends AppCompatActivity {
         }
 
         @Override
-        protected Void doInBackground(Violation... violations) {
-            Helper.updateViolation(violations[0]);
-            return null;
+        protected String doInBackground(Violation... violations) {
+            try {
+                Helper.updateViolation(violations[0]);
+                return "updated";
+            } catch (BackendlessException e){
+                return "error";
+            }
         }
 
-        protected void onPostExecute(Void result) {
-            Helper.showToast("Данные успешно обновлены", Feedback.this);
+        protected void onPostExecute(String result) {
+            if (result.equals("updated")) {
+                Helper.showToast("Данные успешно обновлены", Feedback.this);
+            } else if (result.equals("error")){
+                Helper.showToast("Error, something went wrong", Feedback.this);
+            }
             updating.dismiss();
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
             finish();
         }
     }
-
-    private void onButtonFeedbackClicked() {
-        currentViolation.setFeedback(editTextFeedback.getText().toString());
-        new UpdateViolationTask().execute(currentViolation);
-    }
-
 
 }

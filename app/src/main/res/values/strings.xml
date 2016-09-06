@@ -38,7 +38,7 @@
     <string name="downloading">Downloading...</string>
     <string name="loading_info">Information is loading</string>
     <string name="end_of_video">End of video</string>
-    <string name="media_loaded">Media file is loaded and ready to go</string>
+    <string name="media_loaded">Connection is established</string>
     <string name="error_download">Download error:</string>
     <string name="file_downloaded">File downloaded</string>
     <string name="press_to_exit">Press once again to exit</string>

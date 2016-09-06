@@ -1,9 +1,13 @@
 package com.example.justicecamera;
 
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.AsyncTask;
+import android.os.Build;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -27,7 +31,7 @@ public class CheckedVideoList extends AppCompatActivity {
     ListView list;
     String objectId = "";
     static final String OBJECTID = "checking";
-    String searchParameter ="status = 1";
+    String searchParameter = "status = 1";
     BackendlessUser user;
 
     @Override
@@ -41,8 +45,9 @@ public class CheckedVideoList extends AppCompatActivity {
 
         Intent outer = getIntent();
         String test = outer.getStringExtra(MainActivity.MY_VIDEO);
-        if (test!= null){
-        if (test.equals("my video")) searchParameter = "ownerId = '"+user.getUserId()+"'";}
+        if (test != null) {
+            if (test.equals("my video")) searchParameter = "ownerId = '" + user.getUserId() + "'";
+        }
 
         new ListOfViolationTask().execute(searchParameter);
 
@@ -99,11 +104,23 @@ public class CheckedVideoList extends AppCompatActivity {
         }
     }
 
-    private class ListOfViolationTask extends AsyncTask<String, Void, BackendlessCollection<Violation>>{
+    private void showViolationList(BackendlessCollection<Violation> listOfViolatioons) {
+        listViolation = listOfViolatioons.getData();
+        String textToShow = getString(R.string.number_of_elements) + Integer.toString(listViolation.size());
+        textViewTester.setText(textToShow);
+        registerForContextMenu(list);
+        MyAdapter adapter = new MyAdapter(CheckedVideoList.this, listViolation);
+        list.setAdapter(adapter);
 
+    }
+
+    private class ListOfViolationTask extends AsyncTask<String, Void, BackendlessCollection<Violation>> {
 
         @Override
         protected void onPreExecute() {
+
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+
             pd = new ProgressDialog(CheckedVideoList.this);
             pd.setTitle(getString(R.string.videolist_downloading));
             pd.setMessage(getString(R.string.wait));
@@ -117,18 +134,10 @@ public class CheckedVideoList extends AppCompatActivity {
 
         protected void onPostExecute(BackendlessCollection<Violation> result) {
             showViolationList(result);
+
             pd.dismiss();
+
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
         }
     }
-
-    private void showViolationList(BackendlessCollection<Violation> listOfViolatioons){
-        listViolation = listOfViolatioons.getData();
-        String textToShow = getString(R.string.number_of_elements) + Integer.toString(listViolation.size());
-        textViewTester.setText(textToShow);
-        registerForContextMenu(list);
-        MyAdapter adapter = new MyAdapter(CheckedVideoList.this, listViolation);
-        list.setAdapter(adapter);
-    //    pd.dismiss();
-    }
-
 }

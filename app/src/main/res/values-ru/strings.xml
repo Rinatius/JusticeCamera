@@ -29,7 +29,6 @@
     <string name="downloading">Загрузка...</string>
     <string name="loading_info">Загрузка информации</string>
     <string name="end_of_video">Конец видео</string>
-    <string name="media_loaded">Медиа файл загружен и готов к воспроизведению</string>
     <string name="error_download">Ошибка загрузки: </string>
     <string name="file_downloaded">Файл загружен</string>
     <string name="press_to_exit">Нажмите еще раз чтобы выйти</string>
@@ -94,4 +93,5 @@
     <string name="leave_feedback">Оставить отзыв</string>
     <string name="action_settings">Настройки</string>
     <string name="about">О программе</string>
+    <string name="media_loaded">Соединение установлено</string>
 </resources>

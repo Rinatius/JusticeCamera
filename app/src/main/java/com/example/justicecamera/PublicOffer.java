@@ -1,6 +1,7 @@
 package com.example.justicecamera;
 
 import android.app.ProgressDialog;
+import android.content.pm.ActivityInfo;
 import android.os.AsyncTask;
 import android.support.v4.widget.TextViewCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -27,6 +28,7 @@ public class PublicOffer extends AppCompatActivity {
 
         @Override
         protected void onPreExecute() {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
             offerD = new ProgressDialog(PublicOffer.this);
             offerD.setTitle("Загрузка...");
             offerD.setMessage(getString(R.string.wait));
@@ -42,6 +44,7 @@ public class PublicOffer extends AppCompatActivity {
         protected void onPostExecute(Offerta result) {
          offerD.dismiss();
             textViewOffer.setText(result.getText());
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
         }
     }
 }

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -18,6 +19,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.ThemedSpinnerAdapter;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -38,6 +40,7 @@ import android.widget.Toast;
 import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
+import com.backendless.exceptions.BackendlessException;
 import com.backendless.exceptions.BackendlessFault;
 
 import java.io.File;
@@ -273,12 +276,12 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
 
-        if (id == R.id.action_leave_feedback){
+        if (id == R.id.action_leave_feedback) {
 
-            if (checkBoxUser.isChecked()){
-            Intent i = new Intent(MainActivity.this, AppComment.class);
-            startActivityForResult(i, RESULT_LEAVE_FEEDBACK);
-            return true;
+            if (checkBoxUser.isChecked()) {
+                Intent i = new Intent(MainActivity.this, AppComment.class);
+                startActivityForResult(i, RESULT_LEAVE_FEEDBACK);
+                return true;
             } else {
                 Toast.makeText(getApplicationContext(), getString(R.string.fill_the_form), Toast.LENGTH_LONG).show();
                 return true;
@@ -310,13 +313,13 @@ public class MainActivity extends AppCompatActivity
                 Toast toast = Toast.makeText(getApplicationContext(),
                         getString(R.string.no_moderator_permission), Toast.LENGTH_LONG);
                 toast.show();
-            } else if (status.equals("1")||status.equals("2")) {
+            } else if (status.equals("1") || status.equals("2")) {
                 startActivityForResult(new Intent(MainActivity.this, ModeratorVideoList.class), RESULT_MODERATOR_LIST);
             }
         } else if (id == R.id.mapOfViolations) {
             Intent i = new Intent(MainActivity.this, MapsActivity.class);
             startActivityForResult(i, RESULT_MAP);
-        } else if (id == R.id.myVideo){
+        } else if (id == R.id.myVideo) {
             Intent i = new Intent(MainActivity.this, CheckedVideoList.class);
             i.putExtra(MY_VIDEO, "my video");
             startActivityForResult(i, RESULT_MY_VIDEO);
@@ -324,7 +327,7 @@ public class MainActivity extends AppCompatActivity
             Backendless.UserService.logout(new AsyncCallback<Void>() {
                 public void handleResponse(Void response) {
                     startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                   // startActivity(new Intent(MainActivity.this, Login1.class));
+                    // startActivity(new Intent(MainActivity.this, Login1.class));
                     // user has been logged out.
                 }
 
@@ -549,7 +552,7 @@ public class MainActivity extends AppCompatActivity
             count++;
         if (!(user.getProperty("phoneNumber") == null) && !user.getProperty("phoneNumber").toString().equals(""))
             count++;
-        if ((user.getProperty("middleName")!=null) && !user.getProperty("middleName").toString().equals(""))
+        if ((user.getProperty("middleName") != null) && !user.getProperty("middleName").toString().equals(""))
             count++;
         if (count == 5) {
             checkBoxUser.setChecked(true);
@@ -610,85 +613,6 @@ public class MainActivity extends AppCompatActivity
         currentViolation.setStatus(defaultStatus);
     }
 
-    private class UploadViolationTask extends AsyncTask<Violation, Integer, Void> {
-
-        @Override
-        protected void onPreExecute() {
-            pd = new ProgressDialog(MainActivity.this);
-            pd.setTitle(getString(R.string.sendingVideo));
-            pd.setMessage(getString(R.string.wait));
-            pd.show();
-        }
-
-        @Override
-        protected Void doInBackground(Violation... violations) {
-            final File file = new File(path);
-            try {
-
-                Helper.uploadVideo(file);
-                listCategory = Helper.getAllCategories().getData();
-
-                Category_id currentViolatCat = listCategory.get(0);
-                for (int i = 0; i < listCategory.size(); i++) {
-                    if (listCategory.get(i).getType().equals(violationType)) {
-                        currentViolatCat = listCategory.get(i);
-                    }
-                }
-
-                violations[0].setCategory(currentViolatCat);
-                violations[0].setVideoUrl("https://api.backendless.com/" + Defaults.APPLICATION_ID + "/" + Defaults.VERSION + "/files/video/" + file.getName());
-                violations[0] = Backendless.Persistence.save(violations[0]);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        protected void onPostExecute(Void result) {
-            Helper.showToast(getString(R.string.uploadedViolation), MainActivity.this);
-
-            editCarMake.setText("");
-            editCarModel.setText("");
-            editCarNumber.setText("");
-            editCarColor.setText("");
-            editViolatCarComment.setText("");
-            editVideoName.setText("");
-            checkBoxLocation.setChecked(false);
-            checkBoxVideo.setChecked(false);
-
-            pd.dismiss();
-        }
-    }
-
-    private class FindOfferTask extends AsyncTask<Void, Void, Offerta> {
-
-        @Override
-        protected void onPreExecute() {
-            offerD = new ProgressDialog(MainActivity.this);
-            offerD.setTitle(getString(R.string.checking));
-            offerD.setMessage(getString(R.string.wait));
-            offerD.show();
-        }
-
-        @Override
-        protected Offerta doInBackground(Void... voids) {
-            return Helper.findLastOffer();
-
-        }
-
-        protected void onPostExecute(Offerta result) {
-            offerta = result;
-            String lastVersion = offerta.getName();
-            offerD.dismiss();
-            if ((user.getProperty("offerVersion") == null) || !(user.getProperty("offerVersion").toString().equals(lastVersion))) {
-                showDialog();
-            } else {
-                showReport();
-            }
-        }
-    }
-
-
     public void showDialog() {
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -711,8 +635,6 @@ public class MainActivity extends AppCompatActivity
                     public void onClick(DialogInterface dialog, int id) {
                         user.setProperty("offerVersion", offerta.getName());
                         new UpdateUserTask().execute(user);
-                        //setViolationParams(current);
-                       // new UploadViolationTask().execute(current);
                         showReport();
                         dialog.dismiss();
                     }
@@ -722,10 +644,12 @@ public class MainActivity extends AppCompatActivity
                     public void onClick(DialogInterface dialog, int id) {
                         Helper.showToast("Чтобы отправить видеонарушение, необходимо принять публичную оферту", MainActivity.this);
                         dialog.dismiss();
+                        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
                     }
                 })
                 .setNeutralButton(getString(R.string.public_offer), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
+                        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
                         Intent intent = new Intent(MainActivity.this, PublicOffer.class);
                         startActivityForResult(intent, RESULT_PUBLIC_OFFER);
 
@@ -734,7 +658,7 @@ public class MainActivity extends AppCompatActivity
                 }).show();
     }
 
-    private void showReport(){
+    private void showReport() {
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View myView = inflater.inflate(R.layout.my_report, null, false);
 
@@ -755,20 +679,12 @@ public class MainActivity extends AppCompatActivity
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
+                        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
                         Helper.showToast("Нарушение не отправлено", MainActivity.this);
                         dialog.dismiss();
                     }
                 })
                 .show();
-    }
-
-    private class UpdateUserTask extends AsyncTask<BackendlessUser, Void, Void> {
-
-        @Override
-        protected Void doInBackground(BackendlessUser... backendlessUsers) {
-            Helper.updateUser(backendlessUsers[0]);
-            return null;
-        }
     }
 
     private void checkIntent() {
@@ -781,32 +697,136 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void makeReport(TextView report){
+    private void makeReport(TextView report) {
         Calendar calendar = Calendar.getInstance();
         String date = Integer.toString(calendar.get(Calendar.DATE));
-        String month = Integer.toString(calendar.get(Calendar.MONTH)+1);
+        String month = Integer.toString(calendar.get(Calendar.MONTH) + 1);
         String year = Integer.toString(calendar.get(Calendar.YEAR));
         report.setText("");
         report.append("Главное управление патрульной милиции Министерства внутренних дел Кыргызской Республики (ГУПМ МВД КР) от ");
-        report.append(user.getProperty("lastName").toString()+"."+user.getProperty("firstName").toString().toCharArray()[0]+"."+user.getProperty("middleName").toString().toCharArray()[0]+".\n");
+        report.append(user.getProperty("lastName").toString() + "." + user.getProperty("firstName").toString().toCharArray()[0] + "." + user.getProperty("middleName").toString().toCharArray()[0] + ".\n");
         report.append("Заявление \n");
         report.append("на основании закона КР «О порядке рассмотрения обращений граждан»\n");
         report.append("Я, " +
-                user.getProperty("lastName").toString()+" " +
-                user.getProperty("firstName").toString()+" " +
-                user.getProperty("middleName").toString()+ " " +
+                user.getProperty("lastName").toString() + " " +
+                user.getProperty("firstName").toString() + " " +
+                user.getProperty("middleName").toString() + " " +
                 "2016 году стал очевидцем нарушения правил дорожного движения автомашиной марки " +
-                editCarMake.getText().toString()+", модель " +
-                editCarModel.getText().toString()+", цвет машины " +
-                editCarColor.getText().toString()+", с государственным номерным знаком " +
-                editCarNumber.getText().toString()+", тип нарушения: " +
-                violationType+". Данное правонарушение было зафиксировано на видеозапись, которую я прилагаю к заявлению.\n");
+                editCarMake.getText().toString() + ", модель " +
+                editCarModel.getText().toString() + ", цвет машины " +
+                editCarColor.getText().toString() + ", с государственным номерным знаком " +
+                editCarNumber.getText().toString() + ", тип нарушения: " +
+                violationType + ". Данное правонарушение было зафиксировано на видеозапись, которую я прилагаю к заявлению.\n");
         report.append("В соответствии с изложенными обстоятельствами, Прошу вас принять меры в отношении автовладельца, " +
                 "а именно проверить факт нарушения «Правилам дорожного движения» утвержденного постановлением Правительства КР от 4 августа 1999 года №421 и " +
                 "применить в отношении автовладельца соответствующую(ие) статью(и) Кодекса «Об административной ответственности КР».\n");
         report.append("Прошу предоставить мне соответствующий ответ о принятых мерах в отношении автовладельца," +
                 " нарушившего ПДД  в срок установленный статьей 8 закона КР «О порядке рассмотрения обращений граждан».\n");
-        report.append(user.getProperty("lastName").toString()+"."+user.getProperty("firstName").toString().toCharArray()[0]+"."+user.getProperty("middleName").toString().toCharArray()[0]+".\n");
-        report.append(date+"."+month+"."+year);
+        report.append(user.getProperty("lastName").toString() + "." + user.getProperty("firstName").toString().toCharArray()[0] + "." + user.getProperty("middleName").toString().toCharArray()[0] + ".\n");
+        report.append(date + "." + month + "." + year);
+    }
+
+    private class UpdateUserTask extends AsyncTask<BackendlessUser, Void, String> {
+
+        @Override
+        protected String doInBackground(BackendlessUser... backendlessUsers) {
+            try {
+                Helper.updateUser(backendlessUsers[0]);
+                return "updated";
+            } catch (BackendlessException e){
+                return "error";
+            }
+        }
+
+    }
+
+    private class UploadViolationTask extends AsyncTask<Violation, Integer, String> {
+
+        @Override
+        protected void onPreExecute() {
+            pd = new ProgressDialog(MainActivity.this);
+            pd.setTitle(getString(R.string.sendingVideo));
+            pd.setMessage(getString(R.string.wait));
+            pd.show();
+        }
+
+        @Override
+        protected String doInBackground(Violation... violations) {
+            final File file = new File(path);
+            try {
+                String uploadedVideoUrl = Helper.uploadVideo(file);
+
+                listCategory = Helper.getAllCategories().getData();
+
+                Category_id currentViolatCat = listCategory.get(0);
+                for (int i = 0; i < listCategory.size(); i++) {
+                    if (listCategory.get(i).getType().equals(violationType)) {
+                        currentViolatCat = listCategory.get(i);
+                    }
+                }
+
+                violations[0].setCategory(currentViolatCat);
+                violations[0].setVideoUrl(uploadedVideoUrl);
+                violations[0] = Backendless.Persistence.save(violations[0]);
+
+                return "videoUploaded";
+            } catch (BackendlessException e) {
+                return "error";
+            } catch (Exception e) {
+                return "error";
+            }
+
+        }
+
+        protected void onPostExecute(String result) {
+
+            if (result.equals("videoUploaded")) {
+                Helper.showToast(getString(R.string.uploadedViolation), MainActivity.this);
+                editCarMake.setText("");
+                editCarModel.setText("");
+                editCarNumber.setText("");
+                editCarColor.setText("");
+                editViolatCarComment.setText("");
+                editVideoName.setText("");
+                path = "";
+                checkBoxLocation.setChecked(false);
+                checkBoxVideo.setChecked(false);
+            } else if (result.equals("error")) {
+                Helper.showToast("Error, something went wrong", MainActivity.this);
+            }
+
+            pd.dismiss();
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+        }
+    }
+
+    private class FindOfferTask extends AsyncTask<Void, Void, Offerta> {
+
+        @Override
+        protected void onPreExecute() {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+            offerD = new ProgressDialog(MainActivity.this);
+            offerD.setTitle(getString(R.string.checking));
+            offerD.setMessage(getString(R.string.wait));
+            offerD.show();
+        }
+
+        @Override
+        protected Offerta doInBackground(Void... voids) {
+            return Helper.findLastOffer();
+
+        }
+
+        protected void onPostExecute(Offerta result) {
+            offerta = result;
+            String lastVersion = offerta.getName();
+            offerD.dismiss();
+
+            if ((user.getProperty("offerVersion") == null) || !(user.getProperty("offerVersion").toString().equals(lastVersion))) {
+                showDialog();
+            } else {
+                showReport();
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.example.justicecamera;
 
 import android.app.ProgressDialog;
+import android.content.pm.ActivityInfo;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.widget.Toast;
 
 import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
+import com.backendless.exceptions.BackendlessException;
 
 public class AppComment extends AppCompatActivity {
     Button buttonLeaveFeedback;
@@ -57,6 +59,7 @@ public class AppComment extends AppCompatActivity {
     private class SaveReportTask extends AsyncTask<Report, Void, String> {
 
         protected void onPreExecute() {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
             pd = new ProgressDialog(AppComment.this);
             pd.setMessage(getString(R.string.wait));
             pd.show();
@@ -64,16 +67,23 @@ public class AppComment extends AppCompatActivity {
 
         @Override
         protected String doInBackground(Report... reports) {
-            return Helper.saveReport(reports[0]);
+            try {
+                Helper.saveReport(reports[0]);
+                return "saved";
+            } catch (BackendlessException e) {
+                return "error";
+            }
         }
 
         @Override
         protected void onPostExecute(String result) {
-            if (result.equals("1")) {
+            if (result.equals("saved")) {
                 Toast.makeText(getApplicationContext(), "Отзыв успешно отправлен", Toast.LENGTH_LONG).show();
-            } else
+            } else if (result.equals("error")) {
                 Toast.makeText(getApplicationContext(), getString(R.string.server_error), Toast.LENGTH_LONG).show();
+            }
 
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
             pd.dismiss();
             finish();
         }
