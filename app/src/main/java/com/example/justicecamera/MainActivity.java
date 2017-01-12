@@ -42,6 +42,8 @@ import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessException;
 import com.backendless.exceptions.BackendlessFault;
+import com.esafirm.imagepicker.features.ImagePicker;
+import com.esafirm.imagepicker.model.Image;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -72,6 +74,7 @@ public class MainActivity extends AppCompatActivity
     Button buttonAddVideo, buttonSendViolation, buttonAddLocaton, buttonAddViolPhoto;
     CheckBox checkBoxVideo, checkBoxText, checkBoxLocation, checkBoxUser;
     List<String> listOfPhotoPath;
+    private ArrayList<Image> images = new ArrayList<>();
     Offerta offerta;
     private static int RESULT_LOAD_VIDEO = 1;
     private static int RESULT_LOAD_IMAGE = 7;
@@ -104,6 +107,14 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
                 Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(i, RESULT_LOAD_VIDEO);
+            }
+        });
+
+        buttonAddViolPhoto.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                start();
             }
         });
 
@@ -174,6 +185,18 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
+        if (requestCode == RESULT_LOAD_IMAGE)
+
+        {
+            if (resultCode == RESULT_OK) {
+                images = (ArrayList<Image>) ImagePicker.getImages(data);
+                printImages(images);
+                return;
+            } else {
+                Toast.makeText(MainActivity.this, "ERROR", Toast.LENGTH_SHORT).show();
+            }
+        }
+
         if (requestCode == RESULT_MY_VIDEO)
 
         {
@@ -183,6 +206,7 @@ public class MainActivity extends AppCompatActivity
 
             }
         }
+
 
         if (requestCode == RESULT_MODERATOR_LIST)
 
@@ -412,7 +436,7 @@ public class MainActivity extends AppCompatActivity
         buttonAddVideo = (Button) findViewById(R.id.buttonAddVideo);
         buttonSendViolation = (Button) findViewById(R.id.buttonSendViolation);
         buttonAddLocaton = (Button) findViewById(R.id.buttonAddLocation);
-        //  buttonAddViolPhoto = (Button) findViewById(R.id.buttonAddViolPhoto);
+        buttonAddViolPhoto = (Button) findViewById(R.id.buttonAddViolPhoto);
         buttonSendViolation.setEnabled(false);
         textShowError = (TextView) findViewById(R.id.textShowError);
         checkBoxLocation = (CheckBox) findViewById(R.id.checkBoxLocation);
@@ -724,6 +748,37 @@ public class MainActivity extends AppCompatActivity
                 " нарушившего ПДД  в срок установленный статьей 8 закона КР «О порядке рассмотрения обращений граждан».\n");
         report.append(user.getProperty("lastName").toString() + "." + user.getProperty("firstName").toString().toCharArray()[0] + "." + user.getProperty("middleName").toString().toCharArray()[0] + ".\n");
         report.append(date + "." + month + "." + year);
+    }
+
+    public void start() {
+
+
+        ImagePicker imagePicker = ImagePicker.create(this)
+                .returnAfterFirst(false) // set whether pick action or camera action should return immediate result or not. Only works in single mode for image picker
+                .folderMode(true) // set folder mode (false by default)
+                .folderTitle("Folder") // folder selection title
+                .imageTitle("Tap to select"); // image selection title
+
+
+        imagePicker.multi(); // multi mode (default mode)
+
+
+        imagePicker.limit(10) // max images can be selected (99 by default)
+                .showCamera(true) // show camera or not (true by default)
+                .imageDirectory("Camera")   // captured image directory name ("Camera" folder by default)
+                .origin(images) // original selected images, used in multi mode
+                .start(RESULT_LOAD_IMAGE); // start image picker activity with request code
+    }
+
+    private void printImages(List<Image> images) {
+        if (images == null) return;
+
+        StringBuilder stringBuffer = new StringBuilder();
+        for (int i = 0, l = images.size(); i < l; i++) {
+            stringBuffer.append(images.get(i).getPath()).append("\n");
+        }
+        //textView.setText(stringBuffer.toString());
+        Toast.makeText(MainActivity.this, stringBuffer.toString(), Toast.LENGTH_SHORT).show();
     }
 
     private class UpdateUserTask extends AsyncTask<BackendlessUser, Void, String> {
