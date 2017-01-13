@@ -1,15 +1,11 @@
 package com.example.justicecamera;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.widget.Toast;
 
 import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
 import com.backendless.BackendlessUser;
-import com.backendless.Files;
-import com.backendless.async.callback.UploadCallback;
 import com.backendless.exceptions.BackendlessException;
 import com.backendless.files.BackendlessFile;
 import com.backendless.persistence.BackendlessDataQuery;
@@ -21,7 +17,8 @@ import java.io.File;
  * Created by admin on 16.08.2016.
  */
 public final class Helper extends Object {
-    private static final String PHOTO_DIRECTORY = "UsersPhoto";
+    private static final String USERS_PHOTO_DIRECTORY = "UsersPhoto";
+    private static final String VIOL_PHOTO_DIRECTORY = "ViolationsPhoto";
     private static final String VIDEO_DIRECTORY = "video";
     private static final boolean OVERWRITE = true;
     private static String report;
@@ -36,12 +33,18 @@ public final class Helper extends Object {
 
     }
 
+    public static String uploadPhoto(File file) throws Exception {
+        BackendlessFile uploadedFile = Backendless.Files.upload(file, VIOL_PHOTO_DIRECTORY);
+        return uploadedFile.getFileURL();
+
+    }
+
     public static void updateUser(BackendlessUser user) throws BackendlessException {
         Backendless.UserService.update(user);
     }
 
     public static void updateUserWithPhoto(BackendlessUser user, File file) throws Exception {
-        BackendlessFile uploadedUserPhoto = Backendless.Files.upload(file, PHOTO_DIRECTORY, OVERWRITE);
+        BackendlessFile uploadedUserPhoto = Backendless.Files.upload(file, USERS_PHOTO_DIRECTORY, OVERWRITE);
         String photoUrl = uploadedUserPhoto.getFileURL();
 
         user.setProperty("photoUrl", photoUrl);

@@ -24,6 +24,7 @@ public class Violation
   private String carNumber;
   private String carMake;
   private String color;
+  private String photoUrl;
   private Category_id category;
   private BackendlessUser user_id;
   private City city;
@@ -156,6 +157,16 @@ public class Violation
   public void setColor( String color )
   {
     this.color = color;
+  }
+
+  public String getPhotoUrl()
+  {
+    return photoUrl;
+  }
+
+  public void setPhotoUrl( String photoUrl )
+  {
+    this.photoUrl = photoUrl;
   }
 
   public Category_id getCategory()

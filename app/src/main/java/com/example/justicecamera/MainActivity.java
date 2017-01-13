@@ -114,6 +114,7 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onClick(View v) {
+                images.clear();
                 start();
             }
         });
@@ -635,6 +636,7 @@ public class MainActivity extends AppCompatActivity
         currentViolation.setLat(lat);
         currentViolation.setLongt(longt);
         currentViolation.setStatus(defaultStatus);
+        //currentViolation.setPhotoUrl(photoUrls);
     }
 
     public void showDialog() {
@@ -778,6 +780,7 @@ public class MainActivity extends AppCompatActivity
             stringBuffer.append(images.get(i).getPath()).append("\n");
         }
         //textView.setText(stringBuffer.toString());
+        //photoUrls = stringBuffer.toString();
         Toast.makeText(MainActivity.this, stringBuffer.toString(), Toast.LENGTH_SHORT).show();
     }
 
@@ -807,8 +810,9 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected String doInBackground(Violation... violations) {
-            final File file = new File(path);
+            //final File file = new File(path);
             try {
+                File file = new File(path);
                 String uploadedVideoUrl = Helper.uploadVideo(file);
 
                 listCategory = Helper.getAllCategories().getData();
@@ -820,6 +824,14 @@ public class MainActivity extends AppCompatActivity
                     }
                 }
 
+                StringBuilder photoUrls = new StringBuilder();
+                for (int i = 0; i < images.size(); i++){
+                    File photoFile = new File(images.get(i).getPath());
+                    String uploadedPhotoUrl = Helper.uploadPhoto(photoFile);
+                    photoUrls.append(uploadedPhotoUrl).append(" ");
+                }
+
+                violations[0].setPhotoUrl(photoUrls.toString());
                 violations[0].setCategory(currentViolatCat);
                 violations[0].setVideoUrl(uploadedVideoUrl);
                 violations[0] = Backendless.Persistence.save(violations[0]);
