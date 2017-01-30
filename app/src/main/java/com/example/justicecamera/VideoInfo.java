@@ -5,19 +5,25 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.media.MediaPlayer;
+import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.PowerManager;
-import android.provider.MediaStore;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.ThemedSpinnerAdapter;
+import android.view.Display;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
-import android.widget.MediaController;
+import android.widget.GridLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
@@ -25,9 +31,13 @@ import android.widget.VideoView;
 import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
 import com.backendless.BackendlessUser;
-import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessException;
-import com.backendless.exceptions.BackendlessFault;
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.drawable.ProgressBarDrawable;
+import com.facebook.drawee.drawable.ScalingUtils;
+import com.facebook.drawee.generic.GenericDraweeHierarchy;
+import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
+import com.facebook.drawee.view.SimpleDraweeView;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -47,7 +57,7 @@ public class VideoInfo extends AppCompatActivity {
     TextView textViewVVideoName, textViewVCarModel, textViewVCarMake, textViewVCarColor, textViewVCarNumber, textViewVcategory, textViewVcomment, textViewVInfo, textViewVFeedback;
     Violation thisViolation;
     List<Violation> listViolation;
-    String videoUrl;
+    String videoUrl, photoUrls;
     String objectId = "";
     String violLat = "";
     String violLongt = "";
@@ -55,12 +65,20 @@ public class VideoInfo extends AppCompatActivity {
     public static String THIS_OBJECT_ID = "objectId";
     public static String VIDEO_URL = "url";
     VideoView video;
+    //ImageView img, img2, img3, img4, img5;
+    ArrayList<ImageView> imgList;
+    ArrayList<String> listOfPhotoUrls;
     ProgressDialog pd;
     BackendlessUser user;
+    GridLayout grid;
+    int columnCount = 2;
+    int rowCount = 2;
+    int width, height;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fresco.initialize(this);
         setContentView(R.layout.activity_video_info);
 
         init();
@@ -211,7 +229,98 @@ public class VideoInfo extends AppCompatActivity {
         textViewVcomment.setText(thisViolation.getComment());
         textViewVFeedback.setText(thisViolation.getFeedback());
         videoUrl = thisViolation.getVideoUrl();
+        photoUrls = thisViolation.getPhotoUrl();
+        if (photoUrls.length() > 0) {
 
+            listOfPhotoUrls = getUrlsFromString(photoUrls);
+            int k = 0;
+            for (int i = 0; i < grid.getRowCount(); i++){
+                for (int j = 0; j < grid.getColumnCount(); j++) {
+                    if (k < listOfPhotoUrls.size()) {
+                        final SimpleDraweeView img = new SimpleDraweeView(this);
+                        GenericDraweeHierarchyBuilder builder =
+                                new GenericDraweeHierarchyBuilder(getResources());
+                        GenericDraweeHierarchy hierarchy = builder
+                                //.setFadeDuration(300)
+                                .setPlaceholderImage(R.drawable.car)
+                                .setActualImageScaleType(ScalingUtils.ScaleType.FIT_CENTER)
+                                .setProgressBarImage(new ProgressBarDrawable())
+                                //.setBackground(background)
+                                //.setOverlays(overlaysList)
+                                .build();
+                        img.setHierarchy(hierarchy);
+
+                        GridLayout.LayoutParams lpImg = new GridLayout.LayoutParams();
+                        lpImg.columnSpec = GridLayout.spec(j);
+                        lpImg.rowSpec = GridLayout.spec(i);
+                        lpImg.width = width/columnCount - width/14;
+                        lpImg.height = lpImg.width;
+
+                        Uri uri = Uri.parse(listOfPhotoUrls.get(k));
+                        img.setImageURI(uri);
+                        grid.addView(img, lpImg);
+                        img.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(VideoInfo.this);
+
+
+                                final AlertDialog dialog = builder.create();
+                                LayoutInflater inflater = getLayoutInflater();
+                                View dialogLayout = inflater.inflate(R.layout.image_dialog, null);
+                                dialog.setView(dialogLayout);
+                                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                                final Drawable drawable = img.getDrawable();
+
+                                img.buildDrawingCache();
+                                final Bitmap bitmap = img.getDrawingCache();
+
+                               // final Drawable drawable = img.getHierarchy().getTopLevelDrawable();
+
+                                dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                                    @Override
+                                    public void onShow(final DialogInterface d) {
+                                        ImageView image = (ImageView) dialog.findViewById(R.id.imageView2);
+                                        image.setBackgroundColor(Color.WHITE);
+                                        //image.setImageDrawable(drawable);
+                                        image.setImageBitmap(bitmap);
+                                        image.setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View v) {
+                                                d.dismiss();
+                                            }
+                                        });
+                                    }
+                                });
+
+                                dialog.show();
+                            }
+                        });
+
+                        k++;
+
+                    }
+
+//                    SimpleDraweeView img = new SimpleDraweeView(this);
+//                    GridLayout.LayoutParams lpImg = new GridLayout.LayoutParams();
+//                    lpImg.columnSpec = GridLayout.spec(j);
+//                    lpImg.rowSpec = GridLayout.spec(i);
+//                    lpImg.width = width / columnCount;
+//                    lpImg.height = lpImg.width;
+//                    Uri uri = Uri.parse(listOfPhotoUrls.get(k));
+//                    img.setBackgroundColor(Color.BLACK);
+//                    img.setImageURI(uri);
+//                    grid.addView(img, lpImg);
+//                    k++;
+
+                }
+            }
+          // new DownloadImgs().execute(listOfPhotoUrls.toArray(new String[listOfPhotoUrls.size()]));
+
+
+        } else {
+            checkUserStatus();
+        }
     }
 
     private void init() {
@@ -229,9 +338,45 @@ public class VideoInfo extends AppCompatActivity {
         textViewVcomment = (TextView) findViewById(R.id.textViewVcomment);
         textViewVFeedback = (TextView) findViewById(R.id.textViewVFeedback);
         textViewVInfo = (TextView) findViewById(R.id.textView10);
+        grid = (GridLayout) findViewById(R.id.grid);
+        grid.setColumnCount(columnCount);
+        grid.setRowCount(rowCount);
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        width = size.x;
+        height = size.y;
+
+//        for (int i = 0; i < grid.getRowCount(); i++){
+//            for (int j = 0; j < grid.getColumnCount(); j++) {
+//                final ImageView img = new ImageView(this);
+//                GridLayout.LayoutParams lpImage = new GridLayout.LayoutParams();
+//                lpImage.columnSpec = GridLayout.spec(j);
+//                lpImage.rowSpec = GridLayout.spec(i);
+//                lpImage.width = width/11;
+//                lpImage.height = lpImage.width;
+//                img.setImageResource(R.drawable.anon);
+//                img.setScaleType(ImageView.ScaleType.FIT_CENTER);
+//                grid.addView(img, lpImage);
+//
+//            }
+//        }
+
         listViolation = new ArrayList<>();
         thisViolation = new Violation();
         video = (VideoView) findViewById(R.id.videoView);
+//        img = (ImageView) findViewById(R.id.violImg);
+//        img2 = (ImageView) findViewById(R.id.violImg2);
+//        img3 = (ImageView) findViewById(R.id.violImg3);
+//        img4 = (ImageView) findViewById(R.id.violImg4);
+//        img5 = (ImageView) findViewById(R.id.violImg5);
+//        imgList = new ArrayList<>();
+//        imgList.add(img);
+//        imgList.add(img2);
+//        imgList.add(img3);
+//        imgList.add(img4);
+//        imgList.add(img5);
+        listOfPhotoUrls = new ArrayList<>();
 
         buttonReject.setEnabled(false);
         buttonReject.setVisibility(View.INVISIBLE);
@@ -321,6 +466,32 @@ public class VideoInfo extends AppCompatActivity {
         }
     }
 
+    private void drawGrid(){
+
+    }
+
+    private ArrayList<String> getUrlsFromString(String photoUrls){
+        ArrayList<String> listOfUrls = new ArrayList<>();
+        char[] chars = photoUrls.toCharArray();
+        StringBuilder url = new StringBuilder();
+        for (int i = 0; i < chars.length; i++){
+            if (chars[i] != ' ') {
+                url.append(chars[i]);
+            } else {
+                if (url.length() > 0){
+                    listOfUrls.add(url.toString());
+                    url.setLength(0);
+                }
+            }
+        }
+        return listOfUrls;
+    }
+
+    private void setImgsFromUrls(ArrayList<String> urls){
+
+
+    }
+
     private class DeleteViolation extends AsyncTask<Violation, Void, String> {
 
         @Override
@@ -405,10 +576,9 @@ public class VideoInfo extends AppCompatActivity {
         protected void onPostExecute(BackendlessCollection<Violation> result) {
 
             listViolation = result.getData();
-            showDetails();
             loading.dismiss();
+            showDetails();
 
-            checkUserStatus();
         }
     }
 
@@ -443,6 +613,50 @@ public class VideoInfo extends AppCompatActivity {
 
             loading.dismiss();
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+        }
+    }
+
+    private class DownloadImgs extends AsyncTask<String, Void, ArrayList<Bitmap>> {
+
+        @Override
+        protected void onPreExecute() {
+            loading = new ProgressDialog(VideoInfo.this);
+            loading.setCancelable(false);
+            loading.setTitle("Загрузка изображений");
+            loading.setMessage(getString(R.string.wait));
+            loading.show();
+        }
+
+        @Override
+        protected ArrayList<Bitmap> doInBackground(String... urls) {
+            ArrayList<Bitmap> list = new ArrayList<>();
+            for (int i = 0; i < urls.length; i++) {
+                String urldisplay = urls[i];
+                Bitmap mIcon11 = null;
+                //InputStream in;
+                try {
+                    InputStream in = new java.net.URL(urldisplay).openStream();
+                    mIcon11 = BitmapFactory.decodeStream(in);
+                    list.add(mIcon11);
+                } catch (Exception e) {
+                    // Toast.makeText(VideoInfo.class, "Error", Toast.LENGTH_SHORT).show();
+                    // e.printStackTrace();
+                }
+                //return mIcon11;
+                //return Helper.findUserById(strings[0]);
+            }
+            return list;
+        }
+
+        protected void onPostExecute(ArrayList<Bitmap> bitmaps) {
+
+            for (int i = 0; i < bitmaps.size(); i++){
+                imgList.get(i).setImageBitmap(bitmaps.get(i));
+            }
+
+            loading.dismiss();
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+            checkUserStatus();
         }
     }
 }

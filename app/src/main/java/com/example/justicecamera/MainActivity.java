@@ -765,7 +765,7 @@ public class MainActivity extends AppCompatActivity
         imagePicker.multi(); // multi mode (default mode)
 
 
-        imagePicker.limit(10) // max images can be selected (99 by default)
+        imagePicker.limit(4) // max images can be selected (99 by default)
                 .showCamera(true) // show camera or not (true by default)
                 .imageDirectory("Camera")   // captured image directory name ("Camera" folder by default)
                 .origin(images) // original selected images, used in multi mode
@@ -824,14 +824,17 @@ public class MainActivity extends AppCompatActivity
                     }
                 }
 
-                StringBuilder photoUrls = new StringBuilder();
-                for (int i = 0; i < images.size(); i++){
-                    File photoFile = new File(images.get(i).getPath());
-                    String uploadedPhotoUrl = Helper.uploadPhoto(photoFile);
-                    photoUrls.append(uploadedPhotoUrl).append(" ");
+                if (images.size() > 0) {
+                    StringBuilder photoUrls = new StringBuilder();
+                    for (int i = 0; i < images.size(); i++) {
+                        File photoFile = new File(images.get(i).getPath());
+                        String uploadedPhotoUrl = Helper.uploadPhoto(photoFile);
+                        photoUrls.append(uploadedPhotoUrl).append(" ");
+                    }
+                    violations[0].setPhotoUrl(photoUrls.toString());
+                } else {
+                    violations[0].setPhotoUrl("");
                 }
-
-                violations[0].setPhotoUrl(photoUrls.toString());
                 violations[0].setCategory(currentViolatCat);
                 violations[0].setVideoUrl(uploadedVideoUrl);
                 violations[0] = Backendless.Persistence.save(violations[0]);
