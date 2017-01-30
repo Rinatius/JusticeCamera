@@ -38,6 +38,7 @@ import com.facebook.drawee.drawable.ScalingUtils;
 import com.facebook.drawee.generic.GenericDraweeHierarchy;
 import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
 import com.facebook.drawee.view.SimpleDraweeView;
+import com.stfalcon.frescoimageviewer.ImageViewer;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -250,6 +251,8 @@ public class VideoInfo extends AppCompatActivity {
                                 .build();
                         img.setHierarchy(hierarchy);
 
+                        final int position = k;
+
                         GridLayout.LayoutParams lpImg = new GridLayout.LayoutParams();
                         lpImg.columnSpec = GridLayout.spec(j);
                         lpImg.rowSpec = GridLayout.spec(i);
@@ -258,42 +261,55 @@ public class VideoInfo extends AppCompatActivity {
 
                         Uri uri = Uri.parse(listOfPhotoUrls.get(k));
                         img.setImageURI(uri);
+
                         grid.addView(img, lpImg);
                         img.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(VideoInfo.this);
+//                                AlertDialog.Builder builder = new AlertDialog.Builder(VideoInfo.this);
+//
+//
+//                                final AlertDialog dialog = builder.create();
+//                                LayoutInflater inflater = getLayoutInflater();
+//                                View dialogLayout = inflater.inflate(R.layout.image_dialog, null);
+//                                dialog.setView(dialogLayout);
+//                                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+//                                final Drawable drawable = img.getDrawable();
+//
+//                                img.buildDrawingCache();
+//                                final Bitmap bitmap = img.getDrawingCache();
+//
+//                               // final Drawable drawable = img.getHierarchy().getTopLevelDrawable();
+//
+//                                dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+//                                    @Override
+//                                    public void onShow(final DialogInterface d) {
+//                                        ImageView image = (ImageView) dialog.findViewById(R.id.imageView2);
+//                                        image.setBackgroundColor(Color.WHITE);
+//                                        //image.setImageDrawable(drawable);
+//                                        image.setImageBitmap(bitmap);
+//                                        image.setOnClickListener(new View.OnClickListener() {
+//                                            @Override
+//                                            public void onClick(View v) {
+//                                                d.dismiss();
+//                                            }
+//                                        });
+//                                    }
+//                                });
+//
+//                                dialog.show();
 
 
-                                final AlertDialog dialog = builder.create();
-                                LayoutInflater inflater = getLayoutInflater();
-                                View dialogLayout = inflater.inflate(R.layout.image_dialog, null);
-                                dialog.setView(dialogLayout);
-                                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                                final Drawable drawable = img.getDrawable();
 
-                                img.buildDrawingCache();
-                                final Bitmap bitmap = img.getDrawingCache();
-
-                               // final Drawable drawable = img.getHierarchy().getTopLevelDrawable();
-
-                                dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-                                    @Override
-                                    public void onShow(final DialogInterface d) {
-                                        ImageView image = (ImageView) dialog.findViewById(R.id.imageView2);
-                                        image.setBackgroundColor(Color.WHITE);
-                                        //image.setImageDrawable(drawable);
-                                        image.setImageBitmap(bitmap);
-                                        image.setOnClickListener(new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View v) {
-                                                d.dismiss();
-                                            }
-                                        });
-                                    }
-                                });
-
-                                dialog.show();
+                                new ImageViewer.Builder(VideoInfo.this, listOfPhotoUrls)
+                                        .setStartPosition(position)
+                                        //.hideStatusBar(false)
+//                                        .setImageMargin(this, R.dimen.image_margin)
+//                                        .setImageChangeListener(getImageChangeListener())
+//                                        .setOnDismissListener(getDisissListener())
+//                                        .setCustomDraweeHierarchyBuilder(getHierarchyBuilder())
+//                                        .setOverlayView(overlayView)
+                                        .show();
                             }
                         });
 
