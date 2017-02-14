@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -46,9 +47,17 @@ import com.esafirm.imagepicker.features.ImagePicker;
 import com.esafirm.imagepicker.model.Image;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.UUID;
+
+import id.zelory.compressor.Compressor;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -59,6 +68,7 @@ public class MainActivity extends AppCompatActivity
     static String violationType;
     static String path = "";
     private static long back_pressed;
+    File tempPhotoFile, compressedImage;
     String prefCarMake = "CarMake";
     String prefCarModel = "CarModel";
     String prefCarNumber = "CarNumber";
@@ -723,6 +733,20 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void copy(File src, File dst) throws IOException {
+        InputStream in = new FileInputStream(src);
+        OutputStream out = new FileOutputStream(dst);
+
+        // Transfer bytes from in to out
+        byte[] buf = new byte[1024];
+        int len;
+        while ((len = in.read(buf)) > 0) {
+            out.write(buf, 0, len);
+        }
+        in.close();
+        out.close();
+    }
+
     private void makeReport(TextView report) {
         Calendar calendar = Calendar.getInstance();
         String date = Integer.toString(calendar.get(Calendar.DATE));
@@ -765,7 +789,7 @@ public class MainActivity extends AppCompatActivity
         imagePicker.multi(); // multi mode (default mode)
 
 
-        imagePicker.limit(4) // max images can be selected (99 by default)
+        imagePicker.limit(6) // max images can be selected (99 by default)
                 .showCamera(true) // show camera or not (true by default)
                 .imageDirectory("Camera")   // captured image directory name ("Camera" folder by default)
                 .origin(images) // original selected images, used in multi mode
@@ -791,7 +815,7 @@ public class MainActivity extends AppCompatActivity
             try {
                 Helper.updateUser(backendlessUsers[0]);
                 return "updated";
-            } catch (BackendlessException e){
+            } catch (BackendlessException e) {
                 return "error";
             }
         }
@@ -828,8 +852,40 @@ public class MainActivity extends AppCompatActivity
                     StringBuilder photoUrls = new StringBuilder();
                     for (int i = 0; i < images.size(); i++) {
                         File photoFile = new File(images.get(i).getPath());
-                        String uploadedPhotoUrl = Helper.uploadPhoto(photoFile);
+                        tempPhotoFile = new File(Environment.getExternalStorageDirectory() + File.separator
+                                + getString(R.string.app_name), UUID.randomUUID().toString() + ".jpg");
+
+                        if ((photoFile.length()/1024) > 1100){
+                            //compressPhoto();
+                            compressedImage = new Compressor.Builder(MainActivity.this)
+                                    .setMaxWidth(2400)
+                                    .setMaxHeight(1800)
+                                    .setQuality(90)
+                                    .setCompressFormat(Bitmap.CompressFormat.JPEG)
+                                    .setDestinationDirectoryPath(Environment.getExternalStorageDirectory() + File.separator
+                                            + getString(R.string.app_name))
+                                    .build()
+                                    .compressToFile(photoFile);
+                            //uploadPhoto();
+                            copy(compressedImage, tempPhotoFile);
+                        } else {
+                            //copyWithNewName();
+                            copy(photoFile, tempPhotoFile);
+                            //uploadPhoto();
+                        }
+
+                       // copy(photoFile, tempPhotoFile);
+
+                        //String uploadedPhotoUrl = Helper.uploadPhoto(photoFile);
+                        String uploadedPhotoUrl = Helper.uploadPhoto(tempPhotoFile);
                         photoUrls.append(uploadedPhotoUrl).append(" ");
+
+                        if (tempPhotoFile.exists()){
+                            tempPhotoFile.delete();
+                        }
+                        if (compressedImage.exists()){
+                            compressedImage.delete();
+                        }
                     }
                     violations[0].setPhotoUrl(photoUrls.toString());
                 } else {
@@ -845,7 +901,6 @@ public class MainActivity extends AppCompatActivity
             } catch (Exception e) {
                 return "error";
             }
-
         }
 
         protected void onPostExecute(String result) {

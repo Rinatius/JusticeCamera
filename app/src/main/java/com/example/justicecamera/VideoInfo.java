@@ -72,7 +72,7 @@ public class VideoInfo extends AppCompatActivity {
     ProgressDialog pd;
     BackendlessUser user;
     GridLayout grid;
-    int columnCount = 2;
+    int columnCount = 3;
     int rowCount = 2;
     int width, height;
 
@@ -332,7 +332,7 @@ public class VideoInfo extends AppCompatActivity {
                 }
             }
           // new DownloadImgs().execute(listOfPhotoUrls.toArray(new String[listOfPhotoUrls.size()]));
-
+            checkUserStatus();
 
         } else {
             checkUserStatus();

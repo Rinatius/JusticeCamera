@@ -94,4 +94,5 @@
     <string name="action_settings">Настройки</string>
     <string name="about">О программе</string>
     <string name="media_loaded">Соединение установлено</string>
+    <string name="too_large_file">Размер файла не должен превышать 30Мб</string>
 </resources>
