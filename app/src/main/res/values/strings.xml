@@ -157,5 +157,7 @@
     <string name="leave_feedback">Leave feedback</string>
     <string name="about">About</string>
     <string name="too_large_file">Too large file. File size should be less than 30Mb</string>
+    <string name="photo_not_selected">No photos selected</string>
+    <string name="photos_added">Photo files added</string>
 
 </resources>

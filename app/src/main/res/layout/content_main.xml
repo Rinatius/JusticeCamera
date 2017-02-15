@@ -197,6 +197,11 @@
             <CheckBox
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="@string/photo_not_selected"
+                android:id="@+id/checkBoxPhoto" />
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="@string/fill_the_form"
                 android:id="@+id/checkBoxUser" />
 

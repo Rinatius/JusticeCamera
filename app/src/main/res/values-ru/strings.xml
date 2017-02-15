@@ -95,4 +95,6 @@
     <string name="about">О программе</string>
     <string name="media_loaded">Соединение установлено</string>
     <string name="too_large_file">Размер файла не должен превышать 30Мб</string>
+    <string name="photo_not_selected">Фото файлы не выбраны</string>
+    <string name="photos_added">Фотографии добавлены</string>
 </resources>

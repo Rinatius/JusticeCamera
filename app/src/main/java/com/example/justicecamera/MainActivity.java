@@ -20,7 +20,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.ThemedSpinnerAdapter;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -82,7 +81,7 @@ public class MainActivity extends AppCompatActivity
     String longt = "";
     String defaultStatus = "0";
     Button buttonAddVideo, buttonSendViolation, buttonAddLocaton, buttonAddViolPhoto;
-    CheckBox checkBoxVideo, checkBoxText, checkBoxLocation, checkBoxUser;
+    CheckBox checkBoxVideo, checkBoxPhoto, checkBoxText, checkBoxLocation, checkBoxUser;
     List<String> listOfPhotoPath;
     private ArrayList<Image> images = new ArrayList<>();
     Offerta offerta;
@@ -117,6 +116,7 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
                 Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(i, RESULT_LOAD_VIDEO);
+
             }
         });
 
@@ -202,8 +202,12 @@ public class MainActivity extends AppCompatActivity
             if (resultCode == RESULT_OK) {
                 images = (ArrayList<Image>) ImagePicker.getImages(data);
                 printImages(images);
+                checkBoxPhoto.setChecked(true);
+                checkBoxPhoto.setText(R.string.photos_added);
                 return;
             } else {
+                checkBoxPhoto.setText(R.string.photo_not_selected);
+                checkBoxPhoto.setChecked(false);
                 Toast.makeText(MainActivity.this, "ERROR", Toast.LENGTH_SHORT).show();
             }
         }
@@ -406,7 +410,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void checkBox() {
-        if (checkBoxText.isChecked() && checkBoxVideo.isChecked() && checkBoxLocation.isChecked() && checkBoxUser.isChecked()) {
+        if (checkBoxText.isChecked() && (checkBoxVideo.isChecked() || checkBoxPhoto.isChecked()) && checkBoxLocation.isChecked() && checkBoxUser.isChecked()) {
             buttonSendViolation.setEnabled(true);
             textShowError.setText(getString(R.string.ready_forsend));
         } else {
@@ -456,6 +460,8 @@ public class MainActivity extends AppCompatActivity
         checkBoxText.setEnabled(false);
         checkBoxVideo = (CheckBox) findViewById(R.id.checkBoxVideo);
         checkBoxVideo.setEnabled(false);
+        checkBoxPhoto = (CheckBox) findViewById(R.id.checkBoxPhoto);
+        checkBoxPhoto.setEnabled(false);
         checkBoxUser = (CheckBox) findViewById(R.id.checkBoxUser);
         checkBoxUser.setEnabled(false);
         user = Backendless.UserService.CurrentUser();
@@ -489,6 +495,7 @@ public class MainActivity extends AppCompatActivity
         };
 
         checkBoxVideo.setOnCheckedChangeListener(checkBoxListener);
+        checkBoxPhoto.setOnCheckedChangeListener(checkBoxListener);
         checkBoxText.setOnCheckedChangeListener(checkBoxListener);
         checkBoxLocation.setOnCheckedChangeListener(checkBoxListener);
         checkBoxUser.setOnCheckedChangeListener(checkBoxListener);
@@ -836,8 +843,13 @@ public class MainActivity extends AppCompatActivity
         protected String doInBackground(Violation... violations) {
             //final File file = new File(path);
             try {
-                File file = new File(path);
-                String uploadedVideoUrl = Helper.uploadVideo(file);
+                if (!(path.equals(""))) {
+                    File file = new File(path);
+                    String uploadedVideoUrl = Helper.uploadVideo(file);
+                    violations[0].setVideoUrl(uploadedVideoUrl);
+                } else {
+                    violations[0].setVideoUrl("");
+                }
 
                 listCategory = Helper.getAllCategories().getData();
 
@@ -847,6 +859,8 @@ public class MainActivity extends AppCompatActivity
                         currentViolatCat = listCategory.get(i);
                     }
                 }
+
+
 
                 if (images.size() > 0) {
                     StringBuilder photoUrls = new StringBuilder();
@@ -867,7 +881,7 @@ public class MainActivity extends AppCompatActivity
                                     .build()
                                     .compressToFile(photoFile);
                             //uploadPhoto();
-                            copy(compressedImage, tempPhotoFile);
+                             copy(compressedImage, tempPhotoFile);
                         } else {
                             //copyWithNewName();
                             copy(photoFile, tempPhotoFile);
@@ -892,7 +906,7 @@ public class MainActivity extends AppCompatActivity
                     violations[0].setPhotoUrl("");
                 }
                 violations[0].setCategory(currentViolatCat);
-                violations[0].setVideoUrl(uploadedVideoUrl);
+
                 violations[0] = Backendless.Persistence.save(violations[0]);
 
                 return "videoUploaded";
@@ -916,6 +930,7 @@ public class MainActivity extends AppCompatActivity
                 path = "";
                 checkBoxLocation.setChecked(false);
                 checkBoxVideo.setChecked(false);
+                checkBoxPhoto.setChecked(false);
             } else if (result.equals("error")) {
                 Helper.showToast("Error, something went wrong", MainActivity.this);
             }
