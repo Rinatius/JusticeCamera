@@ -159,5 +159,7 @@
     <string name="too_large_file">Too large file. File size should be less than 30Mb</string>
     <string name="photo_not_selected">No photos selected</string>
     <string name="photos_added">Photo files added</string>
+    <string name="select_folder">Select folder</string>
+    <string name="tap_to_select">Tap to select</string>
 
 </resources>

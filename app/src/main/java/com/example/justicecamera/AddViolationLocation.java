@@ -55,6 +55,7 @@ public class AddViolationLocation extends FragmentActivity implements OnMapReady
                 getString(R.string.choose_location), Toast.LENGTH_LONG);
         showMessage.show();
 
+
         // Add a marker in Sydney and move the camera
         LatLng bishkek = new LatLng(42.8709181, 74.6144781);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(bishkek));
@@ -62,18 +63,6 @@ public class AddViolationLocation extends FragmentActivity implements OnMapReady
 
         UiSettings set = mMap.getUiSettings();
         set.setZoomControlsEnabled(true);
-
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        mMap.setMyLocationEnabled(true);
 
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
@@ -91,14 +80,69 @@ public class AddViolationLocation extends FragmentActivity implements OnMapReady
             }
         });
 
-        buttonAddLocation.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View view){
-                 Intent i = new Intent(AddViolationLocation.this, MainActivity.class);
-                 i.putExtra(LAT, lat);
-                 i.putExtra(LONGT, longt);
-                 setResult(RESULT_OK, i);
-                 finish();
+        buttonAddLocation.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                Intent i = new Intent(AddViolationLocation.this, MainActivity.class);
+                i.putExtra(LAT, lat);
+                i.putExtra(LONGT, longt);
+                setResult(RESULT_OK, i);
+                finish();
             }
         });
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+
+            return;
+        }
+        mMap.setMyLocationEnabled(true);
+//
+//        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+//            @Override
+//            public void onMapClick(LatLng latLng) {
+//
+//                if (!lat.equals("")) {
+//                    mMap.clear();
+//                }
+//
+//                lat = Double.toString(latLng.latitude);
+//                longt = Double.toString(latLng.longitude);
+//                LatLng position = new LatLng(latLng.latitude, latLng.longitude);
+//                Marker location = mMap.addMarker(new MarkerOptions().position(position));
+//                buttonAddLocation.setEnabled(true);
+//            }
+//        });
+
+//        buttonAddLocation.setOnClickListener(new View.OnClickListener() {
+//            public void onClick(View view) {
+//                Intent i = new Intent(AddViolationLocation.this, MainActivity.class);
+//                i.putExtra(LAT, lat);
+//                i.putExtra(LONGT, longt);
+//                setResult(RESULT_OK, i);
+//                finish();
+//            }
+//        });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    mMap.setMyLocationEnabled(true);
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
     }
 }

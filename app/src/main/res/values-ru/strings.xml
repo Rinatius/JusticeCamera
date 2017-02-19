@@ -6,7 +6,7 @@
     <string name="registration">Регистрация</string>
     <string name="havebeen_registered">успешна завершена</string>
     <string name="sendingVideo">Отправка видео</string>
-    <string name="wait">Подождите</string>
+    <string name="wait">Подождите...</string>
     <string name="uploadedVideo">Видео загружено</string>
     <string name="uploadedViolation">Нарушение отправлено</string>
     <string name="added_video">Видео добавлено</string>
@@ -17,7 +17,7 @@
     <string name="fill_all_data">Необходимо заполнить все данные</string>
     <string name="fields_filled">Все поля заполнены</string>
     <string name="fields_notfilled">Необходимо заполнить все поля</string>
-    <string name="send_violation">Отправка видеонарушения</string>
+    <string name="send_violation">Отправка нарушения</string>
     <string name="violation_type">Тип нарушения</string>
     <string name="v_coordinates_added">Координаты нарушения добавлены</string>
     <string name="go_to_video">Для перехода к видео выберите маркер и нажмите по описанию</string>
@@ -97,4 +97,6 @@
     <string name="too_large_file">Размер файла не должен превышать 30Мб</string>
     <string name="photo_not_selected">Фото файлы не выбраны</string>
     <string name="photos_added">Фотографии добавлены</string>
+    <string name="select_folder">Выберите папку</string>
+    <string name="tap_to_select">Нажмите для выбора</string>
 </resources>

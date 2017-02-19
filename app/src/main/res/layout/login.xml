@@ -34,18 +34,6 @@
         android:textColor="#ffffff"
         android:layout_alignParentBottom="true"
         android:layout_toEndOf="@+id/textViewInfo" />
-    <TextView
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/restore_link"
-        android:id="@+id/restoreLink"
-        android:background="@drawable/button"
-        android:clickable="true"
-        android:textColor="#ffffff"
-        android:layout_alignParentBottom="true"
-        android:layout_alignEnd="@+id/loginButton" />
-
 
 
     <EditText
@@ -94,5 +82,18 @@
         android:id="@+id/rememberLoginBox"
         android:layout_below="@+id/loginButton"
         android:layout_centerHorizontal="true" />
+
+    <TextView
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/restore_link"
+        android:id="@+id/restoreLink"
+        android:background="@drawable/button"
+        android:clickable="true"
+        android:textColor="#ffffff"
+        android:layout_below="@+id/rememberLoginBox"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="11dp" />
 
 </RelativeLayout>

@@ -56,6 +56,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
+import fm.jiecao.jcvideoplayer_lib.JCVideoPlayerStandard;
 import id.zelory.compressor.Compressor;
 
 public class MainActivity extends AppCompatActivity
@@ -87,7 +88,7 @@ public class MainActivity extends AppCompatActivity
     Offerta offerta;
     private static int RESULT_LOAD_VIDEO = 1;
     private static int RESULT_LOAD_IMAGE = 7;
-    private static int RESULT_MY_VIDEO = 8;
+    private static int RESULT_MY_VIDEO = 11;
     private static int RESULT_LEAVE_FEEDBACK = 9;
     private static int RESULT_ADD_LOC = 2;
     private static int RESULT_PUBLIC_OFFER = 8;
@@ -201,14 +202,15 @@ public class MainActivity extends AppCompatActivity
         {
             if (resultCode == RESULT_OK) {
                 images = (ArrayList<Image>) ImagePicker.getImages(data);
-                printImages(images);
+                //printImages(images);
                 checkBoxPhoto.setChecked(true);
+                //checkBoxPhoto.setText(R.string.photos_added+ ": " + Integer.toString(images.size()));
                 checkBoxPhoto.setText(R.string.photos_added);
-                return;
+                //return;
             } else {
                 checkBoxPhoto.setText(R.string.photo_not_selected);
                 checkBoxPhoto.setChecked(false);
-                Toast.makeText(MainActivity.this, "ERROR", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "", Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -283,9 +285,11 @@ public class MainActivity extends AppCompatActivity
         } else {
             if (back_pressed + 2000 > System.currentTimeMillis()) {
                 Intent a = new Intent(Intent.ACTION_MAIN);
+                //a.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 a.addCategory(Intent.CATEGORY_HOME);
                 a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(a);
+               // finish();
             } else {
                 Toast.makeText(getBaseContext(), getString(R.string.press_to_exit),
                         Toast.LENGTH_SHORT).show();
@@ -685,7 +689,7 @@ public class MainActivity extends AppCompatActivity
                 })
                 .setNegativeButton(getString(R.string.disagree), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        Helper.showToast("Чтобы отправить видеонарушение, необходимо принять публичную оферту", MainActivity.this);
+                        Helper.showToast("Чтобы отправить зафиксированное нарушение, необходимо принять публичную оферту", MainActivity.this);
                         dialog.dismiss();
                         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
                     }
@@ -768,17 +772,17 @@ public class MainActivity extends AppCompatActivity
                 user.getProperty("lastName").toString() + " " +
                 user.getProperty("firstName").toString() + " " +
                 user.getProperty("middleName").toString() + " " +
-                "2016 году стал очевидцем нарушения правил дорожного движения автомашиной марки " +
+                "2016 году стал(а) очевидцем нарушения правил дорожного движения автомашиной марки " +
                 editCarMake.getText().toString() + ", модель " +
                 editCarModel.getText().toString() + ", цвет машины " +
                 editCarColor.getText().toString() + ", с государственным номерным знаком " +
                 editCarNumber.getText().toString() + ", тип нарушения: " +
-                violationType + ". Данное правонарушение было зафиксировано на видеозапись, которую я прилагаю к заявлению.\n");
-        report.append("В соответствии с изложенными обстоятельствами, Прошу вас принять меры в отношении автовладельца, " +
-                "а именно проверить факт нарушения «Правилам дорожного движения» утвержденного постановлением Правительства КР от 4 августа 1999 года №421 и " +
-                "применить в отношении автовладельца соответствующую(ие) статью(и) Кодекса «Об административной ответственности КР».\n");
-        report.append("Прошу предоставить мне соответствующий ответ о принятых мерах в отношении автовладельца," +
-                " нарушившего ПДД  в срок установленный статьей 8 закона КР «О порядке рассмотрения обращений граждан».\n");
+                violationType + ". Данное правонарушение было зафиксировано на видео- (фото-)запись, которую я прилагаю к заявлению.\n");
+        report.append("В соответствии с изложенными обстоятельствами, Прошу вас принять меры в отношении автовладельца, "
+                + "а именно проверить факт нарушения «Правилам дорожного движения» утвержденного постановлением Правительства КР от 4 августа 1999 года №421 и "
+                + "применить в отношении автовладельца соответствующую(ие) статью(и) Кодекса «Об административной ответственности КР».\n");
+        report.append("Прошу предоставить мне соответствующий ответ о принятых мерах в отношении автовладельца,"
+                + " нарушившего ПДД  в срок установленный статьей 8 закона КР «О порядке рассмотрения обращений граждан».\n");
         report.append(user.getProperty("lastName").toString() + "." + user.getProperty("firstName").toString().toCharArray()[0] + "." + user.getProperty("middleName").toString().toCharArray()[0] + ".\n");
         report.append(date + "." + month + "." + year);
     }
@@ -789,8 +793,8 @@ public class MainActivity extends AppCompatActivity
         ImagePicker imagePicker = ImagePicker.create(this)
                 .returnAfterFirst(false) // set whether pick action or camera action should return immediate result or not. Only works in single mode for image picker
                 .folderMode(true) // set folder mode (false by default)
-                .folderTitle("Folder") // folder selection title
-                .imageTitle("Tap to select"); // image selection title
+                .folderTitle(getString(R.string.select_folder)) // folder selection title
+                .imageTitle(getString(R.string.tap_to_select)); // image selection title
 
 
         imagePicker.multi(); // multi mode (default mode)
@@ -833,10 +837,12 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected void onPreExecute() {
-            pd = new ProgressDialog(MainActivity.this);
-            pd.setTitle(getString(R.string.sendingVideo));
-            pd.setMessage(getString(R.string.wait));
-            pd.show();
+            pd = ProgressDialog.show(MainActivity.this, getString(R.string.send_violation), getString(R.string.wait), true);
+//            pd = new ProgressDialog(MainActivity.this);
+//            pd.setTitle(getString(R.string.sendingVideo));
+//            pd.setMessage(getString(R.string.wait));
+//            pd.setCancelable(false);
+//            pd.show();
         }
 
         @Override
@@ -860,8 +866,6 @@ public class MainActivity extends AppCompatActivity
                     }
                 }
 
-
-
                 if (images.size() > 0) {
                     StringBuilder photoUrls = new StringBuilder();
                     for (int i = 0; i < images.size(); i++) {
@@ -882,6 +886,7 @@ public class MainActivity extends AppCompatActivity
                                     .compressToFile(photoFile);
                             //uploadPhoto();
                              copy(compressedImage, tempPhotoFile);
+                            compressedImage.delete();
                         } else {
                             //copyWithNewName();
                             copy(photoFile, tempPhotoFile);
@@ -896,9 +901,6 @@ public class MainActivity extends AppCompatActivity
 
                         if (tempPhotoFile.exists()){
                             tempPhotoFile.delete();
-                        }
-                        if (compressedImage.exists()){
-                            compressedImage.delete();
                         }
                     }
                     violations[0].setPhotoUrl(photoUrls.toString());
@@ -931,6 +933,7 @@ public class MainActivity extends AppCompatActivity
                 checkBoxLocation.setChecked(false);
                 checkBoxVideo.setChecked(false);
                 checkBoxPhoto.setChecked(false);
+                images.clear();
             } else if (result.equals("error")) {
                 Helper.showToast("Error, something went wrong", MainActivity.this);
             }
@@ -945,10 +948,11 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected void onPreExecute() {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
-            offerD = new ProgressDialog(MainActivity.this);
-            offerD.setTitle(getString(R.string.checking));
-            offerD.setMessage(getString(R.string.wait));
-            offerD.show();
+            offerD = ProgressDialog.show(MainActivity.this, getString(R.string.checking), getString(R.string.wait), true);
+//            offerD = new ProgressDialog(MainActivity.this);
+//            offerD.setTitle(getString(R.string.checking));
+//            offerD.setMessage(getString(R.string.wait));
+//            offerD.show();
         }
 
         @Override

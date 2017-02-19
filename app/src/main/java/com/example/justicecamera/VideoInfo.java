@@ -24,6 +24,7 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
@@ -32,6 +33,7 @@ import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
 import com.backendless.BackendlessUser;
 import com.backendless.exceptions.BackendlessException;
+import com.danikula.videocache.HttpProxyCacheServer;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.drawable.ProgressBarDrawable;
 import com.facebook.drawee.drawable.ScalingUtils;
@@ -50,6 +52,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import fm.jiecao.jcvideoplayer_lib.JCVideoPlayer;
+import fm.jiecao.jcvideoplayer_lib.JCVideoPlayerStandard;
+
 public class VideoInfo extends AppCompatActivity {
     static ProgressDialog loading;
     ProgressDialog mProgressDialog;
@@ -63,6 +68,7 @@ public class VideoInfo extends AppCompatActivity {
     String violLat = "";
     String violLongt = "";
     String thisObjectId;
+
     public static String THIS_OBJECT_ID = "objectId";
     public static String VIDEO_URL = "url";
     VideoView video;
@@ -76,10 +82,13 @@ public class VideoInfo extends AppCompatActivity {
     int rowCount = 2;
     int width, height;
 
+    LinearLayout linearLayout;
+    JCVideoPlayerStandard jcVideoPlayerStandard;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Fresco.initialize(this);
+        //Fresco.initialize(this);
         setContentView(R.layout.activity_video_info);
 
         init();
@@ -230,117 +239,95 @@ public class VideoInfo extends AppCompatActivity {
         textViewVcomment.setText(thisViolation.getComment());
         textViewVFeedback.setText(thisViolation.getFeedback());
         videoUrl = thisViolation.getVideoUrl();
+
+        if (!(videoUrl.equals(""))) {
+
+            HttpProxyCacheServer proxy = App.getProxy(getApplicationContext());
+            String proxyUrl = proxy.getProxyUrl(videoUrl);
+
+            JCVideoPlayerStandard jcVideoPlayerStandard = new JCVideoPlayerStandard(VideoInfo.this);
+            //jcVideoPlayerStandard.setUp("https://api.backendless.com/A2A1E1C9-A8F7-C938-FFEF-4D4EA6C0A300/v1/files/video/VID_2017-02-17_041638.mp4"
+            jcVideoPlayerStandard.setUp(proxyUrl
+                    , JCVideoPlayerStandard.SCREEN_LAYOUT_NORMAL, thisViolation.getName());
+            //jcVideoPlayerStandard.thumbImageView.setImage("http://p.qpic.cn/videoyun/0/2449_43b6f696980311e59ed467f22794e792_1/640");
+
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            jcVideoPlayerStandard.setLayoutParams(params);
+
+            linearLayout.addView(jcVideoPlayerStandard);
+
+           //Toast.makeText(VideoInfo.this, videoUrl, Toast.LENGTH_SHORT).show();
+        }
+
         photoUrls = thisViolation.getPhotoUrl();
-        if (photoUrls.length() > 0) {
+        if (photoUrls != null) {
+            if (photoUrls.length() > 0) {
 
-            listOfPhotoUrls = getUrlsFromString(photoUrls);
-            int k = 0;
-            for (int i = 0; i < grid.getRowCount(); i++){
-                for (int j = 0; j < grid.getColumnCount(); j++) {
-                    if (k < listOfPhotoUrls.size()) {
-                        final SimpleDraweeView img = new SimpleDraweeView(this);
-                        GenericDraweeHierarchyBuilder builder =
-                                new GenericDraweeHierarchyBuilder(getResources());
-                        GenericDraweeHierarchy hierarchy = builder
-                                //.setFadeDuration(300)
-                                .setPlaceholderImage(R.drawable.car)
-                                .setActualImageScaleType(ScalingUtils.ScaleType.FIT_CENTER)
-                                .setProgressBarImage(new ProgressBarDrawable())
-                                //.setBackground(background)
-                                //.setOverlays(overlaysList)
-                                .build();
-                        img.setHierarchy(hierarchy);
+                listOfPhotoUrls = getUrlsFromString(photoUrls);
+                int k = 0;
+                for (int i = 0; i < grid.getRowCount(); i++) {
+                    for (int j = 0; j < grid.getColumnCount(); j++) {
+                        if (k < listOfPhotoUrls.size()) {
+                            final SimpleDraweeView img = new SimpleDraweeView(this);
+                            GenericDraweeHierarchyBuilder builder =
+                                    new GenericDraweeHierarchyBuilder(getResources());
+                            GenericDraweeHierarchy hierarchy = builder
+                                    //.setFadeDuration(300)
+                                    .setPlaceholderImage(R.drawable.car)
+                                    .setActualImageScaleType(ScalingUtils.ScaleType.FIT_CENTER)
+                                    .setProgressBarImage(new ProgressBarDrawable())
+                                    //.setBackground(background)
+                                    //.setOverlays(overlaysList)
+                                    .build();
+                            img.setHierarchy(hierarchy);
 
-                        final int position = k;
+                            final int position = k;
 
-                        GridLayout.LayoutParams lpImg = new GridLayout.LayoutParams();
-                        lpImg.columnSpec = GridLayout.spec(j);
-                        lpImg.rowSpec = GridLayout.spec(i);
-                        lpImg.width = width/columnCount - width/14;
-                        lpImg.height = lpImg.width;
+                            GridLayout.LayoutParams lpImg = new GridLayout.LayoutParams();
+                            lpImg.columnSpec = GridLayout.spec(j);
+                            lpImg.rowSpec = GridLayout.spec(i);
+                            lpImg.width = width / columnCount - width / 20;
+                            lpImg.height = lpImg.width;
 
-                        Uri uri = Uri.parse(listOfPhotoUrls.get(k));
-                        img.setImageURI(uri);
+                            Uri uri = Uri.parse(listOfPhotoUrls.get(k));
+                            img.setImageURI(uri);
 
-                        grid.addView(img, lpImg);
-                        img.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-//                                AlertDialog.Builder builder = new AlertDialog.Builder(VideoInfo.this);
-//
-//
-//                                final AlertDialog dialog = builder.create();
-//                                LayoutInflater inflater = getLayoutInflater();
-//                                View dialogLayout = inflater.inflate(R.layout.image_dialog, null);
-//                                dialog.setView(dialogLayout);
-//                                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-//                                final Drawable drawable = img.getDrawable();
-//
-//                                img.buildDrawingCache();
-//                                final Bitmap bitmap = img.getDrawingCache();
-//
-//                               // final Drawable drawable = img.getHierarchy().getTopLevelDrawable();
-//
-//                                dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-//                                    @Override
-//                                    public void onShow(final DialogInterface d) {
-//                                        ImageView image = (ImageView) dialog.findViewById(R.id.imageView2);
-//                                        image.setBackgroundColor(Color.WHITE);
-//                                        //image.setImageDrawable(drawable);
-//                                        image.setImageBitmap(bitmap);
-//                                        image.setOnClickListener(new View.OnClickListener() {
-//                                            @Override
-//                                            public void onClick(View v) {
-//                                                d.dismiss();
-//                                            }
-//                                        });
-//                                    }
-//                                });
-//
-//                                dialog.show();
+                            grid.addView(img, lpImg);
+                            img.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
 
-
-
-                                new ImageViewer.Builder(VideoInfo.this, listOfPhotoUrls)
-                                        .setStartPosition(position)
-                                        //.hideStatusBar(false)
+                                    new ImageViewer.Builder(VideoInfo.this, listOfPhotoUrls)
+                                            .setStartPosition(position)
+                                            //.hideStatusBar(false)
 //                                        .setImageMargin(this, R.dimen.image_margin)
 //                                        .setImageChangeListener(getImageChangeListener())
 //                                        .setOnDismissListener(getDisissListener())
 //                                        .setCustomDraweeHierarchyBuilder(getHierarchyBuilder())
 //                                        .setOverlayView(overlayView)
-                                        .show();
-                            }
-                        });
+                                            .show();
+                                }
+                            });
 
-                        k++;
+                            k++;
+
+                        }
 
                     }
-
-//                    SimpleDraweeView img = new SimpleDraweeView(this);
-//                    GridLayout.LayoutParams lpImg = new GridLayout.LayoutParams();
-//                    lpImg.columnSpec = GridLayout.spec(j);
-//                    lpImg.rowSpec = GridLayout.spec(i);
-//                    lpImg.width = width / columnCount;
-//                    lpImg.height = lpImg.width;
-//                    Uri uri = Uri.parse(listOfPhotoUrls.get(k));
-//                    img.setBackgroundColor(Color.BLACK);
-//                    img.setImageURI(uri);
-//                    grid.addView(img, lpImg);
-//                    k++;
-
                 }
-            }
-          // new DownloadImgs().execute(listOfPhotoUrls.toArray(new String[listOfPhotoUrls.size()]));
-            checkUserStatus();
+                // new DownloadImgs().execute(listOfPhotoUrls.toArray(new String[listOfPhotoUrls.size()]));
+                checkUserStatus();
 
-        } else {
-            checkUserStatus();
+            } else {
+                checkUserStatus();
+            }
         }
     }
 
     private void init() {
+        linearLayout = (LinearLayout) findViewById(R.id.videoLayout);
         buttonPlayVideo = (Button) findViewById(R.id.buttonPlayVideo);
+        buttonPlayVideo.setVisibility(View.INVISIBLE);
         buttonDownload = (Button) findViewById(R.id.buttonDownload);
         buttonApprove = (Button) findViewById(R.id.buttonApprove);
         buttonReject = (Button) findViewById(R.id.buttonReject);
@@ -482,19 +469,19 @@ public class VideoInfo extends AppCompatActivity {
         }
     }
 
-    private void drawGrid(){
+    private void drawGrid() {
 
     }
 
-    private ArrayList<String> getUrlsFromString(String photoUrls){
+    private ArrayList<String> getUrlsFromString(String photoUrls) {
         ArrayList<String> listOfUrls = new ArrayList<>();
         char[] chars = photoUrls.toCharArray();
         StringBuilder url = new StringBuilder();
-        for (int i = 0; i < chars.length; i++){
+        for (int i = 0; i < chars.length; i++) {
             if (chars[i] != ' ') {
                 url.append(chars[i]);
             } else {
-                if (url.length() > 0){
+                if (url.length() > 0) {
                     listOfUrls.add(url.toString());
                     url.setLength(0);
                 }
@@ -503,7 +490,7 @@ public class VideoInfo extends AppCompatActivity {
         return listOfUrls;
     }
 
-    private void setImgsFromUrls(ArrayList<String> urls){
+    private void setImgsFromUrls(ArrayList<String> urls) {
 
 
     }
@@ -530,9 +517,9 @@ public class VideoInfo extends AppCompatActivity {
         }
 
         protected void onPostExecute(String result) {
-            if (result.equals("deleted")){
+            if (result.equals("deleted")) {
                 Helper.showToast("Успешно удалено", VideoInfo.this);
-            } else if (result.equals("error")){
+            } else if (result.equals("error")) {
                 Helper.showToast("Error, something went wrong", VideoInfo.this);
             }
 
@@ -566,7 +553,7 @@ public class VideoInfo extends AppCompatActivity {
         protected void onPostExecute(String result) {
             if (result.equals("updated")) {
                 Helper.showToast(getString(R.string.approved), VideoInfo.this);
-            } else if (result.equals("error")){
+            } else if (result.equals("error")) {
                 Helper.showToast("Error, something went wrong", VideoInfo.this);
             }
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
@@ -666,7 +653,7 @@ public class VideoInfo extends AppCompatActivity {
 
         protected void onPostExecute(ArrayList<Bitmap> bitmaps) {
 
-            for (int i = 0; i < bitmaps.size(); i++){
+            for (int i = 0; i < bitmaps.size(); i++) {
                 imgList.get(i).setImageBitmap(bitmaps.get(i));
             }
 
@@ -674,6 +661,19 @@ public class VideoInfo extends AppCompatActivity {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
             checkUserStatus();
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (JCVideoPlayer.backPress()) {
+            return;
+        }
+        super.onBackPressed();
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        JCVideoPlayer.releaseAllVideos();
     }
 }
 
