@@ -99,4 +99,6 @@
     <string name="photos_added">Фотографии добавлены</string>
     <string name="select_folder">Выберите папку</string>
     <string name="tap_to_select">Нажмите для выбора</string>
+    <string name="deleting">Удаление...</string>
+    <string name="max_size_video">Размер файла не должен превышать 25Мб</string>
 </resources>

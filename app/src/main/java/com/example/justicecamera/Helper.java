@@ -85,6 +85,10 @@ public final class Helper extends Object {
         return Backendless.Persistence.of(Offerta.class).findLast();
     }
 
+    public static Acct findPass(){
+        return Backendless.Persistence.of(Acct.class).findLast();
+    }
+
     public static Violation findViolationById(String objectId) {
         return Backendless.Data.of(Violation.class).findById(objectId);
     }

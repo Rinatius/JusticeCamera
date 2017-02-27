@@ -17,6 +17,7 @@ import android.os.PowerManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.ThemedSpinnerAdapter;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -68,7 +69,7 @@ public class VideoInfo extends AppCompatActivity {
     String violLat = "";
     String violLongt = "";
     String thisObjectId;
-
+    BackendlessUser videoOwner;
     public static String THIS_OBJECT_ID = "objectId";
     public static String VIDEO_URL = "url";
     VideoView video;
@@ -218,13 +219,15 @@ public class VideoInfo extends AppCompatActivity {
     }
 
     public void setViolationParams(final Violation thisViolation) {
-
-        if (thisViolation.getStatus().equals("0") && (user.getProperty("status").toString().equals("2") || user.getProperty("status").toString().equals("1"))) {
+        if (thisViolation.getStatus().equals("0")
+                && (user.getProperty("status").toString().equals("2")
+                || user.getProperty("status").toString().equals("1"))) {
             buttonReject.setEnabled(true);
             buttonReject.setVisibility(View.VISIBLE);
             buttonApprove.setEnabled(true);
             buttonApprove.setVisibility(View.VISIBLE);
         }
+
         if (user.getProperty("status").toString().equals("2")) {
             buttonFeedback.setEnabled(true);
             buttonFeedback.setVisibility(View.VISIBLE);
@@ -246,17 +249,13 @@ public class VideoInfo extends AppCompatActivity {
             String proxyUrl = proxy.getProxyUrl(videoUrl);
 
             JCVideoPlayerStandard jcVideoPlayerStandard = new JCVideoPlayerStandard(VideoInfo.this);
-            //jcVideoPlayerStandard.setUp("https://api.backendless.com/A2A1E1C9-A8F7-C938-FFEF-4D4EA6C0A300/v1/files/video/VID_2017-02-17_041638.mp4"
             jcVideoPlayerStandard.setUp(proxyUrl
                     , JCVideoPlayerStandard.SCREEN_LAYOUT_NORMAL, thisViolation.getName());
-            //jcVideoPlayerStandard.thumbImageView.setImage("http://p.qpic.cn/videoyun/0/2449_43b6f696980311e59ed467f22794e792_1/640");
 
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             jcVideoPlayerStandard.setLayoutParams(params);
 
             linearLayout.addView(jcVideoPlayerStandard);
-
-           //Toast.makeText(VideoInfo.this, videoUrl, Toast.LENGTH_SHORT).show();
         }
 
         photoUrls = thisViolation.getPhotoUrl();
@@ -315,7 +314,6 @@ public class VideoInfo extends AppCompatActivity {
 
                     }
                 }
-                // new DownloadImgs().execute(listOfPhotoUrls.toArray(new String[listOfPhotoUrls.size()]));
                 checkUserStatus();
 
             } else {
@@ -329,6 +327,7 @@ public class VideoInfo extends AppCompatActivity {
         buttonPlayVideo = (Button) findViewById(R.id.buttonPlayVideo);
         buttonPlayVideo.setVisibility(View.INVISIBLE);
         buttonDownload = (Button) findViewById(R.id.buttonDownload);
+        buttonDownload.setVisibility(View.INVISIBLE);
         buttonApprove = (Button) findViewById(R.id.buttonApprove);
         buttonReject = (Button) findViewById(R.id.buttonReject);
         buttonFeedback = (Button) findViewById(R.id.buttonFeedback);
@@ -350,35 +349,9 @@ public class VideoInfo extends AppCompatActivity {
         width = size.x;
         height = size.y;
 
-//        for (int i = 0; i < grid.getRowCount(); i++){
-//            for (int j = 0; j < grid.getColumnCount(); j++) {
-//                final ImageView img = new ImageView(this);
-//                GridLayout.LayoutParams lpImage = new GridLayout.LayoutParams();
-//                lpImage.columnSpec = GridLayout.spec(j);
-//                lpImage.rowSpec = GridLayout.spec(i);
-//                lpImage.width = width/11;
-//                lpImage.height = lpImage.width;
-//                img.setImageResource(R.drawable.anon);
-//                img.setScaleType(ImageView.ScaleType.FIT_CENTER);
-//                grid.addView(img, lpImage);
-//
-//            }
-//        }
-
         listViolation = new ArrayList<>();
         thisViolation = new Violation();
         video = (VideoView) findViewById(R.id.videoView);
-//        img = (ImageView) findViewById(R.id.violImg);
-//        img2 = (ImageView) findViewById(R.id.violImg2);
-//        img3 = (ImageView) findViewById(R.id.violImg3);
-//        img4 = (ImageView) findViewById(R.id.violImg4);
-//        img5 = (ImageView) findViewById(R.id.violImg5);
-//        imgList = new ArrayList<>();
-//        imgList.add(img);
-//        imgList.add(img2);
-//        imgList.add(img3);
-//        imgList.add(img4);
-//        imgList.add(img5);
         listOfPhotoUrls = new ArrayList<>();
 
         buttonReject.setEnabled(false);
@@ -469,10 +442,6 @@ public class VideoInfo extends AppCompatActivity {
         }
     }
 
-    private void drawGrid() {
-
-    }
-
     private ArrayList<String> getUrlsFromString(String photoUrls) {
         ArrayList<String> listOfUrls = new ArrayList<>();
         char[] chars = photoUrls.toCharArray();
@@ -490,20 +459,16 @@ public class VideoInfo extends AppCompatActivity {
         return listOfUrls;
     }
 
-    private void setImgsFromUrls(ArrayList<String> urls) {
-
-
-    }
-
     private class DeleteViolation extends AsyncTask<Violation, Void, String> {
 
         @Override
         protected void onPreExecute() {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
-            pd = new ProgressDialog(VideoInfo.this);
-            pd.setTitle("Удаление ...");
-            pd.setMessage(getString(R.string.wait));
-            pd.show();
+            pd = ProgressDialog.show(VideoInfo.this, getString(R.string.deleting), getString(R.string.wait), true);
+//            pd = new ProgressDialog(VideoInfo.this);
+//            pd.setTitle("Удаление ...");
+//            pd.setMessage(getString(R.string.wait));
+//            pd.show();
         }
 
         @Override
@@ -537,6 +502,7 @@ public class VideoInfo extends AppCompatActivity {
     private class UpdateViolationTask extends AsyncTask<Violation, Void, String> {
         @Override
         protected void onPreExecute() {
+            pd = ProgressDialog.show(VideoInfo.this, "", getString(R.string.wait), true);
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
         }
 
@@ -552,11 +518,17 @@ public class VideoInfo extends AppCompatActivity {
 
         protected void onPostExecute(String result) {
             if (result.equals("updated")) {
-                Helper.showToast(getString(R.string.approved), VideoInfo.this);
+                //статус нарушения обновлен, начало поиска пароля
+                //Helper.showToast(getString(R.string.approved), VideoInfo.this);
+                buttonApprove.setVisibility(View.INVISIBLE);
+                buttonReject.setVisibility(View.INVISIBLE);
+                new GetPassword().execute();
             } else if (result.equals("error")) {
+                pd.dismiss();
                 Helper.showToast("Error, something went wrong", VideoInfo.this);
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
             }
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+            //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
         }
     }
 
@@ -565,10 +537,11 @@ public class VideoInfo extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
-            loading = new ProgressDialog(VideoInfo.this);
-            loading.setTitle(getString(R.string.loading_info));
-            loading.setMessage(getString(R.string.wait));
-            loading.show();
+            loading = ProgressDialog.show(VideoInfo.this, getString(R.string.loading_info), getString(R.string.wait), true);
+//            loading = new ProgressDialog(VideoInfo.this);
+//            loading.setTitle(getString(R.string.loading_info));
+//            loading.setMessage(getString(R.string.wait));
+//            loading.show();
         }
 
         @Override
@@ -589,10 +562,11 @@ public class VideoInfo extends AppCompatActivity {
 
         @Override
         protected void onPreExecute() {
-            loading = new ProgressDialog(VideoInfo.this);
-            loading.setTitle("Загрузка данных пользователя");
-            loading.setMessage(getString(R.string.wait));
-            loading.show();
+            loading = ProgressDialog.show(VideoInfo.this, "Загрузка данных пользователя", getString(R.string.wait), true);
+//            loading = new ProgressDialog(VideoInfo.this);
+//            loading.setTitle("Загрузка данных пользователя");
+//            loading.setMessage(getString(R.string.wait));
+//            loading.show();
         }
 
         @Override
@@ -601,17 +575,18 @@ public class VideoInfo extends AppCompatActivity {
             return Helper.findUserById(strings[0]);
         }
 
-        protected void onPostExecute(BackendlessUser videoOwner) {
+        protected void onPostExecute(BackendlessUser owner) {
 
-            if (videoOwner != null) {
+            if (owner != null) {
+                videoOwner = owner;
                 textViewVcomment.append("  \n\n");
                 textViewVcomment.append("Информация о пользователе: \n");
-                textViewVcomment.append(videoOwner.getProperty("lastName").toString() + " " +
-                        videoOwner.getProperty("firstName").toString() + " " +
-                        videoOwner.getProperty("middleName").toString() + "\n");
-                textViewVcomment.append(videoOwner.getEmail() + "\n");
-                textViewVcomment.append(getString(R.string.passport_no) + ": " + videoOwner.getProperty("passportNo").toString() + "\n");
-                textViewVcomment.append(getString(R.string.phone_number) + ": " + videoOwner.getProperty("phoneNumber").toString());
+                textViewVcomment.append(owner.getProperty("lastName").toString() + " " +
+                        owner.getProperty("firstName").toString() + " " +
+                        owner.getProperty("middleName").toString() + "\n");
+                textViewVcomment.append(owner.getEmail() + "\n");
+                textViewVcomment.append(getString(R.string.passport_no) + ": " + owner.getProperty("passportNo").toString() + "\n");
+                textViewVcomment.append(getString(R.string.phone_number) + ": " + owner.getProperty("phoneNumber").toString());
             }
 
             loading.dismiss();
@@ -670,10 +645,118 @@ public class VideoInfo extends AppCompatActivity {
         }
         super.onBackPressed();
     }
+
     @Override
     protected void onPause() {
         super.onPause();
         JCVideoPlayer.releaseAllVideos();
+    }
+
+    private class GetPassword extends  AsyncTask<Void, Void, String>{
+
+        @Override
+        protected void onPreExecute(){
+            //pd = ProgressDialog.show(VideoInfo.this, "", "Загрузка", true);
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            Acct passHolder = Helper.findPass();
+            String password = passHolder.getPassword();
+
+            if ((password != null) && (!password.equals(""))) {
+                return password;
+            } else return "ERROR";
+        }
+
+        @Override
+        protected void onPostExecute(String result){
+
+            if (result.equals("ERROR")){
+                //статус был обновлен, но не получилось скачать пароль, письмо не будет отправлено
+                Toast.makeText(VideoInfo.this, getString(R.string.approved), Toast.LENGTH_SHORT).show();
+                pd.dismiss();
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+            } else { //пароль найден, запуск отправки письма
+                //String body = "test body";
+                String body = setEmailBodyText(new StringBuilder());
+                new SendEmail().execute(result, body);
+                //Toast.makeText(VideoInfo.this, result, Toast.LENGTH_SHORT).show();
+            }
+
+           // pd.dismiss();
+        }
+    }
+
+    private class SendEmail extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            Mail m = new Mail("tester.kloop@gmail.com", params[0]);
+
+            String[] toArr = {"erlanamanatov@gmail.com", "kksezim@gmail.com", "akp@kloop.kg"};
+            //String[] toArr = {"erlanamanatov@gmail.com"};
+            m.setTo(toArr);
+            m.setFrom("JusticeCamera");
+            m.setSubject("Заявление одобрено");
+            m.setBody(params[1]);
+
+            try {
+                if (m.send()) {
+                    // Toast.makeText(MailApp.this, "Email was sent successfully.", Toast.LENGTH_LONG).show();
+                    return "OK";
+                } else {
+                    //Toast.makeText(MailApp.this, "Email was not sent.", Toast.LENGTH_LONG).show();
+                    return "ERROR";
+                }
+            } catch (Exception e) {
+                return e.toString();
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String result){
+            Toast.makeText(VideoInfo.this, getString(R.string.approved), Toast.LENGTH_SHORT).show();
+            if (result.equals("OK")) {
+                //Нарушение одобрено, письмо отправлено
+            } else if (result.equals("ERROR")) {
+                //нарушение одобрено, ошибка при отправке письма
+                //Toast.makeText(VideoInfo.this, "Error sending message", Toast.LENGTH_SHORT).show();
+            } else {
+                //нарушение одобрено, ошибка Exception
+                //можно прочитать данные об ошибке как result
+                //Toast.makeText(VideoInfo.this, "Ошибка exception "+result, Toast.LENGTH_SHORT).show();
+            }
+            pd.dismiss();
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+        }
+    }
+
+    private String setEmailBodyText(StringBuilder body){
+        body.append("Ф.И.О. заявителя: ").append(videoOwner.getProperty("lastName").toString() + " "
+                + videoOwner.getProperty("firstName").toString() + " "
+                + videoOwner.getProperty("middleName").toString() + "\n");
+        body.append("email: ").append(videoOwner.getEmail()).append("\n");
+        body.append("№ паспорта: ").append((videoOwner.getProperty("passportNo")).toString()).append("\n");
+        body.append("тел: ").append((videoOwner.getProperty("phoneNumber")).toString()).append("\n\n");
+        body.append("Данные по нарушению:").append("\n");
+        body.append("Название: ").append(thisViolation.getName()).append("\n");
+        body.append("Марка автомобиля: ").append(thisViolation.getCarMake()).append("\n");
+        body.append("Модель автомобиля: ").append(thisViolation.getCarModel()).append("\n");
+        body.append("Цвет: ").append(thisViolation.getColor()).append("\n");
+        body.append("Номер: ").append(thisViolation.getCarNumber()).append("\n");
+        body.append("Тип нарушения: ").append(thisViolation.getCategory().getType()).append("\n");
+        body.append("Комментарии пользователя: ").append(thisViolation.getComment()).append("\n");
+        if (!(thisViolation.getVideoUrl().equals(""))){
+            body.append("Ссылка на видео: ").append(thisViolation.getVideoUrl()).append("\n");
+        }
+        if (!(thisViolation.getPhotoUrl().equals(""))){
+            body.append("Ссылки на фотографии: ");
+            for (String url: listOfPhotoUrls){
+                body.append(url).append("\n");
+            }
+        }
+        return body.toString();
     }
 }
 

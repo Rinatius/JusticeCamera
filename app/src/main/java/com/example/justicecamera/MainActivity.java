@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity
     static String path = "";
     private static long back_pressed;
     File tempPhotoFile, compressedImage;
+    String password = "";
     String prefCarMake = "CarMake";
     String prefCarModel = "CarModel";
     String prefCarNumber = "CarNumber";
@@ -155,8 +156,16 @@ public class MainActivity extends AppCompatActivity
             if (resultCode == RESULT_OK && data != null && data.getData() != null) {
                 Uri uri = data.getData();
                 path = getRealPathFromURI(this, uri);
-                checkBoxVideo.setChecked(true);
-                checkBoxVideo.setText(getString(R.string.added_video));
+                File videoFile = new File(path);
+                if ((videoFile.length()/1024) > 25600){
+                    checkBoxVideo.setChecked(false);
+                    checkBoxVideo.setText(getString(R.string.video_notselected));
+                    path = "";
+                    Toast.makeText(this, getString(R.string.max_size_video), Toast.LENGTH_SHORT).show();
+                } else {
+                    checkBoxVideo.setChecked(true);
+                    checkBoxVideo.setText(getString(R.string.added_video));
+                }
 
             } else {
                 checkBoxVideo.setChecked(false);
@@ -922,7 +931,7 @@ public class MainActivity extends AppCompatActivity
         protected void onPostExecute(String result) {
 
             if (result.equals("videoUploaded")) {
-                Helper.showToast(getString(R.string.uploadedViolation), MainActivity.this);
+                //Helper.showToast(getString(R.string.uploadedViolation), MainActivity.this);
                 editCarMake.setText("");
                 editCarModel.setText("");
                 editCarNumber.setText("");
@@ -934,10 +943,60 @@ public class MainActivity extends AppCompatActivity
                 checkBoxVideo.setChecked(false);
                 checkBoxPhoto.setChecked(false);
                 images.clear();
+                pd.dismiss();
+                current = null;
+                current = new Violation();
+                //new SendEmail().execute();
+                new GetPassword().execute();
             } else if (result.equals("error")) {
                 Helper.showToast("Error, something went wrong", MainActivity.this);
+                pd.dismiss();
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
             }
 
+            //pd.dismiss();
+            //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+        }
+    }
+
+    private class SendEmail extends AsyncTask<Void, Void, String> {
+
+        @Override
+        protected String doInBackground(Void... params) {
+            Mail m = new Mail("tester.kloop@gmail.com", password);
+
+            String[] toArr = {"erlanamanatov@gmail.com"};
+            m.setTo(toArr);
+            m.setFrom("JusticeCamera");
+            m.setSubject("New Violation");
+            m.setBody("New violation was added in Justice Camera app.");
+
+            try {
+                // m.addAttachment("/sdcard/filelocation");
+
+                if (m.send()) {
+                    // Toast.makeText(MailApp.this, "Email was sent successfully.", Toast.LENGTH_LONG).show();
+                    return "OK";
+                } else {
+                    //Toast.makeText(MailApp.this, "Email was not sent.", Toast.LENGTH_LONG).show();
+                    return "ERROR";
+                }
+            } catch (Exception e) {
+                return e.toString();
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String result){
+            Toast.makeText(MainActivity.this, getString(R.string.uploadedViolation), Toast.LENGTH_SHORT).show();
+            if (result.equals("OK")) {
+                //Нарушение отправлено, письмо о новом нарушении отправлено
+            } else if (result.equals("ERROR")) {
+                //нарушение загружено, ошибка при отправке письма о новом нарушении
+            } else {
+                //нарушение отправлено, ошибка Exception
+                //можно прочитать данные об ошибке как result
+            }
             pd.dismiss();
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
         }
@@ -970,6 +1029,39 @@ public class MainActivity extends AppCompatActivity
                 showDialog();
             } else {
                 showReport();
+            }
+        }
+    }
+
+    private class GetPassword extends  AsyncTask<Void, Void, String>{
+
+        @Override
+        protected void onPreExecute(){
+            pd = ProgressDialog.show(MainActivity.this, "", getString(R.string.wait), true);
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            Acct passHolder = Helper.findPass();
+            String password = passHolder.getPassword();
+
+            if ((password != null) && (!password.equals(""))) {
+                return password;
+            } else return "ERROR";
+        }
+
+        @Override
+        protected void onPostExecute(String result){
+
+            if (result.equals("ERROR")){
+                //нарушение было отправлено, но не удалось получить пароль почты, письмо не будет отправлено
+                Toast.makeText(MainActivity.this, "Нарушение отправлено", Toast.LENGTH_SHORT).show();
+                pd.dismiss();
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+            } else {
+                //нарушение отправлено, получен пароль от почты, запускается задача отправки письма
+                password = result;
+                new SendEmail().execute();
             }
         }
     }

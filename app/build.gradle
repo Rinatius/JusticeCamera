@@ -7,8 +7,8 @@ android {
         applicationId "kloopMedia.justicecamera"
         minSdkVersion 17
         targetSdkVersion 24
-        versionCode 9
-        versionName "2.0"
+        versionCode 14
+        versionName "2.3"
 
         multiDexEnabled true
     }
@@ -35,4 +35,5 @@ dependencies {
     compile 'id.zelory:compressor:1.0.4'
     compile 'fm.jiecao:jiecaovideoplayer:5.4'
     compile 'com.danikula:videocache:2.6.4'
+    compile files('libs/activation.jar')
 }
