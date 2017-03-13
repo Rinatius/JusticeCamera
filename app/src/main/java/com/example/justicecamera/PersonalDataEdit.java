@@ -15,13 +15,18 @@ import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.RadioButton;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,7 +50,10 @@ public class PersonalDataEdit extends AppCompatActivity {
     Button buttonSavePersonalData, buttonAddUserPhoto;
     EditText editLastname, editFirstname, editMiddlename, editCarNumber, editPassportNo, editPhoneNumber;
     RadioButton radioButtonMale, radioButtonFeMale;
-    TextView textViewTester, textViewCard;
+    TextView textViewTester, textViewCard, textNotificationStatus;
+    Switch notificationSwitch;
+    LinearLayout notificationLayout;
+    CompoundButton.OnCheckedChangeListener changeNotificationStatusListener;
 
     private static final int PICK_FROM_CAMERA = 1;
     private static final int CROP_FROM_CAMERA = 2;
@@ -58,6 +66,7 @@ public class PersonalDataEdit extends AppCompatActivity {
     String carNumber = "";
     String passportNo = "";
     String phoneNumber = "";
+    private static final String TAG = "myLogs";
     boolean sex = true;
     String lastName = "";
     String firstName = "";
@@ -93,6 +102,47 @@ public class PersonalDataEdit extends AppCompatActivity {
     }
 
     private void setUserParams() {
+
+
+
+        if (user.getProperty("status").toString().equals("2")) {
+            final ProgressDialog progressDialog = ProgressDialog.show(PersonalDataEdit.this, "", getString(R.string.wait), true);
+
+            LayoutInflater factory = LayoutInflater.from(this);
+            View myView = factory.inflate(R.layout.notification_selector, null);
+            textNotificationStatus = (TextView) myView.findViewById(R.id.textViewNotification);
+            notificationSwitch = (Switch) myView.findViewById(R.id.switchNotification);
+            notificationLayout.addView(myView);
+
+            Backendless.Messaging.getDeviceRegistration(new AsyncCallback<com.backendless.DeviceRegistration>() {
+                @Override
+                public void handleResponse(com.backendless.DeviceRegistration response) {
+                    List<String> channels = response.getChannels();
+                    if (channels.contains("moderator")){
+                        textNotificationStatus.setText(getString(R.string.notifications_turned_on));
+                        notificationSwitch.setChecked(true);
+                    } else {
+                        textNotificationStatus.setText(getString(R.string.notifications_turned_off));
+                        notificationSwitch.setChecked(false);
+                    }
+                    notificationSwitch.setOnCheckedChangeListener(changeNotificationStatusListener);
+                    progressDialog.dismiss();
+                }
+
+                @Override
+                public void handleFault(BackendlessFault fault) {
+                    textNotificationStatus.setText(getString(R.string.notifications_turned_off));
+                    notificationSwitch.setChecked(false);
+                    notificationSwitch.setOnCheckedChangeListener(changeNotificationStatusListener);
+                    progressDialog.dismiss();
+                }
+
+            } );
+
+
+        }
+
+
         if (user.getProperty("firstName") != null) {
             editFirstname.setText(user.getProperty("firstName").toString());
 
@@ -114,7 +164,7 @@ public class PersonalDataEdit extends AppCompatActivity {
             if (user.getProperty("phoneNumber")!=null){
             editPhoneNumber.setText(user.getProperty("phoneNumber").toString());}
             if (user.getProperty("sex")!=null){
-            boolean sex = (boolean) user.getProperty("sex");}
+            sex = (boolean) user.getProperty("sex");}
             radioButtonMale.setChecked(sex);
             radioButtonFeMale.setChecked(!sex);
         }
@@ -144,6 +194,7 @@ public class PersonalDataEdit extends AppCompatActivity {
         month.setMinValue(1);
         year.setMaxValue(2000);
         year.setMinValue(1950);
+        notificationLayout = (LinearLayout) findViewById(R.id.notification_layout);
 
         File folder = new File(Environment.getExternalStorageDirectory() + File.separator
                 + getString(R.string.app_name)+File.separator+"user_"+user.getUserId());
@@ -181,6 +232,41 @@ public class PersonalDataEdit extends AppCompatActivity {
         radioButtonFeMale.setOnClickListener(radioListener);
         radioButtonMale.setOnClickListener(radioListener);
 
+        changeNotificationStatusListener = new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked){
+                    Backendless.Messaging.registerDevice( "706245228160", "moderator", new AsyncCallback<Void>()
+                    {
+                        @Override
+                        public void handleResponse( Void response )
+                        {
+                            textNotificationStatus.setText(getString(R.string.notifications_turned_on));
+                            Log.d(TAG, "Device sucsessfully registered");
+                        }
+
+                        @Override
+                        public void handleFault( BackendlessFault fault )
+                        {
+                            notificationSwitch.setOnCheckedChangeListener(null);
+                            notificationSwitch.setChecked(false);
+                            notificationSwitch.setEnabled(false);
+                            textNotificationStatus.setText(getString(R.string.notifications_turned_off));
+                            Toast.makeText(PersonalDataEdit.this, "Server error, please try later", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "Device registration failed");
+                        }
+                    } );
+                } else {
+                    try{
+                        Backendless.Messaging.unregisterDevice();
+                        textNotificationStatus.setText(getString(R.string.notifications_turned_off));
+                        Log.d(TAG, "Device sucsessfully unregistered");
+                    } catch (Exception e){
+                        Log.d(TAG, String.format("Error while cancelling device registration %s", e.getMessage()));
+                    }
+                }
+            }
+        };
         preparePhotoDialog();
     }
 
@@ -192,7 +278,6 @@ public class PersonalDataEdit extends AppCompatActivity {
         switch (requestCode) {
             case PICK_FROM_CAMERA:
                 doCrop();
-
                 break;
 
             case PICK_FROM_FILE:
@@ -214,16 +299,12 @@ public class PersonalDataEdit extends AppCompatActivity {
                 File f = new File(Environment.getExternalStorageDirectory() + File.separator
                         + getString(R.string.app_name)+File.separator+"user_"+user.getUserId(), "user_photo.jpg");
                 pathToUserPhoto = f.getAbsolutePath();
-                // Toast.makeText(getApplicationContext(), pathToUserPhoto, Toast.LENGTH_LONG).show();
-
-                //    if (f.exists()) f.delete();
 
                 FileOutputStream out = null;
                 try {
                     out = new FileOutputStream(f);
                     photo.compress(Bitmap.CompressFormat.PNG, 100, out); // bmp is your Bitmap instance
                     // PNG is a lossless format, the compression factor (100) is ignored
-
 
                 } catch (Exception e) {
                     e.printStackTrace();

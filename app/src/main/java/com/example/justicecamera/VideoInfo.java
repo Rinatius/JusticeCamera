@@ -73,8 +73,6 @@ public class VideoInfo extends AppCompatActivity {
     public static String THIS_OBJECT_ID = "objectId";
     public static String VIDEO_URL = "url";
     VideoView video;
-    //ImageView img, img2, img3, img4, img5;
-    ArrayList<ImageView> imgList;
     ArrayList<String> listOfPhotoUrls;
     ProgressDialog pd;
     BackendlessUser user;
@@ -84,7 +82,6 @@ public class VideoInfo extends AppCompatActivity {
     int width, height;
 
     LinearLayout linearLayout;
-    JCVideoPlayerStandard jcVideoPlayerStandard;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -262,7 +259,7 @@ public class VideoInfo extends AppCompatActivity {
         if (photoUrls != null) {
             if (photoUrls.length() > 0) {
 
-                listOfPhotoUrls = getUrlsFromString(photoUrls);
+                listOfPhotoUrls = Helper.getUrlsFromString(photoUrls);
                 int k = 0;
                 for (int i = 0; i < grid.getRowCount(); i++) {
                     for (int j = 0; j < grid.getColumnCount(); j++) {
@@ -594,64 +591,6 @@ public class VideoInfo extends AppCompatActivity {
         }
     }
 
-    private class DownloadImgs extends AsyncTask<String, Void, ArrayList<Bitmap>> {
-
-        @Override
-        protected void onPreExecute() {
-            loading = new ProgressDialog(VideoInfo.this);
-            loading.setCancelable(false);
-            loading.setTitle("Загрузка изображений");
-            loading.setMessage(getString(R.string.wait));
-            loading.show();
-        }
-
-        @Override
-        protected ArrayList<Bitmap> doInBackground(String... urls) {
-            ArrayList<Bitmap> list = new ArrayList<>();
-            for (int i = 0; i < urls.length; i++) {
-                String urldisplay = urls[i];
-                Bitmap mIcon11 = null;
-                //InputStream in;
-                try {
-                    InputStream in = new java.net.URL(urldisplay).openStream();
-                    mIcon11 = BitmapFactory.decodeStream(in);
-                    list.add(mIcon11);
-                } catch (Exception e) {
-                    // Toast.makeText(VideoInfo.class, "Error", Toast.LENGTH_SHORT).show();
-                    // e.printStackTrace();
-                }
-                //return mIcon11;
-                //return Helper.findUserById(strings[0]);
-            }
-            return list;
-        }
-
-        protected void onPostExecute(ArrayList<Bitmap> bitmaps) {
-
-            for (int i = 0; i < bitmaps.size(); i++) {
-                imgList.get(i).setImageBitmap(bitmaps.get(i));
-            }
-
-            loading.dismiss();
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
-            checkUserStatus();
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (JCVideoPlayer.backPress()) {
-            return;
-        }
-        super.onBackPressed();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        JCVideoPlayer.releaseAllVideos();
-    }
-
     private class GetPassword extends  AsyncTask<Void, Void, String>{
 
         @Override
@@ -757,6 +696,20 @@ public class VideoInfo extends AppCompatActivity {
             }
         }
         return body.toString();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (JCVideoPlayer.backPress()) {
+            return;
+        }
+        super.onBackPressed();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        JCVideoPlayer.releaseAllVideos();
     }
 }
 

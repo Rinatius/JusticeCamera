@@ -23,6 +23,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,8 +41,13 @@ import android.widget.Toast;
 import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
+import com.backendless.async.callback.BackendlessCallback;
 import com.backendless.exceptions.BackendlessException;
 import com.backendless.exceptions.BackendlessFault;
+import com.backendless.messaging.DeliveryOptions;
+import com.backendless.messaging.PublishOptions;
+import com.backendless.messaging.PushPolicyEnum;
+import com.backendless.services.messaging.MessageStatus;
 import com.esafirm.imagepicker.features.ImagePicker;
 import com.esafirm.imagepicker.model.Image;
 
@@ -53,10 +59,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-import fm.jiecao.jcvideoplayer_lib.JCVideoPlayerStandard;
 import id.zelory.compressor.Compressor;
 
 public class MainActivity extends AppCompatActivity
@@ -71,6 +77,7 @@ public class MainActivity extends AppCompatActivity
     File tempPhotoFile, compressedImage;
     String password = "";
     String prefCarMake = "CarMake";
+    private static String TAG = "myLogs";
     String prefCarModel = "CarModel";
     String prefCarNumber = "CarNumber";
     String prefCarColor = "CarColor";
@@ -118,7 +125,6 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
                 Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(i, RESULT_LOAD_VIDEO);
-
             }
         });
 
@@ -128,6 +134,7 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View v) {
                 images.clear();
                 start();
+
             }
         });
 
@@ -157,7 +164,7 @@ public class MainActivity extends AppCompatActivity
                 Uri uri = data.getData();
                 path = getRealPathFromURI(this, uri);
                 File videoFile = new File(path);
-                if ((videoFile.length()/1024) > 25600){
+                if ((videoFile.length() / 1024) > 25600) {
                     checkBoxVideo.setChecked(false);
                     checkBoxVideo.setText(getString(R.string.video_notselected));
                     path = "";
@@ -211,15 +218,11 @@ public class MainActivity extends AppCompatActivity
         {
             if (resultCode == RESULT_OK) {
                 images = (ArrayList<Image>) ImagePicker.getImages(data);
-                //printImages(images);
                 checkBoxPhoto.setChecked(true);
-                //checkBoxPhoto.setText(R.string.photos_added+ ": " + Integer.toString(images.size()));
                 checkBoxPhoto.setText(R.string.photos_added);
-                //return;
             } else {
                 checkBoxPhoto.setText(R.string.photo_not_selected);
                 checkBoxPhoto.setChecked(false);
-                //Toast.makeText(MainActivity.this, "", Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -294,11 +297,9 @@ public class MainActivity extends AppCompatActivity
         } else {
             if (back_pressed + 2000 > System.currentTimeMillis()) {
                 Intent a = new Intent(Intent.ACTION_MAIN);
-                //a.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 a.addCategory(Intent.CATEGORY_HOME);
                 a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(a);
-               // finish();
             } else {
                 Toast.makeText(getBaseContext(), getString(R.string.press_to_exit),
                         Toast.LENGTH_SHORT).show();
@@ -816,18 +817,6 @@ public class MainActivity extends AppCompatActivity
                 .start(RESULT_LOAD_IMAGE); // start image picker activity with request code
     }
 
-    private void printImages(List<Image> images) {
-        if (images == null) return;
-
-        StringBuilder stringBuffer = new StringBuilder();
-        for (int i = 0, l = images.size(); i < l; i++) {
-            stringBuffer.append(images.get(i).getPath()).append("\n");
-        }
-        //textView.setText(stringBuffer.toString());
-        //photoUrls = stringBuffer.toString();
-        Toast.makeText(MainActivity.this, stringBuffer.toString(), Toast.LENGTH_SHORT).show();
-    }
-
     private class UpdateUserTask extends AsyncTask<BackendlessUser, Void, String> {
 
         @Override
@@ -856,7 +845,6 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected String doInBackground(Violation... violations) {
-            //final File file = new File(path);
             try {
                 if (!(path.equals(""))) {
                     File file = new File(path);
@@ -882,8 +870,7 @@ public class MainActivity extends AppCompatActivity
                         tempPhotoFile = new File(Environment.getExternalStorageDirectory() + File.separator
                                 + getString(R.string.app_name), UUID.randomUUID().toString() + ".jpg");
 
-                        if ((photoFile.length()/1024) > 1100){
-                            //compressPhoto();
+                        if ((photoFile.length() / 1024) > 1100) {
                             compressedImage = new Compressor.Builder(MainActivity.this)
                                     .setMaxWidth(2400)
                                     .setMaxHeight(1800)
@@ -893,22 +880,17 @@ public class MainActivity extends AppCompatActivity
                                             + getString(R.string.app_name))
                                     .build()
                                     .compressToFile(photoFile);
-                            //uploadPhoto();
-                             copy(compressedImage, tempPhotoFile);
+
+                            copy(compressedImage, tempPhotoFile);
                             compressedImage.delete();
                         } else {
-                            //copyWithNewName();
                             copy(photoFile, tempPhotoFile);
-                            //uploadPhoto();
                         }
 
-                       // copy(photoFile, tempPhotoFile);
-
-                        //String uploadedPhotoUrl = Helper.uploadPhoto(photoFile);
                         String uploadedPhotoUrl = Helper.uploadPhoto(tempPhotoFile);
                         photoUrls.append(uploadedPhotoUrl).append(" ");
 
-                        if (tempPhotoFile.exists()){
+                        if (tempPhotoFile.exists()) {
                             tempPhotoFile.delete();
                         }
                     }
@@ -931,7 +913,6 @@ public class MainActivity extends AppCompatActivity
         protected void onPostExecute(String result) {
 
             if (result.equals("videoUploaded")) {
-                //Helper.showToast(getString(R.string.uploadedViolation), MainActivity.this);
                 editCarMake.setText("");
                 editCarModel.setText("");
                 editCarNumber.setText("");
@@ -946,16 +927,14 @@ public class MainActivity extends AppCompatActivity
                 pd.dismiss();
                 current = null;
                 current = new Violation();
-                //new SendEmail().execute();
-                new GetPassword().execute();
+                pd.dismiss();
+                new SendEmailAndPublishNotification().execute();
             } else if (result.equals("error")) {
                 Helper.showToast("Error, something went wrong", MainActivity.this);
                 pd.dismiss();
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
             }
 
-            //pd.dismiss();
-            //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
         }
     }
 
@@ -972,8 +951,6 @@ public class MainActivity extends AppCompatActivity
             m.setBody("New violation was added in Justice Camera app.");
 
             try {
-                // m.addAttachment("/sdcard/filelocation");
-
                 if (m.send()) {
                     // Toast.makeText(MailApp.this, "Email was sent successfully.", Toast.LENGTH_LONG).show();
                     return "OK";
@@ -987,8 +964,8 @@ public class MainActivity extends AppCompatActivity
         }
 
         @Override
-        protected void onPostExecute(String result){
-            Toast.makeText(MainActivity.this, getString(R.string.uploadedViolation), Toast.LENGTH_SHORT).show();
+        protected void onPostExecute(String result) {
+
             if (result.equals("OK")) {
                 //Нарушение отправлено, письмо о новом нарушении отправлено
             } else if (result.equals("ERROR")) {
@@ -997,8 +974,35 @@ public class MainActivity extends AppCompatActivity
                 //нарушение отправлено, ошибка Exception
                 //можно прочитать данные об ошибке как result
             }
-            pd.dismiss();
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+            //Toast.makeText(MainActivity.this, getString(R.string.uploadedViolation), Toast.LENGTH_SHORT).show();
+
+            String message = getString(R.string.new_violation_added);
+
+            DeliveryOptions deliveryOptions = new DeliveryOptions();
+            deliveryOptions.setPushPolicy(PushPolicyEnum.ONLY);
+
+            PublishOptions publishOptions = new PublishOptions();
+            HashMap<String, String> headers = new HashMap<String, String>();
+            headers.put("android-ticker-text", getString(R.string.new_statement));
+            headers.put("android-content-title", getString(R.string.new_violation_added));
+            headers.put("android-content-text", "");
+            publishOptions.setHeaders(headers);
+
+            Backendless.Messaging.publish(Defaults.MODERATOR_CHANNEL_NAME, message, publishOptions
+                    , deliveryOptions, new BackendlessCallback<MessageStatus>() {
+                        @Override
+                        public void handleResponse(MessageStatus messageStatus) {
+                            Toast.makeText(MainActivity.this, getString(R.string.uploadedViolation), Toast.LENGTH_SHORT).show();
+//                            pd.dismiss();
+//                            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+                        }
+
+                        public void handleFault(BackendlessFault fault) {
+                            Toast.makeText(MainActivity.this, getString(R.string.uploadedViolation), Toast.LENGTH_SHORT).show();
+//                            pd.dismiss();
+//                            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+                        }
+                    });
         }
     }
 
@@ -1033,11 +1037,11 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private class GetPassword extends  AsyncTask<Void, Void, String>{
+    private class GetPassword extends AsyncTask<Void, Void, String> {
 
         @Override
-        protected void onPreExecute(){
-            pd = ProgressDialog.show(MainActivity.this, "", getString(R.string.wait), true);
+        protected void onPreExecute() {
+            //pd = ProgressDialog.show(MainActivity.this, "", getString(R.string.wait), true);
         }
 
         @Override
@@ -1051,9 +1055,9 @@ public class MainActivity extends AppCompatActivity
         }
 
         @Override
-        protected void onPostExecute(String result){
+        protected void onPostExecute(String result) {
 
-            if (result.equals("ERROR")){
+            if (result.equals("ERROR")) {
                 //нарушение было отправлено, но не удалось получить пароль почты, письмо не будет отправлено
                 Toast.makeText(MainActivity.this, "Нарушение отправлено", Toast.LENGTH_SHORT).show();
                 pd.dismiss();
@@ -1065,4 +1069,93 @@ public class MainActivity extends AppCompatActivity
             }
         }
     }
+
+    private class SendEmailAndPublishNotification extends AsyncTask<Void, Void, String> {
+
+        @Override
+        protected void onPreExecute() {
+            pd = ProgressDialog.show(MainActivity.this, "", "Завершение", true);
+
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            try {
+                //getting password from backendless
+                Acct passHolder = Helper.findPass();
+                String password = passHolder.getPassword();
+
+                if ((password == null) || (password.equals(""))) {
+                    return "Error";
+                }
+
+                //sending email to moderators
+                String[] recipients = {"erlanamanatov@gmail.com"};
+                sendEmail(recipients, password);
+
+                //publishing push notifications to moderators
+                publishPushNotification();
+
+                return "OK";
+
+            } catch (BackendlessException e) {
+                Log.d(TAG, e.getMessage());
+                return e.getMessage();
+            } catch (Exception e) {
+                Log.d(TAG, e.getMessage());
+                return e.getMessage();
+            }
+
+            //return "OK";
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            pd.dismiss();
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+            if (result.equals("OK")) {
+                Log.d(TAG, "Sucsess");
+            } else {
+                Log.d(TAG, "ERROR");
+            }
+
+        }
+
+        private void publishPushNotification() {
+
+            String message = getString(R.string.new_violation_added);
+
+            DeliveryOptions deliveryOptions = new DeliveryOptions();
+            deliveryOptions.setPushPolicy(PushPolicyEnum.ONLY);
+
+            PublishOptions publishOptions = new PublishOptions();
+            HashMap<String, String> headers = new HashMap<String, String>();
+            headers.put("android-ticker-text", getString(R.string.new_statement));
+            headers.put("android-content-title", getString(R.string.new_violation_added));
+            headers.put("android-content-text", user.getEmail() + " зафиксировал нарушение");
+            publishOptions.setHeaders(headers);
+            MessageStatus messageStatus = Backendless.Messaging.publish(Defaults.MODERATOR_CHANNEL_NAME, message, publishOptions
+                    , deliveryOptions);
+
+            Log.d(TAG, messageStatus.getStatus().toString());
+
+        }
+
+        private void sendEmail(String[] recipients, String password) throws Exception {
+            Mail mail = new Mail("tester.kloop@gmail.com", password);
+            mail.setTo(recipients);
+            mail.setFrom("JusticeCamera");
+            mail.setSubject("New Violation");
+            mail.setBody("New violation was added in Justice Camera app.");
+
+            if (mail.send()) {
+                // email was succesfully sent
+                Log.d(TAG, "email was succesfully sent");
+            } else {
+                Log.d(TAG, "email was not sent");
+            }
+        }
+    }
+
+
 }

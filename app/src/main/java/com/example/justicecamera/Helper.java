@@ -11,6 +11,7 @@ import com.backendless.files.BackendlessFile;
 import com.backendless.persistence.BackendlessDataQuery;
 
 import java.io.File;
+import java.util.ArrayList;
 
 
 /**
@@ -67,10 +68,21 @@ public final class Helper extends Object {
     }
 
     public static void deleteViolation(Violation violation) throws Exception {
-        String fullUrl = violation.getVideoUrl();
-        String fileName = fullUrl.substring(fullUrl.lastIndexOf('/') + 1);
-        Backendless.Files.remove(VIDEO_DIRECTORY + "/" + fileName);
-        Backendless.Persistence.of(Violation.class).remove(violation);
+
+            if (!(violation.getVideoUrl().equals(""))) {
+                String fullUrl = violation.getVideoUrl();
+                String fileName = fullUrl.substring(fullUrl.lastIndexOf('/') + 1);
+                Backendless.Files.remove(VIDEO_DIRECTORY + "/" + fileName);
+            }
+
+            if (!(violation.getPhotoUrl().equals(""))) {
+                ArrayList<String> urls = getUrlsFromString(violation.getPhotoUrl());
+                for (String url : urls) {
+                    String fileName = url.substring(url.lastIndexOf('/') + 1);
+                    Backendless.Files.remove(VIOL_PHOTO_DIRECTORY + "/" + fileName);
+                }
+            }
+            Backendless.Persistence.of(Violation.class).remove(violation);
     }
 
     public static void showToast(String text, Context context) {
@@ -105,4 +117,20 @@ public final class Helper extends Object {
             Backendless.Persistence.save(report);
     }
 
+    public static ArrayList<String> getUrlsFromString(String photoUrls) {
+        ArrayList<String> listOfUrls = new ArrayList<>();
+        char[] chars = photoUrls.toCharArray();
+        StringBuilder url = new StringBuilder();
+        for (int i = 0; i < chars.length; i++) {
+            if (chars[i] != ' ') {
+                url.append(chars[i]);
+            } else {
+                if (url.length() > 0) {
+                    listOfUrls.add(url.toString());
+                    url.setLength(0);
+                }
+            }
+        }
+        return listOfUrls;
+    }
 }

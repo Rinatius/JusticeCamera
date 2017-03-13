@@ -101,4 +101,8 @@
     <string name="tap_to_select">Нажмите для выбора</string>
     <string name="deleting">Удаление...</string>
     <string name="max_size_video">Размер файла не должен превышать 25Мб</string>
+    <string name="notifications_turned_on">Push уведомления включены</string>
+    <string name="notifications_turned_off">Push уведомления отключены</string>
+    <string name="new_violation_added">Добавлено новое нарушение</string>
+    <string name="new_statement">Новое заявление</string>
 </resources>
