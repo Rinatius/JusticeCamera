@@ -104,7 +104,6 @@ public class PersonalDataEdit extends AppCompatActivity {
     private void setUserParams() {
 
 
-
         if (user.getProperty("status").toString().equals("2")) {
             final ProgressDialog progressDialog = ProgressDialog.show(PersonalDataEdit.this, "", getString(R.string.wait), true);
 
@@ -118,7 +117,7 @@ public class PersonalDataEdit extends AppCompatActivity {
                 @Override
                 public void handleResponse(com.backendless.DeviceRegistration response) {
                     List<String> channels = response.getChannels();
-                    if (channels.contains("moderator")){
+                    if (channels.contains("moderator")) {
                         textNotificationStatus.setText(getString(R.string.notifications_turned_on));
                         notificationSwitch.setChecked(true);
                     } else {
@@ -137,7 +136,7 @@ public class PersonalDataEdit extends AppCompatActivity {
                     progressDialog.dismiss();
                 }
 
-            } );
+            });
 
 
         }
@@ -145,29 +144,39 @@ public class PersonalDataEdit extends AppCompatActivity {
 
         if (user.getProperty("firstName") != null) {
             editFirstname.setText(user.getProperty("firstName").toString());
-
-            if (user.getProperty("lastName")!= null){
-                editLastname.setText(user.getProperty("lastName").toString());
-            }
-            if (user.getProperty("carNumber")!=null){
-            editCarNumber.setText(user.getProperty("carNumber").toString());}
-            if (user.getProperty("middleName")!=null){
-            editMiddlename.setText(user.getProperty("middleName").toString());}
-            if (user.getProperty("dayBirthday")!=null){
-            day.setValue(Integer.parseInt(user.getProperty("dayBirthday").toString()));}
-            if (user.getProperty("monthBirhday")!=null){
-            month.setValue(Integer.parseInt(user.getProperty("monthBirthday").toString()));}
-            if (user.getProperty("yearBirhday")!= null){
-            year.setValue(Integer.parseInt(user.getProperty("yearBirhday").toString()));}
-            if (user.getProperty("passportNo")!=null){
-            editPassportNo.setText(user.getProperty("passportNo").toString());}
-            if (user.getProperty("phoneNumber")!=null){
-            editPhoneNumber.setText(user.getProperty("phoneNumber").toString());}
-            if (user.getProperty("sex")!=null){
-            sex = (boolean) user.getProperty("sex");}
-            radioButtonMale.setChecked(sex);
-            radioButtonFeMale.setChecked(!sex);
         }
+
+        if (user.getProperty("lastName") != null) {
+            editLastname.setText(user.getProperty("lastName").toString());
+        }
+
+        if (user.getProperty("carNumber") != null) {
+            editCarNumber.setText(user.getProperty("carNumber").toString());
+        }
+        if (user.getProperty("middleName") != null) {
+            editMiddlename.setText(user.getProperty("middleName").toString());
+        }
+
+        if (user.getProperty("dayBirthday") != null) {
+            day.setValue(Integer.parseInt(user.getProperty("dayBirthday").toString()));
+        }
+        if (user.getProperty("monthBirhday") != null) {
+            month.setValue(Integer.parseInt(user.getProperty("monthBirthday").toString()));
+        }
+        if (user.getProperty("yearBirhday") != null) {
+            year.setValue(Integer.parseInt(user.getProperty("yearBirhday").toString()));
+        }
+        if (user.getProperty("passportNo") != null) {
+            editPassportNo.setText(user.getProperty("passportNo").toString());
+        }
+        if (user.getProperty("phoneNumber") != null) {
+            editPhoneNumber.setText(user.getProperty("phoneNumber").toString());
+        }
+        if (user.getProperty("sex") != null) {
+            sex = (boolean) user.getProperty("sex");
+        }
+        radioButtonMale.setChecked(sex);
+        radioButtonFeMale.setChecked(!sex);
     }
 
     private void init() {
@@ -197,25 +206,24 @@ public class PersonalDataEdit extends AppCompatActivity {
         notificationLayout = (LinearLayout) findViewById(R.id.notification_layout);
 
         File folder = new File(Environment.getExternalStorageDirectory() + File.separator
-                + getString(R.string.app_name)+File.separator+"user_"+user.getUserId());
+                + getString(R.string.app_name) + File.separator + "user_" + user.getUserId());
         if (!folder.exists()) {
             folder.mkdir();
         }
 
         File file = new File(Environment.getExternalStorageDirectory() + File.separator
-                + getString(R.string.app_name)+File.separator+"user_"+user.getUserId(), "user_photo.jpg");
+                + getString(R.string.app_name) + File.separator + "user_" + user.getUserId(), "user_photo.jpg");
         if (file.exists()) {
             Uri userPhoto = Uri.fromFile(file);
             mImageView.setImageURI(userPhoto);
             pathToUserPhoto = Environment.getExternalStorageDirectory() + File.separator
-                    + getString(R.string.app_name)+File.separator+"user_"+user.getUserId() + "/user_photo.jpg";
+                    + getString(R.string.app_name) + File.separator + "user_" + user.getUserId() + "/user_photo.jpg";
         }
 
         // true = male, false = female
         radioListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO Auto-generated method stub
                 RadioButton rb = (RadioButton) v;
                 switch (rb.getId()) {
                     case R.id.radioButtonMale:
@@ -235,19 +243,16 @@ public class PersonalDataEdit extends AppCompatActivity {
         changeNotificationStatusListener = new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked){
-                    Backendless.Messaging.registerDevice( "706245228160", "moderator", new AsyncCallback<Void>()
-                    {
+                if (isChecked) {
+                    Backendless.Messaging.registerDevice("706245228160", "moderator", new AsyncCallback<Void>() {
                         @Override
-                        public void handleResponse( Void response )
-                        {
+                        public void handleResponse(Void response) {
                             textNotificationStatus.setText(getString(R.string.notifications_turned_on));
                             Log.d(TAG, "Device sucsessfully registered");
                         }
 
                         @Override
-                        public void handleFault( BackendlessFault fault )
-                        {
+                        public void handleFault(BackendlessFault fault) {
                             notificationSwitch.setOnCheckedChangeListener(null);
                             notificationSwitch.setChecked(false);
                             notificationSwitch.setEnabled(false);
@@ -255,13 +260,13 @@ public class PersonalDataEdit extends AppCompatActivity {
                             Toast.makeText(PersonalDataEdit.this, "Server error, please try later", Toast.LENGTH_SHORT).show();
                             Log.d(TAG, "Device registration failed");
                         }
-                    } );
+                    });
                 } else {
-                    try{
+                    try {
                         Backendless.Messaging.unregisterDevice();
                         textNotificationStatus.setText(getString(R.string.notifications_turned_off));
                         Log.d(TAG, "Device sucsessfully unregistered");
-                    } catch (Exception e){
+                    } catch (Exception e) {
                         Log.d(TAG, String.format("Error while cancelling device registration %s", e.getMessage()));
                     }
                 }
@@ -297,7 +302,7 @@ public class PersonalDataEdit extends AppCompatActivity {
                 }
 
                 File f = new File(Environment.getExternalStorageDirectory() + File.separator
-                        + getString(R.string.app_name)+File.separator+"user_"+user.getUserId(), "user_photo.jpg");
+                        + getString(R.string.app_name) + File.separator + "user_" + user.getUserId(), "user_photo.jpg");
                 pathToUserPhoto = f.getAbsolutePath();
 
                 FileOutputStream out = null;
@@ -414,7 +419,7 @@ public class PersonalDataEdit extends AppCompatActivity {
                     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
                     mImageCaptureUri = Uri.fromFile(new File(Environment.getExternalStorageDirectory() + File.separator
-                            + getString(R.string.app_name)+File.separator+"user_"+user.getUserId(), "user_photo.jpg"));
+                            + getString(R.string.app_name) + File.separator + "user_" + user.getUserId(), "user_photo.jpg"));
 
                     intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, mImageCaptureUri);
 
@@ -438,17 +443,20 @@ public class PersonalDataEdit extends AppCompatActivity {
     }
 
     private File photoFileToUpload() {
-        final File fileSrc = new File(pathToUserPhoto);
+        if (pathToUserPhoto.equals("")) {
+            return null;
+        } else {
+            final File fileSrc = new File(pathToUserPhoto);
 
-        fileUpl = new File(Environment.getExternalStorageDirectory() + File.separator
-                + getString(R.string.app_name) + "/userPhoto_" + user.getProperty("objectId") + ".jpg");
-        try {
-            copy(fileSrc, fileUpl);
-        } catch (IOException e) {
-            e.printStackTrace();
+            fileUpl = new File(Environment.getExternalStorageDirectory() + File.separator
+                    + getString(R.string.app_name) + "/userPhoto_" + user.getProperty("objectId") + ".jpg");
+            try {
+                copy(fileSrc, fileUpl);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return fileUpl;
         }
-        return fileUpl;
-
     }
 
     private void prepareFields() {
@@ -473,7 +481,7 @@ public class PersonalDataEdit extends AppCompatActivity {
         user.setProperty("sex", sex);
         user.setProperty("middleName", middleName);
 
-        if (user.getProperty("status") == null){
+        if (user.getProperty("status") == null) {
             user.setProperty("status", "0");
         }
 
@@ -482,7 +490,7 @@ public class PersonalDataEdit extends AppCompatActivity {
     private class UpdateUser extends AsyncTask<File, Void, String> {
         @Override
         protected void onPreExecute() {
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
             updatingUser = new ProgressDialog(PersonalDataEdit.this);
             updatingUser.setTitle(getString(R.string.updating_user));
             updatingUser.setMessage(getString(R.string.wait));
@@ -507,11 +515,13 @@ public class PersonalDataEdit extends AppCompatActivity {
             super.onPostExecute(result);
             if (result.equals("updated")) {
                 Toast.makeText(getApplicationContext(), getString(R.string.updated_user), Toast.LENGTH_LONG).show();
-            } else if (result.equals("error")){
+            } else if (result.equals("error")) {
                 Toast.makeText(getApplicationContext(), "Error, something went wrong", Toast.LENGTH_LONG);
             }
 
-            fileUpl.delete();
+            if (fileUpl != null) {
+                if (fileUpl.exists()) fileUpl.delete();
+            }
             updatingUser.dismiss();
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
         }

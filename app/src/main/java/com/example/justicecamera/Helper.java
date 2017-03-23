@@ -45,10 +45,13 @@ public final class Helper extends Object {
     }
 
     public static void updateUserWithPhoto(BackendlessUser user, File file) throws Exception {
-        BackendlessFile uploadedUserPhoto = Backendless.Files.upload(file, USERS_PHOTO_DIRECTORY, OVERWRITE);
-        String photoUrl = uploadedUserPhoto.getFileURL();
+        if (file != null) {
+            BackendlessFile uploadedUserPhoto = Backendless.Files.upload(file, USERS_PHOTO_DIRECTORY, OVERWRITE);
+            String photoUrl = uploadedUserPhoto.getFileURL();
 
-        user.setProperty("photoUrl", photoUrl);
+            user.setProperty("photoUrl", photoUrl);
+        }
+
         Backendless.UserService.update(user);
     }
 

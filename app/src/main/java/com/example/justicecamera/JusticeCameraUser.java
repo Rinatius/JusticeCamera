@@ -49,6 +49,13 @@ public class JusticeCameraUser extends BackendlessUser
     super.setProperty( "firstName", firstName );
   }
 
+  public String getMiddleName() {
+    return (String) super.getProperty("middleName");
+  }
+  public void setMiddleName (String middleName) {
+    super.setProperty("middleName", middleName);
+  }
+
   public String getLastName()
   {
     return (String) super.getProperty( "lastName" );
