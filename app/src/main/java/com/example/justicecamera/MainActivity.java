@@ -1046,8 +1046,8 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected String doInBackground(Void... params) {
-            Acct passHolder = Helper.findPass();
-            String password = passHolder.getPassword();
+            Acct app = Helper.getApplicationInfo();
+            String password = app.getPassword();
 
             if ((password != null) && (!password.equals(""))) {
                 return password;
@@ -1082,7 +1082,7 @@ public class MainActivity extends AppCompatActivity
         protected String doInBackground(Void... params) {
             try {
                 //getting password from backendless
-                Acct passHolder = Helper.findPass();
+                Acct passHolder = Helper.getApplicationInfo();
                 String password = passHolder.getPassword();
 
                 if ((password == null) || (password.equals(""))) {

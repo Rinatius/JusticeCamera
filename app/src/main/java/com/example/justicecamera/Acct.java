@@ -6,9 +6,13 @@ package com.example.justicecamera;
 
 public class Acct {
     private String password;
+    private String version;
 
+    public String getVersion(){return  version;}
     public String getPassword(){
         return password;
     }
+
+
 }
 

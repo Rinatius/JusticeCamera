@@ -105,4 +105,11 @@
     <string name="notifications_turned_off">Push уведомления отключены</string>
     <string name="new_violation_added">Добавлено новое нарушение</string>
     <string name="new_statement">Новое заявление</string>
+    <string name="checking_version">Проверка версии приложения</string>
+    <string name="loading">Загрузка...</string>
+    <string name="logging_in">Вход в аккаунт...</string>
+    <string name="check_internet_connection">Проверьте подключение к интернету</string>
+    <string name="update">Обновить</string>
+    <string name="quit">Выход</string>
+    <string name="update_application">Для продолжения работы обновите приложение</string>
 </resources>

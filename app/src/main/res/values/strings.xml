@@ -167,5 +167,12 @@
     <string name="notifications_turned_off">Push notifications turned OFF</string>
     <string name="new_violation_added">New violation has been added</string>
     <string name="new_statement">New statement</string>
+    <string name="checking_version">Checking app version</string>
+    <string name="loading">Loading...</string>
+    <string name="logging_in">Logging in...</string>
+    <string name="check_internet_connection">Check internet connection</string>
+    <string name="update">Update</string>
+    <string name="quit">Quit</string>
+    <string name="update_application">Please update your application to continue</string>
 
 </resources>
