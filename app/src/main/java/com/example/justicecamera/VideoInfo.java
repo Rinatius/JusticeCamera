@@ -623,9 +623,7 @@ public class VideoInfo extends AppCompatActivity {
         protected String doInBackground(String... params) {
             Mail m = new Mail("tester.kloop@gmail.com", params[0]);
 
-            String[] toArr = {"erlanamanatov@gmail.com", "kksezim@gmail.com", "akp@kloop.kg"};
-            //String[] toArr = {"erlanamanatov@gmail.com"};
-            m.setTo(toArr);
+            m.setTo(Defaults.onViolationApprovedMailRecipients);
             m.setFrom("JusticeCamera");
             m.setSubject("Заявление одобрено");
             m.setBody(params[1]);

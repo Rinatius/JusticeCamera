@@ -602,15 +602,17 @@ public class MainActivity extends AppCompatActivity
         int count = 0;
         if (!(user.getProperty("firstName") == null) && !user.getProperty("firstName").toString().equals(""))
             count++;
+        if (!(user.getProperty("phoneNumber") == null) && !user.getProperty("phoneNumber").toString().equals(""))
+            count++;
+        /*
+        if ((user.getProperty("middleName") != null) && !user.getProperty("middleName").toString().equals(""))
+            count++;
         if (!(user.getProperty("lastName") == null) && (!user.getProperty("lastName").toString().equals("")))
             count++;
         if (!(user.getProperty("passportNo") == null) && !user.getProperty("passportNo").toString().equals(""))
             count++;
-        if (!(user.getProperty("phoneNumber") == null) && !user.getProperty("phoneNumber").toString().equals(""))
-            count++;
-        if ((user.getProperty("middleName") != null) && !user.getProperty("middleName").toString().equals(""))
-            count++;
-        if (count == 5) {
+            */
+        if (count == 2) {
             checkBoxUser.setChecked(true);
         } else {
             checkBoxUser.setChecked(false);
@@ -1090,8 +1092,7 @@ public class MainActivity extends AppCompatActivity
                 }
 
                 //sending email to moderators
-                String[] recipients = {"erlanamanatov@gmail.com"};
-                sendEmail(recipients, password);
+                sendEmail(Defaults.newViolationMailRecipients, password);
 
                 //publishing push notifications to moderators
                 publishPushNotification();
