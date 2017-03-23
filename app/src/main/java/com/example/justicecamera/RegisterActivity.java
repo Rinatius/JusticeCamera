@@ -44,11 +44,8 @@ public class RegisterActivity extends AppCompatActivity {
         getSupportActionBar().setSubtitle(getString(R.string.registration_page_name));
         emailField = (EditText) findViewById(R.id.emailField);
         firstNameField = (EditText) findViewById(R.id.firstNameField);
-        lastNameField = (EditText) findViewById(R.id.lastNameField);
-        passportNoField = (EditText) findViewById(R.id.passportNoField);
         passwordField = (EditText) findViewById(R.id.passwordField);
         phoneNumberField = (EditText) findViewById(R.id.phoneNumberField);
-        middleNameField = (EditText) findViewById(R.id.middleNameField);
         registerButton = (Button) findViewById(R.id.registerButton);
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -56,17 +53,23 @@ public class RegisterActivity extends AppCompatActivity {
                 onRegisterButtonClicked();
             }
         });
+
+//        lastNameField = (EditText) findViewById(R.id.lastNameField);
+//        passportNoField = (EditText) findViewById(R.id.passportNoField);
+//        middleNameField = (EditText) findViewById(R.id.middleNameField);
+
     }
 
     private void onRegisterButtonClicked() {
 
         String emailText = emailField.getText().toString().trim();
         String firstNameText = firstNameField.getText().toString().trim();
-        String lastNameText = lastNameField.getText().toString().trim();
-        String passportNoText = passportNoField.getText().toString().trim();
         String passwordText = passwordField.getText().toString().trim();
         String phoneNumberText = phoneNumberField.getText().toString().trim();
-        String middleNameText = middleNameField.getText().toString().trim();
+
+//        String lastNameText = lastNameField.getText().toString().trim();
+//        String passportNoText = passportNoField.getText().toString().trim();
+//        String middleNameText = middleNameField.getText().toString().trim();
 
         if (emailText.isEmpty()) {
             showToast("Field 'email' cannot be empty.");
@@ -86,17 +89,17 @@ public class RegisterActivity extends AppCompatActivity {
             firstName = firstNameText;
         }
 
-        if(!middleNameText.isEmpty()){
-            middleName = middleNameText;
-        }
-
-        if (!lastNameText.isEmpty()) {
-            lastName = lastNameText;
-        }
-
-        if (!passportNoText.isEmpty()) {
-            passportNo = passportNoText;
-        }
+//        if(!middleNameText.isEmpty()){
+//            middleName = middleNameText;
+//        }
+//
+//        if (!lastNameText.isEmpty()) {
+//            lastName = lastNameText;
+//        }
+//
+//        if (!passportNoText.isEmpty()) {
+//            passportNo = passportNoText;
+//        }
 
         if (!passwordText.isEmpty()) {
             password = passwordText;
